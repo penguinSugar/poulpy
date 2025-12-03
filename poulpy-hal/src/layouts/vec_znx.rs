@@ -129,12 +129,6 @@ impl<D: DataRef> ZnxView for VecZnx<D> {
     type Scalar = i64;
 }
 
-impl VecZnx<Vec<u8>> {
-    pub fn rsh_tmp_bytes(n: usize) -> usize {
-        n * std::mem::size_of::<i64>()
-    }
-}
-
 impl<D: DataMut> ZnxZero for VecZnx<D> {
     fn zero(&mut self) {
         self.raw_mut().fill(0)

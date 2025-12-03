@@ -2,10 +2,10 @@ use poulpy_hal::{
     api::{
         BivariateTensoring, ModuleN, ScratchTakeBasic, VecZnxAdd, VecZnxAddInplace, VecZnxBigNormalize, VecZnxCopy,
         VecZnxIdftApplyConsume, VecZnxMulXpMinusOne, VecZnxMulXpMinusOneInplace, VecZnxNegate, VecZnxNormalize,
-        VecZnxNormalizeInplace, VecZnxNormalizeTmpBytes, VecZnxRotate, VecZnxRotateInplace, VecZnxRshInplace, VecZnxSub,
-        VecZnxSubInplace, VecZnxSubNegateInplace, VecZnxZero,
+        VecZnxNormalizeInplace, VecZnxNormalizeTmpBytes, VecZnxRotate, VecZnxRotateInplace, VecZnxRshInplace, VecZnxRshTmpBytes,
+        VecZnxSub, VecZnxSubInplace, VecZnxSubNegateInplace, VecZnxZero,
     },
-    layouts::{Backend, Module, Scratch, VecZnx, VecZnxBig, ZnxInfos},
+    layouts::{Backend, Module, Scratch, VecZnxBig, ZnxInfos},
     reference::vec_znx::vec_znx_rotate_inplace_tmp_bytes,
 };
 
@@ -357,14 +357,14 @@ where
     }
 }
 
-impl<BE: Backend> GLWEShift<BE> for Module<BE> where Self: ModuleN + VecZnxRshInplace<BE> {}
+impl<BE: Backend> GLWEShift<BE> for Module<BE> where Self: ModuleN + VecZnxRshInplace<BE> + VecZnxRshTmpBytes {}
 
 pub trait GLWEShift<BE: Backend>
 where
-    Self: ModuleN + VecZnxRshInplace<BE>,
+    Self: ModuleN + VecZnxRshInplace<BE> + VecZnxRshTmpBytes,
 {
     fn glwe_rsh_tmp_byte(&self) -> usize {
-        VecZnx::rsh_tmp_bytes(self.n())
+        self.vec_znx_rsh_tmp_bytes()
     }
 
     fn glwe_rsh<R>(&self, k: usize, res: &mut R, scratch: &mut Scratch<BE>)
