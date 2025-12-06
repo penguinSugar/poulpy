@@ -11,8 +11,9 @@ use crate::{
     encryption::SIGMA,
     glwe_trace::GLWETrace,
     layouts::{
-        GLWE, GLWEAutomorphismKey, GLWEAutomorphismKeyLayout, GLWEAutomorphismKeyPreparedFactory, GLWELayout, GLWEPlaintext,
-        GLWESecret, GLWESecretPreparedFactory, LWEInfos,
+        GLWE, GLWEAutomorphismKey, GLWEAutomorphismKeyLayout, GLWEAutomorphismKeyOwned, GLWEAutomorphismKeyPreparedFactory,
+        GLWEAutomorphismKeyPreparedOwned, GLWELayout, GLWEOwned, GLWEPlaintext, GLWEPlaintextOwned, GLWESecret, GLWESecretOwned,
+        GLWESecretPreparedFactory, GLWESecretPreparedOwned, LWEInfos,
         prepared::{GLWEAutomorphismKeyPrepared, GLWESecretPrepared},
     },
     noise::var_noise_gglwe_product,
@@ -59,9 +60,9 @@ where
             dnum: dnum.into(),
         };
 
-        let mut glwe_out: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_out_infos);
-        let mut pt_want: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&glwe_out_infos);
-        let mut pt_have: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&glwe_out_infos);
+        let mut glwe_out: GLWEOwned = GLWE::alloc_from_infos(&glwe_out_infos);
+        let mut pt_want: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&glwe_out_infos);
+        let mut pt_have: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&glwe_out_infos);
 
         let mut source_xs: Source = Source::new([0u8; 32]);
         let mut source_xe: Source = Source::new([0u8; 32]);
@@ -74,10 +75,10 @@ where
                 | GLWE::trace_tmp_bytes(module, &glwe_out_infos, &glwe_out_infos, &key_infos),
         );
 
-        let mut sk: GLWESecret<Vec<u8>> = GLWESecret::alloc_from_infos(&glwe_out_infos);
+        let mut sk: GLWESecretOwned = GLWESecret::alloc_from_infos(&glwe_out_infos);
         sk.fill_ternary_prob(0.5, &mut source_xs);
 
-        let mut sk_dft: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc_from_infos(module, &sk);
+        let mut sk_dft: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc_from_infos(module, &sk);
         sk_dft.prepare(module, &sk);
 
         let mut data_want: Vec<i64> = vec![0i64; n];
@@ -97,9 +98,9 @@ where
             scratch.borrow(),
         );
 
-        let mut auto_keys: HashMap<i64, GLWEAutomorphismKeyPrepared<Vec<u8>, BE>> = HashMap::new();
+        let mut auto_keys: HashMap<i64, GLWEAutomorphismKeyPreparedOwned<BE>> = HashMap::new();
         let gal_els: Vec<i64> = GLWE::trace_galois_elements(module);
-        let mut tmp: GLWEAutomorphismKey<Vec<u8>> = GLWEAutomorphismKey::alloc_from_infos(&key_infos);
+        let mut tmp: GLWEAutomorphismKeyOwned = GLWEAutomorphismKey::alloc_from_infos(&key_infos);
         gal_els.iter().for_each(|gal_el| {
             tmp.encrypt_sk(
                 module,
@@ -109,7 +110,7 @@ where
                 &mut source_xe,
                 scratch.borrow(),
             );
-            let mut atk_prepared: GLWEAutomorphismKeyPrepared<Vec<u8>, BE> =
+            let mut atk_prepared: GLWEAutomorphismKeyPreparedOwned<BE> =
                 GLWEAutomorphismKeyPrepared::alloc_from_infos(module, &tmp);
             atk_prepared.prepare(module, &tmp, scratch.borrow());
             auto_keys.insert(*gal_el, atk_prepared);

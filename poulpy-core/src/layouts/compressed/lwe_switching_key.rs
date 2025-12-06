@@ -4,8 +4,8 @@ use poulpy_hal::{
 };
 
 use crate::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGLWECompressed, GGLWECompressedToMut, GGLWECompressedToRef, GGLWEInfos, GGLWEToMut, GLWEInfos,
-    GLWESwitchingKeyDegrees, GLWESwitchingKeyDegreesMut, LWEInfos, LWESwitchingKey, Rank, TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGLWECompressedMut, GGLWECompressedRef, GGLWECompressedToMut, GGLWECompressedToRef, GGLWEInfos,
+    GGLWEToMut, GLWEInfos, GLWESwitchingKeyDegrees, GLWESwitchingKeyDegreesMut, LWEInfos, LWESwitchingKey, Rank, TorusPrecision,
     compressed::{GLWESwitchingKeyCompressed, GLWESwitchingKeyDecompress},
 };
 use std::fmt;
@@ -171,13 +171,15 @@ impl<D: DataMut> LWESwitchingKey<D> {
 }
 
 impl<D: DataRef> GGLWECompressedToRef for LWESwitchingKeyCompressed<D> {
-    fn to_ref(&self) -> GGLWECompressed<&[u8]> {
+    fn to_ref(&self) -> GGLWECompressedRef<'_> {
         self.0.to_ref()
     }
 }
 
 impl<D: DataMut> GGLWECompressedToMut for LWESwitchingKeyCompressed<D> {
-    fn to_mut(&mut self) -> GGLWECompressed<&mut [u8]> {
+    fn to_mut(&mut self) -> GGLWECompressedMut<'_> {
         self.0.to_mut()
     }
 }
+
+pub type LWESwitchingKeyCompressedOwned = LWESwitchingKeyCompressed<Vec<u8>>;

@@ -86,7 +86,7 @@ pub struct BlindRotationKey<D: Data, BRT: BlindRotationAlgo> {
 }
 
 pub trait BlindRotationKeyFactory<BRA: BlindRotationAlgo> {
-    fn blind_rotation_key_alloc<A>(infos: &A) -> BlindRotationKey<Vec<u8>, BRA>
+    fn blind_rotation_key_alloc<A>(infos: &A) -> BlindRotationKeyOwned<BRA>
     where
         A: BlindRotationKeyInfos;
 }
@@ -95,7 +95,7 @@ impl<BRA: BlindRotationAlgo> BlindRotationKey<Vec<u8>, BRA>
 where
     Self: BlindRotationKeyFactory<BRA>,
 {
-    pub fn alloc<A>(infos: &A) -> BlindRotationKey<Vec<u8>, BRA>
+    pub fn alloc<A>(infos: &A) -> BlindRotationKeyOwned<BRA>
     where
         A: BlindRotationKeyInfos,
     {
@@ -176,6 +176,8 @@ impl<D: DataRef, BRT: BlindRotationAlgo> WriterTo for BlindRotationKey<D, BRT> {
         Ok(())
     }
 }
+
+pub type BlindRotationKeyOwned<BRT> = BlindRotationKey<Vec<u8>, BRT>;
 
 impl<D: DataRef, BRT: BlindRotationAlgo> BlindRotationKeyInfos for BlindRotationKey<D, BRT> {
     fn n_glwe(&self) -> Degree {

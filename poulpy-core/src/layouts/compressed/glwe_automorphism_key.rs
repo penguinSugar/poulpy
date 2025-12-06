@@ -4,9 +4,9 @@ use poulpy_hal::{
 };
 
 use crate::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGLWECompressed, GGLWECompressedSeedMut, GGLWECompressedToMut, GGLWECompressedToRef,
-    GGLWEDecompress, GGLWEInfos, GGLWEToMut, GLWEAutomorphismKey, GLWEDecompress, GLWEInfos, GetGaloisElement, LWEInfos, Rank,
-    SetGaloisElement, TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGLWECompressed, GGLWECompressedMut, GGLWECompressedRef, GGLWECompressedSeedMut,
+    GGLWECompressedToMut, GGLWECompressedToRef, GGLWEDecompress, GGLWEInfos, GGLWEToMut, GLWEAutomorphismKey, GLWEDecompress,
+    GLWEInfos, GetGaloisElement, LWEInfos, Rank, SetGaloisElement, TorusPrecision,
 };
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use std::fmt;
@@ -168,16 +168,18 @@ where
 }
 
 impl<D: DataRef> GGLWECompressedToRef for GLWEAutomorphismKeyCompressed<D> {
-    fn to_ref(&self) -> GGLWECompressed<&[u8]> {
+    fn to_ref(&self) -> GGLWECompressedRef<'_> {
         self.key.to_ref()
     }
 }
 
 impl<D: DataMut> GGLWECompressedToMut for GLWEAutomorphismKeyCompressed<D> {
-    fn to_mut(&mut self) -> GGLWECompressed<&mut [u8]> {
+    fn to_mut(&mut self) -> GGLWECompressedMut<'_> {
         self.key.to_mut()
     }
 }
+
+pub type GLWEAutomorphismKeyCompressedOwned = GLWEAutomorphismKeyCompressed<Vec<u8>>;
 
 impl<D: DataMut> GGLWECompressedSeedMut for GLWEAutomorphismKeyCompressed<D> {
     fn seed_mut(&mut self) -> &mut Vec<[u8; 32]> {

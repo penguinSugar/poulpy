@@ -3,8 +3,8 @@ use poulpy_hal::layouts::{Backend, DataMut, Module, Scratch, ZnxZero};
 use crate::{
     GLWEExternalProduct, ScratchTakeCore,
     layouts::{
-        GGLWE, GGLWEInfos, GGLWEToMut, GGLWEToRef, GGSWInfos, GGSWPrepared, GLWEAutomorphismKey, GLWEInfos, GLWESwitchingKey,
-        prepared::GGSWPreparedToRef,
+        GGLWEInfos, GGLWEMut, GGLWERef, GGLWEToMut, GGLWEToRef, GGSWInfos, GGSWPreparedRef, GLWEAutomorphismKey, GLWEInfos,
+        GLWESwitchingKey, prepared::GGSWPreparedToRef,
     },
 };
 
@@ -90,9 +90,9 @@ where
         );
         assert_eq!(res.base2k(), a.base2k());
 
-        let res: &mut GGLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GGLWE<&[u8]> = &a.to_ref();
-        let b: &GGSWPrepared<&[u8], BE> = &b.to_ref();
+        let res: &mut GGLWEMut<'_> = &mut res.to_mut();
+        let a: &GGLWERef<'_> = &a.to_ref();
+        let b: &GGSWPreparedRef<'_, BE> = &b.to_ref();
 
         for row in 0..res.dnum().into() {
             for col in 0..res.rank_in().into() {
@@ -113,8 +113,8 @@ where
         A: GGSWPreparedToRef<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GGLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GGSWPrepared<&[u8], BE> = &a.to_ref();
+        let res: &mut GGLWEMut<'_> = &mut res.to_mut();
+        let a: &GGSWPreparedRef<'_, BE> = &a.to_ref();
 
         assert_eq!(
             res.rank_out(),

@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use poulpy_core::{
     GGSWEncryptSk, GLWEDecrypt, GLWEEncryptSk, ScratchTakeCore,
     layouts::{
-        Base2K, Dnum, Dsize, GGSWLayout, GGSWPreparedFactory, GLWE, GLWELayout, GLWEPlaintext, GLWESecretPrepared,
-        GLWESecretPreparedFactory, Rank, TorusPrecision,
+        Base2K, Dnum, Dsize, GGSWLayout, GGSWPreparedFactory, GLWE, GLWELayout, GLWEOwned, GLWEPlaintext, GLWEPlaintextOwned,
+        GLWESecretPreparedFactory, GLWESecretPreparedOwned, Rank, TorusPrecision,
     },
 };
 use poulpy_hal::{
@@ -16,7 +16,7 @@ use rand::RngCore;
 
 use crate::bin_fhe::{
     bdd_arithmetic::{
-        FheUintPrepared, GLWEBlinSelection,
+        FheUintPrepared, FheUintPreparedOwned, GLWEBlinSelection,
         tests::test_suite::{TEST_FHEUINT_BASE2K, TEST_RANK, TestContext},
     },
     blind_rotation::BlindRotationAlgo,
@@ -35,7 +35,7 @@ where
     Scratch<BE>: ScratchTakeCore<BE>,
 {
     let module: &Module<BE> = &test_context.module;
-    let sk_glwe_prep: &GLWESecretPrepared<Vec<u8>, BE> = &test_context.sk_glwe;
+    let sk_glwe_prep: &GLWESecretPreparedOwned<BE> = &test_context.sk_glwe;
 
     let base2k: Base2K = TEST_FHEUINT_BASE2K.into();
     let rank: Rank = TEST_RANK.into();
@@ -64,11 +64,11 @@ where
 
     let mut scratch: ScratchOwned<BE> = ScratchOwned::alloc(1 << 22);
 
-    let mut res: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_infos);
+    let mut res: GLWEOwned = GLWE::alloc_from_infos(&glwe_infos);
 
     let k: u32 = source.next_u32();
 
-    let mut k_enc_prep: FheUintPrepared<Vec<u8>, u32, BE> =
+    let mut k_enc_prep: FheUintPreparedOwned<u32, BE> =
         FheUintPrepared::<Vec<u8>, u32, BE>::alloc_from_infos(module, &ggsw_infos);
     k_enc_prep.encrypt_sk(
         module,
@@ -89,10 +89,10 @@ where
     data.iter_mut().enumerate().for_each(|(i, x)| *x = i as i64);
 
     for _ in 0..32_usize.div_ceil(digit) {
-        let mut pt: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&glwe_infos);
+        let mut pt: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&glwe_infos);
 
-        let mut cts_map: HashMap<usize, &mut GLWE<Vec<u8>>> = HashMap::new();
-        let mut cts: Vec<GLWE<Vec<u8>>> = Vec::new();
+        let mut cts_map: HashMap<usize, &mut GLWEOwned> = HashMap::new();
+        let mut cts: Vec<GLWEOwned> = Vec::new();
 
         for value in data.iter().take(1 << digit) {
             pt.encode_coeff_i64(*value, TorusPrecision(base2k.as_u32()), 0);

@@ -14,8 +14,8 @@ use crate::{
     dist::Distribution,
     encryption::{SIGMA, SIGMA_BOUND},
     layouts::{
-        GLWE, GLWEInfos, GLWEPlaintext, GLWEPlaintextToRef, GLWEPrepared, GLWEPreparedToRef, GLWEToMut, LWEInfos,
-        prepared::{GLWESecretPrepared, GLWESecretPreparedToRef},
+        GLWE, GLWEInfos, GLWEMut, GLWEPlaintextOwned, GLWEPlaintextRef, GLWEPlaintextToRef, GLWEPreparedRef, GLWEPreparedToRef,
+        GLWESecretPreparedRef, GLWEToMut, LWEInfos, prepared::GLWESecretPreparedToRef,
     },
 };
 
@@ -158,9 +158,9 @@ where
         P: GLWEPlaintextToRef,
         S: GLWESecretPreparedToRef<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let pt: &GLWEPlaintext<&[u8]> = &pt.to_ref();
-        let sk: &GLWESecretPrepared<&[u8], BE> = &sk.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let pt: &GLWEPlaintextRef<'_> = &pt.to_ref();
+        let sk: &GLWESecretPreparedRef<'_, BE> = &sk.to_ref();
 
         assert_eq!(res.rank(), sk.rank());
         assert_eq!(res.n(), self.n() as u32);
@@ -200,8 +200,8 @@ where
         R: GLWEToMut,
         S: GLWESecretPreparedToRef<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let sk: &GLWESecretPrepared<&[u8], BE> = &sk.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let sk: &GLWESecretPreparedRef<'_, BE> = &sk.to_ref();
 
         assert_eq!(res.rank(), sk.rank());
         assert_eq!(res.n(), self.n() as u32);
@@ -220,7 +220,7 @@ where
             res.data_mut(),
             cols,
             false,
-            None::<(&GLWEPlaintext<Vec<u8>>, usize)>,
+            None::<(&GLWEPlaintextOwned, usize)>,
             sk,
             source_xa,
             source_xe,
@@ -304,7 +304,7 @@ where
     {
         self.glwe_encrypt_pk_internal(
             res,
-            None::<(&GLWEPlaintext<Vec<u8>>, usize)>,
+            None::<(&GLWEPlaintextOwned, usize)>,
             pk,
             source_xu,
             source_xe,
@@ -354,7 +354,7 @@ where
         P: GLWEPlaintextToRef + GLWEInfos,
         K: GLWEPreparedToRef<BE> + GetDistribution + GLWEInfos,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
 
         assert_eq!(res.base2k(), pk.base2k());
         assert_eq!(res.n(), pk.n());
@@ -390,7 +390,7 @@ where
         }
 
         {
-            let pk: &GLWEPrepared<&[u8], BE> = &pk.to_ref();
+            let pk: &GLWEPreparedRef<'_, BE> = &pk.to_ref();
 
             // ct[i] = pk[i] * u + ei (+ m if col = i)
             for i in 0..cols {
@@ -484,7 +484,7 @@ where
         S: GLWESecretPreparedToRef<BE>,
     {
         let ct: &mut VecZnxMut<'_> = &mut res.to_mut();
-        let sk: GLWESecretPrepared<&[u8], BE> = sk.to_ref();
+        let sk: GLWESecretPreparedRef<'_, BE> = sk.to_ref();
 
         if compressed {
             assert_eq!(

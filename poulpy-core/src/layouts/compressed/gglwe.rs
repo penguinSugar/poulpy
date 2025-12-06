@@ -7,7 +7,8 @@ use poulpy_hal::{
 };
 
 use crate::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGLWE, GGLWEInfos, GGLWEToMut, GLWEInfos, LWEInfos, Rank, TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGLWE, GGLWEInfos, GGLWEMut, GGLWEToMut, GLWECompressedMut, GLWECompressedRef, GLWEInfos,
+    LWEInfos, Rank, TorusPrecision,
     compressed::{GLWECompressed, GLWEDecompress},
 };
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
@@ -192,7 +193,7 @@ impl GGLWECompressed<Vec<u8>> {
 }
 
 impl<D: DataRef> GGLWECompressed<D> {
-    pub(crate) fn at(&self, row: usize, col: usize) -> GLWECompressed<&[u8]> {
+    pub(crate) fn at(&self, row: usize, col: usize) -> GLWECompressedRef<'_> {
         let rank_in: usize = self.rank_in().into();
         GLWECompressed {
             data: self.data.at(row, col),
@@ -205,7 +206,7 @@ impl<D: DataRef> GGLWECompressed<D> {
 }
 
 impl<D: DataMut> GGLWECompressed<D> {
-    pub(crate) fn at_mut(&mut self, row: usize, col: usize) -> GLWECompressed<&mut [u8]> {
+    pub(crate) fn at_mut(&mut self, row: usize, col: usize) -> GLWECompressedMut<'_> {
         let rank_in: usize = self.rank_in().into();
         GLWECompressed {
             k: self.k,
@@ -255,8 +256,8 @@ where
         R: GGLWEToMut,
         O: GGLWECompressedToRef,
     {
-        let res: &mut GGLWE<&mut [u8]> = &mut res.to_mut();
-        let other: &GGLWECompressed<&[u8]> = &other.to_ref();
+        let res: &mut GGLWEMut<'_> = &mut res.to_mut();
+        let other: &GGLWECompressedRef<'_> = &other.to_ref();
 
         assert_eq!(res.dsize(), other.dsize());
         assert!(res.dnum() <= other.dnum());
@@ -283,12 +284,16 @@ impl<D: DataMut> GGLWE<D> {
     }
 }
 
+pub type GGLWECompressedOwned = GGLWECompressed<Vec<u8>>;
+pub type GGLWECompressedRef<'a> = GGLWECompressed<&'a [u8]>;
+pub type GGLWECompressedMut<'a> = GGLWECompressed<&'a mut [u8]>;
+
 pub trait GGLWECompressedToMut {
-    fn to_mut(&mut self) -> GGLWECompressed<&mut [u8]>;
+    fn to_mut(&mut self) -> GGLWECompressedMut<'_>;
 }
 
 impl<D: DataMut> GGLWECompressedToMut for GGLWECompressed<D> {
-    fn to_mut(&mut self) -> GGLWECompressed<&mut [u8]> {
+    fn to_mut(&mut self) -> GGLWECompressedMut<'_> {
         GGLWECompressed {
             k: self.k(),
             base2k: self.base2k(),
@@ -301,11 +306,11 @@ impl<D: DataMut> GGLWECompressedToMut for GGLWECompressed<D> {
 }
 
 pub trait GGLWECompressedToRef {
-    fn to_ref(&self) -> GGLWECompressed<&[u8]>;
+    fn to_ref(&self) -> GGLWECompressedRef<'_>;
 }
 
 impl<D: DataRef> GGLWECompressedToRef for GGLWECompressed<D> {
-    fn to_ref(&self) -> GGLWECompressed<&[u8]> {
+    fn to_ref(&self) -> GGLWECompressedRef<'_> {
         GGLWECompressed {
             k: self.k(),
             base2k: self.base2k(),

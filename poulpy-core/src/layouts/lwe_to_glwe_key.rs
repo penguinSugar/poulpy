@@ -6,8 +6,8 @@ use poulpy_hal::{
 };
 
 use crate::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGLWE, GGLWEInfos, GGLWEToMut, GGLWEToRef, GLWEInfos, GLWESwitchingKey, GLWESwitchingKeyDegrees,
-    GLWESwitchingKeyDegreesMut, LWEInfos, Rank, TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGLWEInfos, GGLWEMut, GGLWERef, GGLWEToMut, GGLWEToRef, GLWEInfos, GLWESwitchingKey,
+    GLWESwitchingKeyDegrees, GLWESwitchingKeyDegreesMut, LWEInfos, Rank, TorusPrecision,
 };
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -197,16 +197,18 @@ impl LWEToGLWEKey<Vec<u8>> {
 }
 
 impl<D: DataRef> GGLWEToRef for LWEToGLWEKey<D> {
-    fn to_ref(&self) -> GGLWE<&[u8]> {
+    fn to_ref(&self) -> GGLWERef<'_> {
         self.0.to_ref()
     }
 }
 
 impl<D: DataMut> GGLWEToMut for LWEToGLWEKey<D> {
-    fn to_mut(&mut self) -> GGLWE<&mut [u8]> {
+    fn to_mut(&mut self) -> GGLWEMut<'_> {
         self.0.to_mut()
     }
 }
+
+pub type LWEToGLWEKeyOwned = LWEToGLWEKey<Vec<u8>>;
 
 impl<D: DataMut> GLWESwitchingKeyDegreesMut for LWEToGLWEKey<D> {
     fn input_degree(&mut self) -> &mut Degree {

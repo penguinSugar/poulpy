@@ -5,7 +5,7 @@ use poulpy_hal::{
 
 use crate::{
     GLWENoise,
-    layouts::{GGLWE, GGLWEInfos, GGLWEToRef, prepared::GLWESecretPreparedToRef},
+    layouts::{GGLWE, GGLWEInfos, GGLWERef, GGLWEToRef, prepared::GLWESecretPreparedToRef},
 };
 use crate::{ScratchTakeCore, layouts::GLWEPlaintext};
 
@@ -74,7 +74,7 @@ where
         S: GLWESecretPreparedToRef<BE>,
         P: ScalarZnxToRef,
     {
-        let res: &GGLWE<&[u8]> = &res.to_ref();
+        let res: &GGLWERef<'_> = &res.to_ref();
         let dsize: usize = res.dsize().into();
         let (mut pt, scratch_1) = scratch.take_glwe_plaintext(res);
         pt.data_mut().zero();

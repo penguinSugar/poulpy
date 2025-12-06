@@ -8,7 +8,7 @@ use crate::{
     ScratchTakeCore,
     encryption::glwe_switching_key::GLWESwitchingKeyEncryptSk,
     layouts::{
-        GGLWEInfos, GGLWEToMut, GLWESecret, GLWESwitchingKey, GLWESwitchingKeyDegreesMut, LWEInfos, LWESecret, LWESecretToRef,
+        GGLWEInfos, GGLWEToMut, GLWESecret, GLWESwitchingKey, GLWESwitchingKeyDegreesMut, LWEInfos, LWESecretRef, LWESecretToRef,
         LWESwitchingKey, Rank,
         prepared::{GLWESecretPrepared, GLWESecretPreparedFactory},
     },
@@ -104,8 +104,8 @@ where
         S1: LWESecretToRef,
         S2: LWESecretToRef,
     {
-        let sk_lwe_in: &LWESecret<&[u8]> = &sk_lwe_in.to_ref();
-        let sk_lwe_out: &LWESecret<&[u8]> = &sk_lwe_out.to_ref();
+        let sk_lwe_in: &LWESecretRef<'_> = &sk_lwe_in.to_ref();
+        let sk_lwe_out: &LWESecretRef<'_> = &sk_lwe_out.to_ref();
 
         assert!(sk_lwe_in.n().0 <= res.n().0);
         assert!(sk_lwe_out.n().0 <= res.n().0);

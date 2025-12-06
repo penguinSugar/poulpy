@@ -8,7 +8,10 @@ use poulpy_hal::{
 
 use crate::{
     GLWEKeySwitchInternal, GLWEKeyswitch, GLWENormalize, ScratchTakeCore,
-    layouts::{GGLWEInfos, GGLWEPreparedToRef, GLWE, GLWEInfos, GLWELayout, GLWEToMut, GLWEToRef, GetGaloisElement, LWEInfos},
+    layouts::{
+        GGLWEInfos, GGLWEPreparedToRef, GLWE, GLWEInfos, GLWELayout, GLWEMut, GLWERef, GLWEToMut, GLWEToRef, GetGaloisElement,
+        LWEInfos,
+    },
 };
 
 impl GLWE<Vec<u8>> {
@@ -186,7 +189,7 @@ where
     {
         self.glwe_keyswitch(res, a, key, scratch);
 
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
 
         for i in 0..res.rank().as_usize() + 1 {
             self.vec_znx_automorphism_inplace(key.p(), res.data_mut(), i, scratch);
@@ -201,7 +204,7 @@ where
     {
         self.glwe_keyswitch_inplace(res, key, scratch);
 
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
 
         for i in 0..res.rank().as_usize() + 1 {
             self.vec_znx_automorphism_inplace(key.p(), res.data_mut(), i, scratch);
@@ -215,8 +218,8 @@ where
         K: GetGaloisElement + GGLWEPreparedToRef<BE> + GGLWEInfos,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWE<&[u8]> = &a.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let a: &GLWERef<'_> = &a.to_ref();
 
         let base2k_a: usize = a.base2k().into();
         let base2k_key: usize = key.base2k().into();
@@ -270,7 +273,7 @@ where
         K: GetGaloisElement + GGLWEPreparedToRef<BE> + GGLWEInfos,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
 
         let base2k_key: usize = key.base2k().into();
         let base2k_res: usize = res.base2k().into();
@@ -324,8 +327,8 @@ where
         K: GetGaloisElement + GGLWEPreparedToRef<BE> + GGLWEInfos,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWE<&[u8]> = &a.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let a: &GLWERef<'_> = &a.to_ref();
 
         let base2k_a: usize = a.base2k().into();
         let base2k_key: usize = key.base2k().into();
@@ -380,8 +383,8 @@ where
         K: GetGaloisElement + GGLWEPreparedToRef<BE> + GGLWEInfos,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWE<&[u8]> = &a.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let a: &GLWERef<'_> = &a.to_ref();
 
         let base2k_a: usize = a.base2k().into();
         let base2k_key: usize = key.base2k().into();
@@ -435,7 +438,7 @@ where
         K: GetGaloisElement + GGLWEPreparedToRef<BE> + GGLWEInfos,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
 
         let base2k_key: usize = key.base2k().into();
         let base2k_res: usize = res.base2k().into();
@@ -488,7 +491,7 @@ where
         K: GetGaloisElement + GGLWEPreparedToRef<BE> + GGLWEInfos,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
 
         let base2k_key: usize = key.base2k().into();
         let base2k_res: usize = res.base2k().into();

@@ -4,7 +4,7 @@ use poulpy_hal::{
 };
 use std::fmt;
 
-use crate::layouts::{Base2K, Degree, Dnum, Dsize, GLWE, GLWEInfos, LWEInfos, Rank, TorusPrecision};
+use crate::layouts::{Base2K, Degree, Dnum, Dsize, GLWE, GLWEInfos, GLWEMut, GLWERef, LWEInfos, Rank, TorusPrecision};
 
 pub trait GGSWInfos
 where
@@ -131,7 +131,7 @@ impl<D: DataMut> FillUniform for GGSW<D> {
 }
 
 impl<D: DataRef> GGSW<D> {
-    pub fn at(&self, row: usize, col: usize) -> GLWE<&[u8]> {
+    pub fn at(&self, row: usize, col: usize) -> GLWERef<'_> {
         GLWE {
             k: self.k,
             base2k: self.base2k,
@@ -141,7 +141,7 @@ impl<D: DataRef> GGSW<D> {
 }
 
 impl<D: DataMut> GGSW<D> {
-    pub fn at_mut(&mut self, row: usize, col: usize) -> GLWE<&mut [u8]> {
+    pub fn at_mut(&mut self, row: usize, col: usize) -> GLWEMut<'_> {
         GLWE {
             k: self.k,
             base2k: self.base2k,
@@ -253,12 +253,16 @@ impl<D: DataRef> WriterTo for GGSW<D> {
     }
 }
 
+pub type GGSWOwned = GGSW<Vec<u8>>;
+pub type GGSWRef<'a> = GGSW<&'a [u8]>;
+pub type GGSWMut<'a> = GGSW<&'a mut [u8]>;
+
 pub trait GGSWToMut {
-    fn to_mut(&mut self) -> GGSW<&mut [u8]>;
+    fn to_mut(&mut self) -> GGSWMut<'_>;
 }
 
 impl<D: DataMut> GGSWToMut for GGSW<D> {
-    fn to_mut(&mut self) -> GGSW<&mut [u8]> {
+    fn to_mut(&mut self) -> GGSWMut<'_> {
         GGSW {
             dsize: self.dsize,
             k: self.k,
@@ -269,11 +273,11 @@ impl<D: DataMut> GGSWToMut for GGSW<D> {
 }
 
 pub trait GGSWToRef {
-    fn to_ref(&self) -> GGSW<&[u8]>;
+    fn to_ref(&self) -> GGSWRef<'_>;
 }
 
 impl<D: DataRef> GGSWToRef for GGSW<D> {
-    fn to_ref(&self) -> GGSW<&[u8]> {
+    fn to_ref(&self) -> GGSWRef<'_> {
         GGSW {
             dsize: self.dsize,
             k: self.k,

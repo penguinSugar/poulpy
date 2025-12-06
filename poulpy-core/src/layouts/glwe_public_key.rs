@@ -3,7 +3,7 @@ use poulpy_hal::layouts::{Data, DataMut, DataRef, ReaderFrom, VecZnx, WriterTo};
 use crate::{
     GetDistribution, GetDistributionMut,
     dist::Distribution,
-    layouts::{Base2K, Degree, GLWE, GLWEInfos, GLWEToMut, GLWEToRef, LWEInfos, Rank, TorusPrecision},
+    layouts::{Base2K, Degree, GLWE, GLWEInfos, GLWEMut, GLWERef, GLWEToMut, GLWEToRef, LWEInfos, Rank, TorusPrecision},
 };
 
 #[derive(PartialEq, Eq)]
@@ -128,13 +128,16 @@ impl<D: DataRef> WriterTo for GLWEPublicKey<D> {
 }
 
 impl<D: DataRef> GLWEToRef for GLWEPublicKey<D> {
-    fn to_ref(&self) -> GLWE<&[u8]> {
+    fn to_ref(&self) -> GLWERef<'_> {
         self.key.to_ref()
     }
 }
 
 impl<D: DataMut> GLWEToMut for GLWEPublicKey<D> {
-    fn to_mut(&mut self) -> GLWE<&mut [u8]> {
+    fn to_mut(&mut self) -> GLWEMut<'_> {
         self.key.to_mut()
     }
 }
+
+pub type GLWEPublicKeyOwned = GLWEPublicKey<Vec<u8>>;
+pub type GLWEPublicKeyMut<'a> = GLWEPublicKey<&'a mut [u8]>;

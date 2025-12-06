@@ -8,8 +8,10 @@ use crate::{
     GGLWEToGGSWKeyEncryptSk, GGSWAutomorphism, GGSWEncryptSk, GGSWNoise, GLWEAutomorphismKeyEncryptSk, ScratchTakeCore,
     encryption::SIGMA,
     layouts::{
-        GGLWEToGGSWKey, GGLWEToGGSWKeyLayout, GGLWEToGGSWKeyPreparedFactory, GGSW, GGSWInfos, GGSWLayout, GLWEAutomorphismKey,
-        GLWEAutomorphismKeyPreparedFactory, GLWEInfos, GLWESecret, GLWESecretPreparedFactory,
+        GGLWEToGGSWKey, GGLWEToGGSWKeyLayout, GGLWEToGGSWKeyOwned, GGLWEToGGSWKeyPreparedFactory, GGLWEToGGSWKeyPreparedOwned,
+        GGSW, GGSWInfos, GGSWLayout, GGSWOwned, GLWEAutomorphismKey, GLWEAutomorphismKeyOwned,
+        GLWEAutomorphismKeyPreparedFactory, GLWEAutomorphismKeyPreparedOwned, GLWEInfos, GLWESecret, GLWESecretOwned,
+        GLWESecretPreparedFactory, GLWESecretPreparedOwned,
         prepared::{GGLWEToGGSWKeyPrepared, GLWEAutomorphismKeyPrepared, GLWESecretPrepared},
     },
     noise::noise_ggsw_keyswitch,
@@ -84,10 +86,10 @@ where
                 rank: rank.into(),
             };
 
-            let mut ct_in: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_in_layout);
-            let mut ct_out: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_out_layout);
-            let mut tsk: GGLWEToGGSWKey<Vec<u8>> = GGLWEToGGSWKey::alloc_from_infos(&tsk_layout);
-            let mut auto_key: GLWEAutomorphismKey<Vec<u8>> = GLWEAutomorphismKey::alloc_from_infos(&auto_key_layout);
+            let mut ct_in: GGSWOwned = GGSW::alloc_from_infos(&ggsw_in_layout);
+            let mut ct_out: GGSWOwned = GGSW::alloc_from_infos(&ggsw_out_layout);
+            let mut tsk: GGLWEToGGSWKeyOwned = GGLWEToGGSWKey::alloc_from_infos(&tsk_layout);
+            let mut auto_key: GLWEAutomorphismKeyOwned = GLWEAutomorphismKey::alloc_from_infos(&auto_key_layout);
             let mut pt_scalar: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
 
             let mut source_xs: Source = Source::new([0u8; 32]);
@@ -103,10 +105,10 @@ where
 
             let var_xs: f64 = 0.5;
 
-            let mut sk: GLWESecret<Vec<u8>> = GLWESecret::alloc_from_infos(&ct_out);
+            let mut sk: GLWESecretOwned = GLWESecret::alloc_from_infos(&ct_out);
             sk.fill_ternary_prob(var_xs, &mut source_xs);
 
-            let mut sk_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc_from_infos(module, &sk);
+            let mut sk_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc_from_infos(module, &sk);
             sk_prepared.prepare(module, &sk);
 
             auto_key.encrypt_sk(
@@ -136,11 +138,11 @@ where
                 scratch.borrow(),
             );
 
-            let mut auto_key_prepared: GLWEAutomorphismKeyPrepared<Vec<u8>, BE> =
+            let mut auto_key_prepared: GLWEAutomorphismKeyPreparedOwned<BE> =
                 GLWEAutomorphismKeyPrepared::alloc_from_infos(module, &auto_key_layout);
             auto_key_prepared.prepare(module, &auto_key, scratch.borrow());
 
-            let mut tsk_prepared: GGLWEToGGSWKeyPrepared<Vec<u8>, BE> = GGLWEToGGSWKeyPrepared::alloc_from_infos(module, &tsk);
+            let mut tsk_prepared: GGLWEToGGSWKeyPreparedOwned<BE> = GGLWEToGGSWKeyPrepared::alloc_from_infos(module, &tsk);
             tsk_prepared.prepare(module, &tsk, scratch.borrow());
 
             ct_out.automorphism(
@@ -242,9 +244,9 @@ where
                 rank: rank.into(),
             };
 
-            let mut ct: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_out_layout);
-            let mut tsk: GGLWEToGGSWKey<Vec<u8>> = GGLWEToGGSWKey::alloc_from_infos(&tsk_layout);
-            let mut auto_key: GLWEAutomorphismKey<Vec<u8>> = GLWEAutomorphismKey::alloc_from_infos(&auto_key_layout);
+            let mut ct: GGSWOwned = GGSW::alloc_from_infos(&ggsw_out_layout);
+            let mut tsk: GGLWEToGGSWKeyOwned = GGLWEToGGSWKey::alloc_from_infos(&tsk_layout);
+            let mut auto_key: GLWEAutomorphismKeyOwned = GLWEAutomorphismKey::alloc_from_infos(&auto_key_layout);
             let mut pt_scalar: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
 
             let mut source_xs: Source = Source::new([0u8; 32]);
@@ -260,10 +262,10 @@ where
 
             let var_xs: f64 = 0.5;
 
-            let mut sk: GLWESecret<Vec<u8>> = GLWESecret::alloc_from_infos(&ct);
+            let mut sk: GLWESecretOwned = GLWESecret::alloc_from_infos(&ct);
             sk.fill_ternary_prob(var_xs, &mut source_xs);
 
-            let mut sk_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc_from_infos(module, &sk);
+            let mut sk_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc_from_infos(module, &sk);
             sk_prepared.prepare(module, &sk);
 
             auto_key.encrypt_sk(
@@ -293,11 +295,11 @@ where
                 scratch.borrow(),
             );
 
-            let mut auto_key_prepared: GLWEAutomorphismKeyPrepared<Vec<u8>, BE> =
+            let mut auto_key_prepared: GLWEAutomorphismKeyPreparedOwned<BE> =
                 GLWEAutomorphismKeyPrepared::alloc_from_infos(module, &auto_key_layout);
             auto_key_prepared.prepare(module, &auto_key, scratch.borrow());
 
-            let mut tsk_prepared: GGLWEToGGSWKeyPrepared<Vec<u8>, BE> = GGLWEToGGSWKeyPrepared::alloc_from_infos(module, &tsk);
+            let mut tsk_prepared: GGLWEToGGSWKeyPreparedOwned<BE> = GGLWEToGGSWKeyPrepared::alloc_from_infos(module, &tsk);
             tsk_prepared.prepare(module, &tsk, scratch.borrow());
 
             ct.automorphism_inplace(module, &auto_key_prepared, &tsk_prepared, scratch.borrow());

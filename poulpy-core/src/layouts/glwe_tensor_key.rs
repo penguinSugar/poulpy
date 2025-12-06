@@ -4,7 +4,8 @@ use poulpy_hal::{
 };
 
 use crate::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGLWE, GGLWEInfos, GGLWEToMut, GGLWEToRef, GLWEInfos, LWEInfos, Rank, TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGLWE, GGLWEInfos, GGLWEMut, GGLWERef, GGLWEToMut, GGLWEToRef, GLWEInfos, LWEInfos, Rank,
+    TorusPrecision,
 };
 
 use std::fmt;
@@ -190,7 +191,7 @@ impl<D: DataRef> GGLWEToRef for GLWETensorKey<D>
 where
     GGLWE<D>: GGLWEToRef,
 {
-    fn to_ref(&self) -> GGLWE<&[u8]> {
+    fn to_ref(&self) -> GGLWERef<'_> {
         self.0.to_ref()
     }
 }
@@ -199,7 +200,10 @@ impl<D: DataMut> GGLWEToMut for GLWETensorKey<D>
 where
     GGLWE<D>: GGLWEToMut,
 {
-    fn to_mut(&mut self) -> GGLWE<&mut [u8]> {
+    fn to_mut(&mut self) -> GGLWEMut<'_> {
         self.0.to_mut()
     }
 }
+
+pub type GLWETensorKeyOwned = GLWETensorKey<Vec<u8>>;
+pub type GLWETensorKeyMut<'a> = GLWETensorKey<&'a mut [u8]>;

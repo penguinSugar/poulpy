@@ -83,11 +83,11 @@ impl<D: DataRef> fmt::Display for LWEPlaintext<D> {
 
 pub trait LWEPlaintextToRef {
     #[allow(dead_code)]
-    fn to_ref(&self) -> LWEPlaintext<&[u8]>;
+    fn to_ref(&self) -> LWEPlaintextRef<'_>;
 }
 
 impl<D: DataRef> LWEPlaintextToRef for LWEPlaintext<D> {
-    fn to_ref(&self) -> LWEPlaintext<&[u8]> {
+    fn to_ref(&self) -> LWEPlaintextRef<'_> {
         LWEPlaintext {
             data: self.data.to_ref(),
             base2k: self.base2k,
@@ -96,13 +96,17 @@ impl<D: DataRef> LWEPlaintextToRef for LWEPlaintext<D> {
     }
 }
 
+pub type LWEPlaintextOwned = LWEPlaintext<Vec<u8>>;
+pub type LWEPlaintextRef<'a> = LWEPlaintext<&'a [u8]>;
+pub type LWEPlaintextMut<'a> = LWEPlaintext<&'a mut [u8]>;
+
 pub trait LWEPlaintextToMut {
     #[allow(dead_code)]
-    fn to_mut(&mut self) -> LWEPlaintext<&mut [u8]>;
+    fn to_mut(&mut self) -> LWEPlaintextMut<'_>;
 }
 
 impl<D: DataMut> LWEPlaintextToMut for LWEPlaintext<D> {
-    fn to_mut(&mut self) -> LWEPlaintext<&mut [u8]> {
+    fn to_mut(&mut self) -> LWEPlaintextMut<'_> {
         LWEPlaintext {
             data: self.data.to_mut(),
             base2k: self.base2k,

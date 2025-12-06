@@ -4,8 +4,8 @@ use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use poulpy_core::{
     GGSWNoise, GLWEDecrypt, GLWEEncryptSk, GLWEExternalProduct, LWEEncryptSk, ScratchTakeCore,
     layouts::{
-        Dsize, GGLWEToGGSWKeyLayout, GGSW, GGSWLayout, GGSWPreparedFactory, GLWEAutomorphismKeyLayout, GLWESecret,
-        GLWESecretPreparedFactory, LWE, LWELayout, LWESecret,
+        Dsize, GGLWEToGGSWKeyLayout, GGSW, GGSWLayout, GGSWOwned, GGSWPreparedFactory, GLWEAutomorphismKeyLayout, GLWESecret,
+        GLWESecretOwned, GLWESecretPreparedFactory, LWE, LWELayout, LWEOwned, LWESecret, LWESecretOwned,
     },
 };
 
@@ -22,11 +22,12 @@ use poulpy_hal::{
 };
 use poulpy_schemes::bin_fhe::{
     blind_rotation::{
-        BlindRotationAlgo, BlindRotationKey, BlindRotationKeyFactory, BlindRotationKeyInfos, BlindRotationKeyLayout, CGGI,
+        BlindRotationAlgo, BlindRotationKeyFactory, BlindRotationKeyInfos, BlindRotationKeyLayout, BlindRotationKeyOwned, CGGI,
     },
     circuit_bootstrapping::{
-        CircuitBootstrappingKey, CircuitBootstrappingKeyEncryptSk, CircuitBootstrappingKeyLayout,
-        CircuitBootstrappingKeyPrepared, CircuitBootstrappingKeyPreparedFactory, CirtuitBootstrappingExecute,
+        CircuitBootstrappingKey, CircuitBootstrappingKeyEncryptSk, CircuitBootstrappingKeyLayout, CircuitBootstrappingKeyOwned,
+        CircuitBootstrappingKeyPrepared, CircuitBootstrappingKeyPreparedFactory, CircuitBootstrappingKeyPreparedOwned,
+        CirtuitBootstrappingExecute,
     },
 };
 
@@ -45,7 +46,7 @@ where
         + GGSWNoise<BE>
         + GLWEEncryptSk<BE>
         + VecZnxRotateInplace<BE>,
-    BlindRotationKey<Vec<u8>, BRA>: BlindRotationKeyFactory<BRA>, // TODO find a way to remove this bound or move it to CBT KEY
+    BlindRotationKeyOwned<BRA>: BlindRotationKeyFactory<BRA>, // TODO find a way to remove this bound or move it to CBT KEY
     ScratchOwned<BE>: ScratchOwnedAlloc<BE> + ScratchOwnedBorrow<BE>,
     Scratch<BE>: ScratchTakeCore<BE>,
 {
@@ -78,7 +79,7 @@ where
             + GGSWNoise<BE>
             + GLWEEncryptSk<BE>
             + VecZnxRotateInplace<BE>,
-        BlindRotationKey<Vec<u8>, BRA>: BlindRotationKeyFactory<BRA>, /* TODO find a way to remove this bound or move it to CBT KEY */
+        BlindRotationKeyOwned<BRA>: BlindRotationKeyFactory<BRA>, /* TODO find a way to remove this bound or move it to CBT KEY */
         ScratchOwned<BE>: ScratchOwnedAlloc<BE> + ScratchOwnedBorrow<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
@@ -95,17 +96,17 @@ where
         let mut source_xa: Source = Source::new([1u8; 32]);
         let mut source_xe: Source = Source::new([1u8; 32]);
 
-        let mut sk_lwe: LWESecret<Vec<u8>> = LWESecret::alloc(n_lwe);
+        let mut sk_lwe: LWESecretOwned = LWESecret::alloc(n_lwe);
         sk_lwe.fill_binary_block(params.block_size, &mut source_xs);
         sk_lwe.fill_zero();
 
-        let mut sk_glwe: GLWESecret<Vec<u8>> = GLWESecret::alloc(n_glwe, rank);
+        let mut sk_glwe: GLWESecretOwned = GLWESecret::alloc(n_glwe, rank);
         sk_glwe.fill_ternary_prob(0.5, &mut source_xs);
 
-        let ct_lwe: LWE<Vec<u8>> = LWE::alloc_from_infos(&params.lwe_infos);
+        let ct_lwe: LWEOwned = LWE::alloc_from_infos(&params.lwe_infos);
 
         // Circuit bootstrapping evaluation key
-        let mut cbt_key: CircuitBootstrappingKey<Vec<u8>, BRA> = CircuitBootstrappingKey::alloc_from_infos(&params.cbt_infos);
+        let mut cbt_key: CircuitBootstrappingKeyOwned<BRA> = CircuitBootstrappingKey::alloc_from_infos(&params.cbt_infos);
         cbt_key.encrypt_sk(
             &module,
             &sk_lwe,
@@ -115,8 +116,8 @@ where
             scratch.borrow(),
         );
 
-        let mut res: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&params.ggsw_infos);
-        let mut cbt_prepared: CircuitBootstrappingKeyPrepared<Vec<u8>, BRA, BE> =
+        let mut res: GGSWOwned = GGSW::alloc_from_infos(&params.ggsw_infos);
+        let mut cbt_prepared: CircuitBootstrappingKeyPreparedOwned<BRA, BE> =
             CircuitBootstrappingKeyPrepared::alloc_from_infos(&module, &params.cbt_infos);
         cbt_prepared.prepare(&module, &cbt_key, scratch.borrow());
         move || {

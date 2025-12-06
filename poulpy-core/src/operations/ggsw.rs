@@ -2,7 +2,7 @@ use poulpy_hal::layouts::{Backend, Module, Scratch};
 
 use crate::{
     GLWERotate, ScratchTakeCore,
-    layouts::{GGSW, GGSWInfos, GGSWToMut, GGSWToRef, GLWEInfos},
+    layouts::{GGSWInfos, GGSWMut, GGSWRef, GGSWToMut, GGSWToRef, GLWEInfos},
 };
 
 impl<BE: Backend> GGSWRotate<BE> for Module<BE> where Module<BE>: GLWERotate<BE> {}
@@ -20,8 +20,8 @@ where
         R: GGSWToMut,
         A: GGSWToRef,
     {
-        let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
-        let a: &GGSW<&[u8]> = &a.to_ref();
+        let res: &mut GGSWMut<'_> = &mut res.to_mut();
+        let a: &GGSWRef<'_> = &a.to_ref();
 
         assert!(res.dnum() <= a.dnum());
         assert_eq!(res.dsize(), a.dsize());
@@ -41,7 +41,7 @@ where
         R: GGSWToMut,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GGSWMut<'_> = &mut res.to_mut();
 
         let rows: usize = res.dnum().into();
         let cols: usize = (res.rank() + 1).into();

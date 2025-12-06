@@ -6,7 +6,9 @@ use poulpy_hal::{
 use crate::{
     LWESampleExtract, ScratchTakeCore,
     keyswitching::GLWEKeyswitch,
-    layouts::{GGLWEInfos, GGLWEPreparedToRef, GLWE, GLWELayout, LWE, LWEInfos, LWEToMut, LWEToRef, Rank, TorusPrecision},
+    layouts::{
+        GGLWEInfos, GGLWEPreparedToRef, GLWE, GLWELayout, LWE, LWEInfos, LWEMut, LWERef, LWEToMut, LWEToRef, Rank, TorusPrecision,
+    },
 };
 
 impl LWE<Vec<u8>> {
@@ -75,8 +77,8 @@ where
         K: GGLWEPreparedToRef<BE> + GGLWEInfos,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut LWE<&mut [u8]> = &mut res.to_mut();
-        let a: &LWE<&[u8]> = &a.to_ref();
+        let res: &mut LWEMut<'_> = &mut res.to_mut();
+        let a: &LWERef<'_> = &a.to_ref();
 
         assert!(res.n().as_usize() <= self.n());
         assert!(a.n().as_usize() <= self.n());

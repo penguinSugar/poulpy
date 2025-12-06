@@ -9,7 +9,7 @@ use poulpy_hal::{
     source::Source,
 };
 
-use crate::layouts::{Base2K, Degree, LWE, LWEInfos, LWEToMut, TorusPrecision};
+use crate::layouts::{Base2K, Degree, LWE, LWEInfos, LWEMut, LWEToMut, TorusPrecision};
 
 #[derive(PartialEq, Eq, Clone)]
 pub struct LWECompressed<D: Data> {
@@ -120,8 +120,8 @@ where
         R: LWEToMut,
         O: LWECompressedToRef,
     {
-        let res: &mut LWE<&mut [u8]> = &mut res.to_mut();
-        let other: &LWECompressed<&[u8]> = &other.to_ref();
+        let res: &mut LWEMut<'_> = &mut res.to_mut();
+        let other: &LWECompressedRef<'_> = &other.to_ref();
 
         assert_eq!(res.lwe_layout(), other.lwe_layout());
 
@@ -145,12 +145,16 @@ impl<D: DataMut> LWE<D> {
     }
 }
 
+pub type LWECompressedOwned = LWECompressed<Vec<u8>>;
+pub type LWECompressedRef<'a> = LWECompressed<&'a [u8]>;
+pub type LWECompressedMut<'a> = LWECompressed<&'a mut [u8]>;
+
 pub trait LWECompressedToRef {
-    fn to_ref(&self) -> LWECompressed<&[u8]>;
+    fn to_ref(&self) -> LWECompressedRef<'_>;
 }
 
 impl<D: DataRef> LWECompressedToRef for LWECompressed<D> {
-    fn to_ref(&self) -> LWECompressed<&[u8]> {
+    fn to_ref(&self) -> LWECompressedRef<'_> {
         LWECompressed {
             k: self.k,
             base2k: self.base2k,
@@ -161,11 +165,11 @@ impl<D: DataRef> LWECompressedToRef for LWECompressed<D> {
 }
 
 pub trait LWECompressedToMut {
-    fn to_mut(&mut self) -> LWECompressed<&mut [u8]>;
+    fn to_mut(&mut self) -> LWECompressedMut<'_>;
 }
 
 impl<D: DataMut> LWECompressedToMut for LWECompressed<D> {
-    fn to_mut(&mut self) -> LWECompressed<&mut [u8]> {
+    fn to_mut(&mut self) -> LWECompressedMut<'_> {
         LWECompressed {
             k: self.k,
             base2k: self.base2k,

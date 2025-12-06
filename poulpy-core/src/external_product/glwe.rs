@@ -10,8 +10,8 @@ use poulpy_hal::{
 use crate::{
     GLWENormalize, ScratchTakeCore,
     layouts::{
-        GGSWInfos, GLWE, GLWEInfos, GLWELayout, GLWEToMut, GLWEToRef, LWEInfos,
-        prepared::{GGSWPrepared, GGSWPreparedToRef},
+        GGSWInfos, GGSWPreparedRef, GLWE, GLWEInfos, GLWELayout, GLWEMut, GLWERef, GLWEToMut, GLWEToRef, LWEInfos,
+        prepared::GGSWPreparedToRef,
     },
 };
 
@@ -128,7 +128,7 @@ where
             self.glwe_external_product_internal(res_dft, res, ggsw, scratch_1)
         };
 
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
         for j in 0..(res.rank() + 1).into() {
             self.vec_znx_big_normalize(
                 base2k_res,
@@ -174,7 +174,7 @@ where
             self.glwe_external_product_internal(res_dft, a, ggsw, scratch_1)
         };
 
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
         for j in 0..(res.rank() + 1).into() {
             self.vec_znx_big_normalize(
                 base2k_res,
@@ -264,8 +264,8 @@ where
         G: GGSWPreparedToRef<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let a: &GLWE<&[u8]> = &a.to_ref();
-        let ggsw: &GGSWPrepared<&[u8], BE> = &ggsw.to_ref();
+        let a: &GLWERef<'_> = &a.to_ref();
+        let ggsw: &GGSWPreparedRef<'_, BE> = &ggsw.to_ref();
 
         assert_eq!(a.base2k(), ggsw.base2k());
 

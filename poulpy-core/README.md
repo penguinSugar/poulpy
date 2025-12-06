@@ -50,9 +50,9 @@ fn main() {
     let glwe_pt_infos: GLWEPlaintextLayout = GLWEPlaintextLayout { n, base2k, k: k_pt };
 
     // Allocates ciphertext & plaintexts
-    let mut ct: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_ct_infos);
-    let mut pt_want: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&glwe_pt_infos);
-    let mut pt_have: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&glwe_pt_infos);
+    let mut ct: GLWEOwned = GLWE::alloc_from_infos(&glwe_ct_infos);
+    let mut pt_want: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&glwe_pt_infos);
+    let mut pt_have: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&glwe_pt_infos);
 
     // CPRNG
     let mut source_xs: Source = Source::new([0u8; 32]);
@@ -65,11 +65,11 @@ fn main() {
     );
 
     // Generate secret-key
-    let mut sk: GLWESecret<Vec<u8>> = GLWESecret::alloc_from_infos(&glwe_ct_infos);
+    let mut sk: GLWESecretOwned = GLWESecret::alloc_from_infos(&glwe_ct_infos);
     sk.fill_ternary_prob(0.5, &mut source_xs);
 
     // Backend-prepared secret
-    let mut sk_prepared: GLWESecretPrepared<Vec<u8>, FFT64Ref> = GLWESecretPrepared::alloc(&module, rank);
+    let mut sk_prepared: GLWESecretPreparedOwned<FFT64Ref> = GLWESecretPrepared::alloc(&module, rank);
     sk_prepared.prepare(&module, &sk);
 
     // Uniform plaintext
@@ -135,7 +135,7 @@ let mut atk_compressed: GGLWEAutomorphismKeyCompressed<Vec<u8>> =
 let mut atk: GGLWEAutomorphismKey<Vec<u8>> = 
     GGLWEAutomorphismKey::alloc(...);
 atk.decompress(module, &atk_compressed);
-let mut atk_prep: GGLWEAutomorphismKeyPrepared<Vec<u8>, B> = GLWESecretPrepared<Vec<u8>, B> = atk.prepare_alloc(...);
+let mut atk_prep: GGLWEAutomorphismKeyPreparedOwned<B> = GLWESecretPreparedOwned<B> = atk.prepare_alloc(...);
 ```
 
 ---

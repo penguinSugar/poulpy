@@ -6,15 +6,16 @@ use poulpy_hal::{
 
 use crate::bin_fhe::blind_rotation::{
     BlindRotationAlgo, BlindRotationExecute, BlindRotationKey, BlindRotationKeyEncryptSk, BlindRotationKeyFactory,
-    BlindRotationKeyLayout, BlindRotationKeyPrepared, BlindRotationKeyPreparedFactory, LookUpTableLayout, LookupTable,
-    LookupTableFactory, mod_switch_2n,
+    BlindRotationKeyLayout, BlindRotationKeyOwned, BlindRotationKeyPrepared, BlindRotationKeyPreparedFactory,
+    BlindRotationKeyPreparedOwned, LookUpTableLayout, LookupTable, LookupTableFactory, mod_switch_2n,
 };
 
 use poulpy_core::{
     GLWEDecrypt, LWEEncryptSk, ScratchTakeCore,
     layouts::{
-        GLWE, GLWELayout, GLWEPlaintext, GLWESecret, GLWESecretPreparedFactory, LWE, LWEInfos, LWELayout, LWEPlaintext,
-        LWESecret, LWEToRef, prepared::GLWESecretPrepared,
+        GLWE, GLWELayout, GLWEOwned, GLWEPlaintext, GLWEPlaintextOwned, GLWESecret, GLWESecretOwned, GLWESecretPreparedFactory,
+        GLWESecretPreparedOwned, LWE, LWEInfos, LWELayout, LWEOwned, LWEPlaintext, LWEPlaintextOwned, LWESecret, LWESecretOwned,
+        LWEToRef, prepared::GLWESecretPrepared,
     },
 };
 
@@ -31,7 +32,7 @@ pub fn test_blind_rotation<BRA: BlindRotationAlgo, M, BE: Backend>(
         + GLWESecretPreparedFactory<BE>
         + GLWEDecrypt<BE>
         + LWEEncryptSk<BE>,
-    BlindRotationKey<Vec<u8>, BRA>: BlindRotationKeyFactory<BRA>,
+    BlindRotationKeyOwned<BRA>: BlindRotationKeyFactory<BRA>,
     ScratchOwned<BE>: ScratchOwnedAlloc<BE> + ScratchOwnedBorrow<BE>,
     Scratch<BE>: ScratchTakeCore<BE>,
 {
@@ -76,12 +77,12 @@ pub fn test_blind_rotation<BRA: BlindRotationAlgo, M, BE: Backend>(
 
     let mut scratch: ScratchOwned<BE> = ScratchOwned::<BE>::alloc(BlindRotationKey::encrypt_sk_tmp_bytes(module, &brk_infos));
 
-    let mut sk_glwe: GLWESecret<Vec<u8>> = GLWESecret::alloc_from_infos(&glwe_infos);
+    let mut sk_glwe: GLWESecretOwned = GLWESecret::alloc_from_infos(&glwe_infos);
     sk_glwe.fill_ternary_prob(0.5, &mut source_xs);
-    let mut sk_glwe_dft: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc_from_infos(module, &glwe_infos);
+    let mut sk_glwe_dft: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc_from_infos(module, &glwe_infos);
     sk_glwe_dft.prepare(module, &sk_glwe);
 
-    let mut sk_lwe: LWESecret<Vec<u8>> = LWESecret::alloc(n_lwe.into());
+    let mut sk_lwe: LWESecretOwned = LWESecret::alloc(n_lwe.into());
     sk_lwe.fill_binary_block(block_size, &mut source_xs);
 
     let mut scratch_br: ScratchOwned<BE> = ScratchOwned::<BE>::alloc(BlindRotationKeyPrepared::execute_tmp_bytes(
@@ -92,7 +93,7 @@ pub fn test_blind_rotation<BRA: BlindRotationAlgo, M, BE: Backend>(
         &brk_infos,
     ));
 
-    let mut brk: BlindRotationKey<Vec<u8>, BRA> = BlindRotationKey::<Vec<u8>, BRA>::alloc(&brk_infos);
+    let mut brk: BlindRotationKeyOwned<BRA> = BlindRotationKey::alloc(&brk_infos);
 
     brk.encrypt_sk(
         module,
@@ -103,9 +104,9 @@ pub fn test_blind_rotation<BRA: BlindRotationAlgo, M, BE: Backend>(
         scratch.borrow(),
     );
 
-    let mut lwe: LWE<Vec<u8>> = LWE::alloc_from_infos(&lwe_infos);
+    let mut lwe: LWEOwned = LWE::alloc_from_infos(&lwe_infos);
 
-    let mut pt_lwe: LWEPlaintext<Vec<u8>> = LWEPlaintext::alloc_from_infos(&lwe_infos);
+    let mut pt_lwe: LWEPlaintextOwned = LWEPlaintext::alloc_from_infos(&lwe_infos);
 
     let x: i64 = 15 % (message_modulus as i64);
 
@@ -138,14 +139,14 @@ pub fn test_blind_rotation<BRA: BlindRotationAlgo, M, BE: Backend>(
     let mut lut: LookupTable = LookupTable::alloc(&lut_infos);
     lut.set(module, &f_vec, log_message_modulus + 1);
 
-    let mut res: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_infos);
+    let mut res: GLWEOwned = GLWE::alloc_from_infos(&glwe_infos);
 
-    let mut brk_prepared: BlindRotationKeyPrepared<Vec<u8>, BRA, BE> = BlindRotationKeyPrepared::alloc(module, &brk);
+    let mut brk_prepared: BlindRotationKeyPreparedOwned<BRA, BE> = BlindRotationKeyPrepared::alloc(module, &brk);
     brk_prepared.prepare(module, &brk, scratch_br.borrow());
 
     brk_prepared.execute(module, &mut res, &lwe, &lut, scratch_br.borrow());
 
-    let mut pt_have: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&glwe_infos);
+    let mut pt_have: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&glwe_infos);
 
     res.decrypt(module, &mut pt_have, &sk_glwe_dft, scratch.borrow());
 

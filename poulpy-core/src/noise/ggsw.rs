@@ -6,7 +6,7 @@ use poulpy_hal::{
     layouts::{Backend, DataRef, Module, ScalarZnxToRef, Scratch, Stats, ZnxZero},
 };
 
-use crate::layouts::{GGSW, GGSWInfos, GGSWToRef, LWEInfos, prepared::GLWESecretPrepared};
+use crate::layouts::{GGSW, GGSWInfos, GGSWRef, GGSWToRef, GLWESecretPreparedRef, LWEInfos};
 use crate::{GLWENoise, layouts::prepared::GLWESecretPreparedToRef};
 use crate::{ScratchTakeCore, layouts::GLWEPlaintext};
 
@@ -86,8 +86,8 @@ where
         P: ScalarZnxToRef,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &GGSW<&[u8]> = &res.to_ref();
-        let sk_prepared: &GLWESecretPrepared<&[u8], BE> = &sk_prepared.to_ref();
+        let res: &GGSWRef<'_> = &res.to_ref();
+        let sk_prepared: &GLWESecretPreparedRef<'_, BE> = &sk_prepared.to_ref();
 
         let base2k: usize = res.base2k().into();
         let dsize: usize = res.dsize().into();

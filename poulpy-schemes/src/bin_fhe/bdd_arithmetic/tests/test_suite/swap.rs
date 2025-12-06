@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use poulpy_core::{
     GGSWEncryptSk, GLWEDecrypt, GLWEEncryptSk,
-    layouts::{GGSW, GGSWPrepared, GGSWPreparedFactory, GLWELayout, GLWESecretPrepared},
+    layouts::{GGSW, GGSWOwned, GGSWPrepared, GGSWPreparedFactory, GGSWPreparedOwned, GLWELayout, GLWESecretPreparedOwned},
 };
 use poulpy_hal::{
     api::{ScratchOwnedAlloc, ScratchOwnedBorrow},
@@ -12,7 +12,8 @@ use rand::RngCore;
 
 use crate::bin_fhe::{
     bdd_arithmetic::{
-        Cswap, FheUint, FheUintPrepared, GLWEBlindRetrieval, GLWEBlindRetriever, ScratchTakeBDD,
+        Cswap, FheUint, FheUintOwned, FheUintPrepared, FheUintPreparedOwned, GLWEBlindRetrieval, GLWEBlindRetriever,
+        ScratchTakeBDD,
         tests::test_suite::{TEST_GGSW_INFOS, TEST_GLWE_INFOS, TestContext},
     },
     blind_rotation::BlindRotationAlgo,
@@ -28,22 +29,22 @@ where
     let ggsw_infos: poulpy_core::layouts::GGSWLayout = TEST_GGSW_INFOS;
 
     let module: &Module<BE> = &test_context.module;
-    let sk: &GLWESecretPrepared<Vec<u8>, BE> = &test_context.sk_glwe;
+    let sk: &GLWESecretPreparedOwned<BE> = &test_context.sk_glwe;
 
     let mut source_xa: Source = Source::new([2u8; 32]);
     let mut source_xe: Source = Source::new([3u8; 32]);
 
     let mut scratch: ScratchOwned<BE> = ScratchOwned::alloc(1 << 22);
 
-    let mut s: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_infos);
-    let mut s_prepared: GGSWPrepared<Vec<u8>, BE> = GGSWPrepared::alloc_from_infos(module, &ggsw_infos);
+    let mut s: GGSWOwned = GGSW::alloc_from_infos(&ggsw_infos);
+    let mut s_prepared: GGSWPreparedOwned<BE> = GGSWPrepared::alloc_from_infos(module, &ggsw_infos);
 
     let a: u32 = source_xa.next_u32();
     let b: u32 = source_xa.next_u32();
 
     for bit in [0, 1] {
-        let mut a_enc: FheUint<Vec<u8>, u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
-        let mut b_enc: FheUint<Vec<u8>, u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
+        let mut a_enc: FheUintOwned<u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
+        let mut b_enc: FheUintOwned<u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
 
         a_enc.encrypt_sk(
             module,
@@ -94,7 +95,7 @@ where
     let ggsw_infos: poulpy_core::layouts::GGSWLayout = TEST_GGSW_INFOS;
 
     let module: &Module<BE> = &test_context.module;
-    let sk: &GLWESecretPrepared<Vec<u8>, BE> = &test_context.sk_glwe;
+    let sk: &GLWESecretPreparedOwned<BE> = &test_context.sk_glwe;
 
     let mut source_xa: Source = Source::new([2u8; 32]);
     let mut source_xe: Source = Source::new([3u8; 32]);
@@ -103,9 +104,9 @@ where
 
     let data: Vec<u32> = (0..25).map(|i| i as u32).collect_vec();
 
-    let mut data_enc: Vec<FheUint<Vec<u8>, u32>> = (0..data.len())
+    let mut data_enc: Vec<FheUintOwned<u32>> = (0..data.len())
         .map(|i| {
-            let mut ct: FheUint<Vec<u8>, u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
+            let mut ct: FheUintOwned<u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
             ct.encrypt_sk(
                 module,
                 data[i],
@@ -154,7 +155,7 @@ where
     let ggsw_infos: poulpy_core::layouts::GGSWLayout = TEST_GGSW_INFOS;
 
     let module: &Module<BE> = &test_context.module;
-    let sk: &GLWESecretPrepared<Vec<u8>, BE> = &test_context.sk_glwe;
+    let sk: &GLWESecretPreparedOwned<BE> = &test_context.sk_glwe;
 
     let mut source_xa: Source = Source::new([2u8; 32]);
     let mut source_xe: Source = Source::new([3u8; 32]);
@@ -163,9 +164,9 @@ where
 
     let data: Vec<u32> = (0..25).map(|i| i as u32).collect_vec();
 
-    let data_enc: Vec<FheUint<Vec<u8>, u32>> = (0..data.len())
+    let data_enc: Vec<FheUintOwned<u32>> = (0..data.len())
         .map(|i| {
-            let mut ct: FheUint<Vec<u8>, u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
+            let mut ct: FheUintOwned<u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
             ct.encrypt_sk(
                 module,
                 data[i],
@@ -181,7 +182,7 @@ where
     let mut retriever: GLWEBlindRetriever = GLWEBlindRetriever::alloc(&glwe_infos, data.len());
     for idx in 0..data.len() as u32 {
         let offset = 2;
-        let mut idx_enc: FheUintPrepared<Vec<u8>, u32, BE> = FheUintPrepared::alloc_from_infos(module, &ggsw_infos);
+        let mut idx_enc: FheUintPreparedOwned<u32, BE> = FheUintPrepared::alloc_from_infos(module, &ggsw_infos);
         idx_enc.encrypt_sk(
             module,
             idx << offset,
@@ -191,7 +192,7 @@ where
             scratch.borrow(),
         );
 
-        let mut res: FheUint<Vec<u8>, u32> = FheUint::alloc_from_infos(&glwe_infos);
+        let mut res: FheUintOwned<u32> = FheUint::alloc_from_infos(&glwe_infos);
         retriever.retrieve(
             module,
             &mut res,

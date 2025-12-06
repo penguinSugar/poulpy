@@ -12,8 +12,8 @@ use poulpy_hal::{
 use crate::{
     ScratchTakeCore,
     layouts::{
-        GLWE, GLWEInfos, GLWEPrepared, GLWEPreparedToRef, GLWETensor, GLWETensorToMut, GLWEToMut, GLWEToRef, LWEInfos,
-        TorusPrecision,
+        GLWE, GLWEInfos, GLWEMut, GLWEPreparedRef, GLWEPreparedToRef, GLWERef, GLWETensorMut, GLWETensorToMut, GLWEToMut,
+        GLWEToRef, LWEInfos, TorusPrecision,
     },
 };
 
@@ -36,9 +36,9 @@ where
         A: GLWEToRef,
         B: GLWEPreparedToRef<BE>,
     {
-        let res: &mut GLWETensor<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWE<&[u8]> = &a.to_ref();
-        let b: &GLWEPrepared<&[u8], BE> = &b.to_ref();
+        let res: &mut GLWETensorMut<'_> = &mut res.to_mut();
+        let a: &GLWERef<'_> = &a.to_ref();
+        let b: &GLWEPreparedRef<'_, BE> = &b.to_ref();
 
         assert_eq!(a.base2k(), b.base2k());
         assert_eq!(a.rank(), res.rank());
@@ -87,9 +87,9 @@ where
         A: GLWEToRef,
         B: GLWEToRef,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &mut GLWE<&[u8]> = &mut a.to_ref();
-        let b: &GLWE<&[u8]> = &b.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let a: &mut GLWERef<'_> = &mut a.to_ref();
+        let b: &GLWERef<'_> = &b.to_ref();
 
         assert_eq!(a.n(), self.n() as u32);
         assert_eq!(b.n(), self.n() as u32);
@@ -134,8 +134,8 @@ where
         R: GLWEToMut,
         A: GLWEToRef,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWE<&[u8]> = &a.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let a: &GLWERef<'_> = &a.to_ref();
 
         assert_eq!(res.n(), self.n() as u32);
         assert_eq!(a.n(), self.n() as u32);
@@ -165,9 +165,9 @@ where
         A: GLWEToRef,
         B: GLWEToRef,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWE<&[u8]> = &a.to_ref();
-        let b: &GLWE<&[u8]> = &b.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let a: &GLWERef<'_> = &a.to_ref();
+        let b: &GLWERef<'_> = &b.to_ref();
 
         assert_eq!(a.n(), self.n() as u32);
         assert_eq!(b.n(), self.n() as u32);
@@ -212,8 +212,8 @@ where
         R: GLWEToMut,
         A: GLWEToRef,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWE<&[u8]> = &a.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let a: &GLWERef<'_> = &a.to_ref();
 
         assert_eq!(res.n(), self.n() as u32);
         assert_eq!(a.n(), self.n() as u32);
@@ -230,8 +230,8 @@ where
         R: GLWEToMut,
         A: GLWEToRef,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWE<&[u8]> = &a.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let a: &GLWERef<'_> = &a.to_ref();
 
         assert_eq!(res.n(), self.n() as u32);
         assert_eq!(a.n(), self.n() as u32);
@@ -259,8 +259,8 @@ where
         R: GLWEToMut,
         A: GLWEToRef,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWE<&[u8]> = &a.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let a: &GLWERef<'_> = &a.to_ref();
 
         assert_eq!(a.n(), self.n() as u32);
         assert_eq!(res.n(), self.n() as u32);
@@ -282,7 +282,7 @@ where
         R: GLWEToMut,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
 
         for i in 0..(res.rank() + 1).into() {
             self.vec_znx_rotate_inplace(k, res.data_mut(), i, scratch);
@@ -301,8 +301,8 @@ where
         R: GLWEToMut,
         A: GLWEToRef,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWE<&[u8]> = &a.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let a: &GLWERef<'_> = &a.to_ref();
 
         assert_eq!(res.n(), self.n() as u32);
         assert_eq!(a.n(), self.n() as u32);
@@ -317,7 +317,7 @@ where
     where
         R: GLWEToMut,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
 
         assert_eq!(res.n(), self.n() as u32);
 
@@ -338,8 +338,8 @@ where
         R: GLWEToMut,
         A: GLWEToRef,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWE<&[u8]> = &a.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let a: &GLWERef<'_> = &a.to_ref();
 
         assert_eq!(res.n(), self.n() as u32);
         assert_eq!(a.n(), self.n() as u32);
@@ -372,7 +372,7 @@ where
         R: GLWEToMut,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
         let base2k: usize = res.base2k().into();
         for i in 0..res.rank().as_usize() + 1 {
             self.vec_znx_rsh_inplace(base2k, k, res.data_mut(), i, scratch);
@@ -403,7 +403,7 @@ where
     }
 
     /// Usage:
-    /// let mut tmp_b: Option<GLWE<&mut [u8]>> = None;
+    /// let mut tmp_b: Option<GLWEMut<'_>> = None;
     /// let (b_conv, scratch_1) = glwe_maybe_convert_in_place(self, b, res.base2k().as_u32(), &mut tmp_b, scratch);
     fn glwe_maybe_cross_normalize_to_ref<'a, A>(
         &self,
@@ -431,7 +431,7 @@ where
         *tmp_slot = Some(tmp);
 
         // Get a mutable handle to the temp and normalize into it
-        let tmp_ref: &mut GLWE<&mut [u8]> = tmp_slot
+        let tmp_ref: &mut GLWEMut<'_> = tmp_slot
             .as_mut()
             .expect("tmp_slot just set to Some, but found None");
 
@@ -442,7 +442,7 @@ where
     }
 
     /// Usage:
-    /// let mut tmp_b: Option<GLWE<&mut [u8]>> = None;
+    /// let mut tmp_b: Option<GLWEMut<'_>> = None;
     /// let (b_conv, scratch_1) = glwe_maybe_convert_in_place(self, b, res.base2k().as_u32(), &mut tmp_b, scratch);
     fn glwe_maybe_cross_normalize_to_mut<'a, A>(
         &self,
@@ -470,7 +470,7 @@ where
         *tmp_slot = Some(tmp);
 
         // Get a mutable handle to the temp and normalize into it
-        let tmp_ref: &mut GLWE<&mut [u8]> = tmp_slot
+        let tmp_ref: &mut GLWEMut<'_> = tmp_slot
             .as_mut()
             .expect("tmp_slot just set to Some, but found None");
 
@@ -486,8 +486,8 @@ where
         A: GLWEToRef,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWE<&[u8]> = &a.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let a: &GLWERef<'_> = &a.to_ref();
 
         assert_eq!(res.n(), self.n() as u32);
         assert_eq!(a.n(), self.n() as u32);
@@ -511,7 +511,7 @@ where
         R: GLWEToMut,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
         for i in 0..res.rank().as_usize() + 1 {
             self.vec_znx_normalize_inplace(res.base2k().into(), res.data_mut(), i, scratch);
         }

@@ -5,7 +5,8 @@ use itertools::Itertools;
 use poulpy_core::{
     GLWECopy, GLWEExternalProductInternal, GLWENormalize, GLWESub, ScratchTakeCore,
     layouts::{
-        GGSWInfos, GGSWPrepared, GLWE, GLWEInfos, GLWELayout, GLWEToMut, GLWEToRef, LWEInfos, prepared::GGSWPreparedToRef,
+        GGSWInfos, GGSWPreparedRef, GLWE, GLWEInfos, GLWELayout, GLWEMut, GLWERef, GLWEToMut, GLWEToRef, LWEInfos,
+        prepared::GGSWPreparedToRef,
     },
 };
 use poulpy_hal::{
@@ -187,7 +188,7 @@ fn eval_level<M, R, G, BE: Backend>(
     Scratch<BE>: ScratchTakeCore<BE>,
 {
     assert!(nodes.len().is_multiple_of(state_size));
-    let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+    let res: &mut GLWEMut<'_> = &mut res.to_mut();
 
     let (mut level, scratch_1) = scratch.take_glwe_slice(state_size * 2, res);
 
@@ -198,7 +199,7 @@ fn eval_level<M, R, G, BE: Backend>(
         .data_mut()
         .encode_coeff_i64(res.base2k().into(), 0, 2, 0, 1);
 
-    let mut level_ref: Vec<&mut GLWE<&mut [u8]>> = level.iter_mut().collect_vec();
+    let mut level_ref: Vec<&mut GLWEMut<'_>> = level.iter_mut().collect_vec();
     let (mut prev_level, mut next_level) = level_ref.split_at_mut(state_size);
 
     let (all_but_last, last) = nodes.split_at(nodes.len() - state_size);
@@ -339,9 +340,9 @@ where
         S: GGSWPreparedToRef<BE> + GGSWInfos,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res_a: &mut GLWE<&mut [u8]> = &mut res_a.to_mut();
-        let res_b: &mut GLWE<&mut [u8]> = &mut res_b.to_mut();
-        let s: &GGSWPrepared<&[u8], BE> = &s.to_ref();
+        let res_a: &mut GLWEMut<'_> = &mut res_a.to_mut();
+        let res_b: &mut GLWEMut<'_> = &mut res_b.to_mut();
+        let s: &GGSWPreparedRef<'_, BE> = &s.to_ref();
         assert_eq!(res_a.base2k(), res_b.base2k());
 
         let res_base2k: usize = res_a.base2k().as_usize();
@@ -493,9 +494,9 @@ where
         S: GGSWPreparedToRef<BE> + GGSWInfos,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let s: &GGSWPrepared<&[u8], BE> = &s.to_ref();
-        let f: GLWE<&[u8]> = f.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let s: &GGSWPreparedRef<'_, BE> = &s.to_ref();
+        let f: GLWERef<'_> = f.to_ref();
 
         let res_base2k: usize = res.base2k().into();
         let ggsw_base2k: usize = s.base2k().into();
@@ -525,9 +526,9 @@ where
         S: GGSWPreparedToRef<BE> + GGSWInfos,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let s: &GGSWPrepared<&[u8], BE> = &s.to_ref();
-        let a: &GLWE<&[u8]> = &a.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let s: &GGSWPreparedRef<'_, BE> = &s.to_ref();
+        let a: &GLWERef<'_> = &a.to_ref();
 
         assert_eq!(res.base2k(), a.base2k());
 
@@ -564,9 +565,9 @@ where
         S: GGSWPreparedToRef<BE> + GGSWInfos,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let s: &GGSWPrepared<&[u8], BE> = &s.to_ref();
-        let a: GLWE<&[u8]> = a.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let s: &GGSWPreparedRef<'_, BE> = &s.to_ref();
+        let a: GLWERef<'_> = a.to_ref();
         let res_base2k: usize = res.base2k().into();
         let ggsw_base2k: usize = s.base2k().into();
         self.glwe_sub_inplace(res, &a);

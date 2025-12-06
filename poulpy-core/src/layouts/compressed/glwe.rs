@@ -6,7 +6,9 @@ use poulpy_hal::{
     source::Source,
 };
 
-use crate::layouts::{Base2K, Degree, GLWE, GLWEInfos, GLWEToMut, GetDegree, LWEInfos, Rank, SetGLWEInfos, TorusPrecision};
+use crate::layouts::{
+    Base2K, Degree, GLWE, GLWEInfos, GLWEMut, GLWEToMut, GetDegree, LWEInfos, Rank, SetGLWEInfos, TorusPrecision,
+};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use std::fmt;
 
@@ -148,8 +150,8 @@ where
         O: GLWECompressedToRef + GLWEInfos,
     {
         {
-            let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-            let other: &GLWECompressed<&[u8]> = &other.to_ref();
+            let res: &mut GLWEMut<'_> = &mut res.to_mut();
+            let other: &GLWECompressedRef<'_> = &other.to_ref();
             assert_eq!(
                 res.n(),
                 self.ring_degree(),
@@ -185,12 +187,16 @@ impl<D: DataMut> GLWE<D> {
     }
 }
 
+pub type GLWECompressedOwned = GLWECompressed<Vec<u8>>;
+pub type GLWECompressedRef<'a> = GLWECompressed<&'a [u8]>;
+pub type GLWECompressedMut<'a> = GLWECompressed<&'a mut [u8]>;
+
 pub trait GLWECompressedToRef {
-    fn to_ref(&self) -> GLWECompressed<&[u8]>;
+    fn to_ref(&self) -> GLWECompressedRef<'_>;
 }
 
 impl<D: DataRef> GLWECompressedToRef for GLWECompressed<D> {
-    fn to_ref(&self) -> GLWECompressed<&[u8]> {
+    fn to_ref(&self) -> GLWECompressedRef<'_> {
         GLWECompressed {
             seed: self.seed,
             base2k: self.base2k,
@@ -202,11 +208,11 @@ impl<D: DataRef> GLWECompressedToRef for GLWECompressed<D> {
 }
 
 pub trait GLWECompressedToMut {
-    fn to_mut(&mut self) -> GLWECompressed<&mut [u8]>;
+    fn to_mut(&mut self) -> GLWECompressedMut<'_>;
 }
 
 impl<D: DataMut> GLWECompressedToMut for GLWECompressed<D> {
-    fn to_mut(&mut self) -> GLWECompressed<&mut [u8]> {
+    fn to_mut(&mut self) -> GLWECompressedMut<'_> {
         GLWECompressed {
             seed: self.seed,
             base2k: self.base2k,

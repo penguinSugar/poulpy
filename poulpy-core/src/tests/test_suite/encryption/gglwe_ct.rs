@@ -10,8 +10,9 @@ use crate::{
     decryption::GLWEDecrypt,
     encryption::SIGMA,
     layouts::{
-        GGLWE, GGLWECompressed, GGLWEInfos, GGLWELayout, GLWESecret, GLWESecretPreparedFactory, GLWESwitchingKey,
-        GLWESwitchingKeyCompressed, GLWESwitchingKeyDecompress, LWEInfos,
+        GGLWE, GGLWECompressed, GGLWECompressedOwned, GGLWEInfos, GGLWELayout, GGLWEOwned, GLWESecret, GLWESecretOwned,
+        GLWESecretPreparedFactory, GLWESecretPreparedOwned, GLWESwitchingKey, GLWESwitchingKeyCompressed,
+        GLWESwitchingKeyCompressedOwned, GLWESwitchingKeyDecompress, GLWESwitchingKeyOwned, LWEInfos,
         prepared::{GGLWEPreparedFactory, GLWESecretPrepared},
     },
     noise::GGLWENoise,
@@ -49,7 +50,7 @@ where
                     rank_out: rank_out.into(),
                 };
 
-                let mut ksk: GLWESwitchingKey<Vec<u8>> = GLWESwitchingKey::alloc_from_infos(&gglwe_infos);
+                let mut ksk: GLWESwitchingKeyOwned = GLWESwitchingKey::alloc_from_infos(&gglwe_infos);
 
                 let mut source_xs: Source = Source::new([0u8; 32]);
                 let mut source_xe: Source = Source::new([0u8; 32]);
@@ -58,12 +59,12 @@ where
                 let mut scratch: ScratchOwned<BE> =
                     ScratchOwned::alloc(GLWESwitchingKey::encrypt_sk_tmp_bytes(module, &gglwe_infos));
 
-                let mut sk_in: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank_in.into());
+                let mut sk_in: GLWESecretOwned = GLWESecret::alloc(n.into(), rank_in.into());
                 sk_in.fill_ternary_prob(0.5, &mut source_xs);
 
-                let mut sk_out: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank_out.into());
+                let mut sk_out: GLWESecretOwned = GLWESecret::alloc(n.into(), rank_out.into());
                 sk_out.fill_ternary_prob(0.5, &mut source_xs);
-                let mut sk_out_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc(module, rank_out.into());
+                let mut sk_out_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(module, rank_out.into());
                 sk_out_prepared.prepare(module, &sk_out);
 
                 ksk.encrypt_sk(
@@ -138,7 +139,7 @@ where
                     rank_out: rank_out.into(),
                 };
 
-                let mut ksk_compressed: GLWESwitchingKeyCompressed<Vec<u8>> =
+                let mut ksk_compressed: GLWESwitchingKeyCompressedOwned =
                     GLWESwitchingKeyCompressed::alloc_from_infos(&gglwe_infos);
 
                 let mut source_xs: Source = Source::new([0u8; 32]);
@@ -149,12 +150,12 @@ where
                     &gglwe_infos,
                 ));
 
-                let mut sk_in: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank_in.into());
+                let mut sk_in: GLWESecretOwned = GLWESecret::alloc(n.into(), rank_in.into());
                 sk_in.fill_ternary_prob(0.5, &mut source_xs);
 
-                let mut sk_out: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank_out.into());
+                let mut sk_out: GLWESecretOwned = GLWESecret::alloc(n.into(), rank_out.into());
                 sk_out.fill_ternary_prob(0.5, &mut source_xs);
-                let mut sk_out_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc(module, rank_out.into());
+                let mut sk_out_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(module, rank_out.into());
                 sk_out_prepared.prepare(module, &sk_out);
 
                 let seed_xa = [1u8; 32];
@@ -168,7 +169,7 @@ where
                     scratch.borrow(),
                 );
 
-                let mut ksk: GLWESwitchingKey<Vec<u8>> = GLWESwitchingKey::alloc_from_infos(&gglwe_infos);
+                let mut ksk: GLWESwitchingKeyOwned = GLWESwitchingKey::alloc_from_infos(&gglwe_infos);
                 ksk.decompress(module, &ksk_compressed);
 
                 let max_noise: f64 = SIGMA.log2() - (ksk.k().as_usize() as f64) + 0.5;
@@ -234,7 +235,7 @@ where
                     rank_out: rank_out.into(),
                 };
 
-                let mut ksk_compressed: GGLWECompressed<Vec<u8>> = GGLWECompressed::alloc_from_infos(&gglwe_infos);
+                let mut ksk_compressed: GGLWECompressedOwned = GGLWECompressed::alloc_from_infos(&gglwe_infos);
 
                 let mut source_xs: Source = Source::new([0u8; 32]);
                 let mut source_xe: Source = Source::new([0u8; 32]);
@@ -242,12 +243,12 @@ where
                 let mut scratch: ScratchOwned<BE> =
                     ScratchOwned::alloc(GGLWECompressed::encrypt_sk_tmp_bytes(module, &gglwe_infos));
 
-                let mut sk_in: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank_in.into());
+                let mut sk_in: GLWESecretOwned = GLWESecret::alloc(n.into(), rank_in.into());
                 sk_in.fill_ternary_prob(0.5, &mut source_xs);
 
-                let mut sk_out: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank_out.into());
+                let mut sk_out: GLWESecretOwned = GLWESecret::alloc(n.into(), rank_out.into());
                 sk_out.fill_ternary_prob(0.5, &mut source_xs);
-                let mut sk_out_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc(module, rank_out.into());
+                let mut sk_out_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(module, rank_out.into());
                 sk_out_prepared.prepare(module, &sk_out);
 
                 let seed_xa = [1u8; 32];
@@ -261,7 +262,7 @@ where
                     scratch.borrow(),
                 );
 
-                let mut ksk: GGLWE<Vec<u8>> = GGLWE::alloc_from_infos(&gglwe_infos);
+                let mut ksk: GGLWEOwned = GGLWE::alloc_from_infos(&gglwe_infos);
                 ksk.decompress(module, &ksk_compressed);
 
                 let max_noise: f64 = SIGMA.log2() - (ksk.k().as_usize() as f64) + 0.5;

@@ -2,9 +2,9 @@ use poulpy_core::{
     GLWEAdd, GLWECopy, GLWEDecrypt, GLWEEncryptSk, GLWEKeyswitch, GLWENoise, GLWEPacking, GLWERotate, GLWESub, GLWETrace,
     LWEFromGLWE, ScratchTakeCore,
     layouts::{
-        Base2K, Degree, GGLWEInfos, GGLWEPreparedToRef, GLWE, GLWEAutomorphismKeyHelper, GLWEInfos, GLWELayout,
-        GLWEPlaintextLayout, GLWESecretPreparedToRef, GLWEToMut, GLWEToRef, GetGaloisElement, LWEInfos, LWEToMut, Rank,
-        TorusPrecision,
+        Base2K, Degree, GGLWEInfos, GGLWEPreparedToRef, GLWE, GLWEAutomorphismKeyHelper, GLWEInfos, GLWELayout, GLWEMut,
+        GLWEOwned, GLWEPlaintextLayout, GLWERef, GLWESecretPreparedToRef, GLWEToMut, GLWEToRef, GetGaloisElement, LWEInfos,
+        LWEToMut, Rank, TorusPrecision,
     },
 };
 use poulpy_hal::{
@@ -21,6 +21,10 @@ pub struct FheUint<D: Data, T: UnsignedInteger> {
     pub(crate) bits: GLWE<D>,
     pub(crate) _phantom: PhantomData<T>,
 }
+
+pub type FheUintOwned<T> = FheUint<Vec<u8>, T>;
+pub type FheUintRef<'a, T> = FheUint<&'a [u8], T>;
+pub type FheUintMut<'a, T> = FheUint<&'a mut [u8], T>;
 
 impl<T: UnsignedInteger> FheUint<Vec<u8>, T> {
     pub fn alloc_from_infos<A>(infos: &A) -> Self
@@ -297,7 +301,7 @@ impl<D: DataMut, T: UnsignedInteger> FheUint<D, T> {
 }
 
 impl<D: DataMut, T: UnsignedInteger> GLWEToMut for FheUint<D, T> {
-    fn to_mut(&mut self) -> GLWE<&mut [u8]> {
+    fn to_mut(&mut self) -> GLWEMut<'_> {
         self.bits.to_mut()
     }
 }
@@ -306,7 +310,7 @@ pub trait ScratchTakeBDD<T: UnsignedInteger, BE: Backend>
 where
     Self: ScratchTakeCore<BE>,
 {
-    fn take_fhe_uint<A>(&mut self, infos: &A) -> (FheUint<&mut [u8], T>, &mut Self)
+    fn take_fhe_uint<A>(&mut self, infos: &A) -> (FheUintMut<'_, T>, &mut Self)
     where
         A: GLWEInfos,
     {
@@ -394,7 +398,7 @@ impl<D: DataRef, T: UnsignedInteger> FheUint<D, T> {
 }
 
 impl<D: DataRef, T: UnsignedInteger> GLWEToRef for FheUint<D, T> {
-    fn to_ref(&self) -> GLWE<&[u8]> {
+    fn to_ref(&self) -> GLWERef<'_> {
         self.bits.to_ref()
     }
 }
@@ -413,8 +417,8 @@ impl<D: DataMut, T: UnsignedInteger> FheUint<D, T> {
         K: GGLWEPreparedToRef<BE> + GetGaloisElement + GGLWEInfos,
         H: GLWEAutomorphismKeyHelper<K, BE>,
     {
-        let zero: GLWE<Vec<u8>> = GLWE::alloc_from_infos(self);
-        let mut one: GLWE<Vec<u8>> = GLWE::alloc_from_infos(self);
+        let zero: GLWEOwned = GLWE::alloc_from_infos(self);
+        let mut one: GLWEOwned = GLWE::alloc_from_infos(self);
         one.data_mut()
             .encode_coeff_i64(self.base2k().into(), 0, 2, 0, 1);
 

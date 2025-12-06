@@ -41,24 +41,25 @@ use poulpy_core::{
     ScratchTakeCore,
     layouts::{
         Base2K, Degree, Dnum, Dsize, GGLWEToGGSWKeyLayout, GGSWLayout, GLWEAutomorphismKeyLayout, GLWELayout, GLWESecret,
-        GLWESecretPrepared, GLWESecretPreparedFactory, GLWESwitchingKeyLayout, GLWEToLWEKeyLayout, LWESecret, Rank,
-        TorusPrecision,
+        GLWESecretOwned, GLWESecretPrepared, GLWESecretPreparedFactory, GLWESecretPreparedOwned, GLWESwitchingKeyLayout,
+        GLWEToLWEKeyLayout, LWESecret, LWESecretOwned, Rank, TorusPrecision,
     },
 };
 
 use crate::bin_fhe::{
-    bdd_arithmetic::{BDDKey, BDDKeyEncryptSk, BDDKeyLayout, BDDKeyPrepared, BDDKeyPreparedFactory},
+    bdd_arithmetic::{BDDKey, BDDKeyEncryptSk, BDDKeyLayout, BDDKeyPrepared, BDDKeyPreparedFactory, BDDKeyPreparedOwned},
     blind_rotation::{
-        BlindRotationAlgo, BlindRotationKey, BlindRotationKeyFactory, BlindRotationKeyLayout, BlindRotationKeyPreparedFactory,
+        BlindRotationAlgo, BlindRotationKeyFactory, BlindRotationKeyLayout, BlindRotationKeyOwned,
+        BlindRotationKeyPreparedFactory,
     },
     circuit_bootstrapping::CircuitBootstrappingKeyLayout,
 };
 
 pub struct TestContext<BRA: BlindRotationAlgo, BE: Backend> {
     pub module: Module<BE>,
-    pub sk_glwe: GLWESecretPrepared<Vec<u8>, BE>,
-    pub sk_lwe: LWESecret<Vec<u8>>,
-    pub bdd_key: BDDKeyPrepared<Vec<u8>, BRA, BE>,
+    pub sk_glwe: GLWESecretPreparedOwned<BE>,
+    pub sk_lwe: LWESecretOwned,
+    pub bdd_key: BDDKeyPreparedOwned<BRA, BE>,
 }
 
 impl<BRA: BlindRotationAlgo, BE: Backend> Default for TestContext<BRA, BE>
@@ -68,7 +69,7 @@ where
         + GLWESecretPreparedFactory<BE>
         + BlindRotationKeyPreparedFactory<BRA, BE>
         + BDDKeyPreparedFactory<BRA, BE>,
-    BlindRotationKey<Vec<u8>, BRA>: BlindRotationKeyFactory<BRA>,
+    BlindRotationKeyOwned<BRA>: BlindRotationKeyFactory<BRA>,
     ScratchOwned<BE>: ScratchOwnedAlloc<BE> + ScratchOwnedBorrow<BE>,
     Scratch<BE>: ScratchTakeCore<BE>,
 {
@@ -93,7 +94,7 @@ impl<BRA: BlindRotationAlgo, BE: Backend> TestContext<BRA, BE> {
             + GLWESecretPreparedFactory<BE>
             + BlindRotationKeyPreparedFactory<BRA, BE>
             + BDDKeyPreparedFactory<BRA, BE>,
-        BlindRotationKey<Vec<u8>, BRA>: BlindRotationKeyFactory<BRA>,
+        BlindRotationKeyOwned<BRA>: BlindRotationKeyFactory<BRA>,
         ScratchOwned<BE>: ScratchOwnedAlloc<BE> + ScratchOwnedBorrow<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
@@ -105,14 +106,14 @@ impl<BRA: BlindRotationAlgo, BE: Backend> TestContext<BRA, BE> {
 
         let mut scratch: ScratchOwned<BE> = ScratchOwned::alloc(1 << 22);
 
-        let mut sk_glwe: GLWESecret<Vec<u8>> = GLWESecret::alloc(TEST_N_GLWE.into(), TEST_RANK.into());
+        let mut sk_glwe: GLWESecretOwned = GLWESecret::alloc(TEST_N_GLWE.into(), TEST_RANK.into());
         sk_glwe.fill_ternary_prob(0.5, &mut source_xs);
-        let mut sk_glwe_prep: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc(&module, TEST_RANK.into());
+        let mut sk_glwe_prep: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(&module, TEST_RANK.into());
         sk_glwe_prep.prepare(&module, &sk_glwe);
 
         let n_lwe: u32 = TEST_N_LWE;
         let block_size: u32 = TEST_BLOCK_SIZE;
-        let mut sk_lwe: LWESecret<Vec<u8>> = LWESecret::alloc(n_lwe.into());
+        let mut sk_lwe: LWESecretOwned = LWESecret::alloc(n_lwe.into());
         sk_lwe.fill_binary_block(block_size as usize, &mut source_xs);
         let bdd_key_infos: BDDKeyLayout = TEST_BDD_KEY_LAYOUT;
         let mut bdd_key: BDDKey<Vec<u8>, BRA> = BDDKey::alloc_from_infos(&bdd_key_infos);
@@ -124,7 +125,7 @@ impl<BRA: BlindRotationAlgo, BE: Backend> TestContext<BRA, BE> {
             &mut source_xe,
             scratch.borrow(),
         );
-        let mut bdd_key_prepared: BDDKeyPrepared<Vec<u8>, BRA, BE> = BDDKeyPrepared::alloc_from_infos(&module, &bdd_key_infos);
+        let mut bdd_key_prepared: BDDKeyPreparedOwned<BRA, BE> = BDDKeyPrepared::alloc_from_infos(&module, &bdd_key_infos);
         bdd_key_prepared.prepare(&module, &bdd_key, scratch.borrow());
 
         TestContext {

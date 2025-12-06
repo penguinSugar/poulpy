@@ -8,8 +8,9 @@ use crate::{
     GLWEAutomorphism, GLWEAutomorphismKeyEncryptSk, GLWEDecrypt, GLWEEncryptSk, GLWENoise, GLWENormalize, ScratchTakeCore,
     encryption::SIGMA,
     layouts::{
-        GLWE, GLWEAutomorphismKey, GLWEAutomorphismKeyLayout, GLWEAutomorphismKeyPreparedFactory, GLWELayout, GLWEPlaintext,
-        GLWESecret, GLWESecretPreparedFactory,
+        GLWE, GLWEAutomorphismKey, GLWEAutomorphismKeyLayout, GLWEAutomorphismKeyOwned, GLWEAutomorphismKeyPreparedFactory,
+        GLWEAutomorphismKeyPreparedOwned, GLWELayout, GLWEOwned, GLWEPlaintext, GLWEPlaintextOwned, GLWESecret, GLWESecretOwned,
+        GLWESecretPreparedFactory, GLWESecretPreparedOwned,
         prepared::{GLWEAutomorphismKeyPrepared, GLWESecretPrepared},
     },
     var_noise_gglwe_product_v2,
@@ -67,11 +68,11 @@ where
                 dsize: dsize.into(),
             };
 
-            let mut autokey: GLWEAutomorphismKey<Vec<u8>> = GLWEAutomorphismKey::alloc_from_infos(&autokey_infos);
-            let mut ct_in: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&ct_in_infos);
-            let mut ct_out: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&ct_out_infos);
-            let mut pt_in: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&ct_in_infos);
-            let mut pt_out: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&ct_out_infos);
+            let mut autokey: GLWEAutomorphismKeyOwned = GLWEAutomorphismKey::alloc_from_infos(&autokey_infos);
+            let mut ct_in: GLWEOwned = GLWE::alloc_from_infos(&ct_in_infos);
+            let mut ct_out: GLWEOwned = GLWE::alloc_from_infos(&ct_out_infos);
+            let mut pt_in: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&ct_in_infos);
+            let mut pt_out: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&ct_out_infos);
 
             let mut source_xs: Source = Source::new([0u8; 32]);
             let mut source_xe: Source = Source::new([0u8; 32]);
@@ -86,10 +87,10 @@ where
                     | GLWE::automorphism_tmp_bytes(module, &ct_out, &ct_in, &autokey),
             );
 
-            let mut sk: GLWESecret<Vec<u8>> = GLWESecret::alloc_from_infos(&ct_out);
+            let mut sk: GLWESecretOwned = GLWESecret::alloc_from_infos(&ct_out);
             sk.fill_ternary_prob(0.5, &mut source_xs);
 
-            let mut sk_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc_from_infos(module, &sk);
+            let mut sk_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc_from_infos(module, &sk);
             sk_prepared.prepare(module, &sk);
 
             autokey.encrypt_sk(
@@ -110,7 +111,7 @@ where
                 scratch.borrow(),
             );
 
-            let mut autokey_prepared: GLWEAutomorphismKeyPrepared<Vec<u8>, BE> =
+            let mut autokey_prepared: GLWEAutomorphismKeyPreparedOwned<BE> =
                 GLWEAutomorphismKeyPrepared::alloc_from_infos(module, &autokey_infos);
             autokey_prepared.prepare(module, &autokey, scratch.borrow());
 
@@ -190,9 +191,9 @@ where
                 dsize: dsize.into(),
             };
 
-            let mut autokey: GLWEAutomorphismKey<Vec<u8>> = GLWEAutomorphismKey::alloc_from_infos(&autokey_infos);
-            let mut ct: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&ct_out_infos);
-            let mut pt_want: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&ct_out_infos);
+            let mut autokey: GLWEAutomorphismKeyOwned = GLWEAutomorphismKey::alloc_from_infos(&autokey_infos);
+            let mut ct: GLWEOwned = GLWE::alloc_from_infos(&ct_out_infos);
+            let mut pt_want: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&ct_out_infos);
 
             let mut source_xs: Source = Source::new([0u8; 32]);
             let mut source_xe: Source = Source::new([0u8; 32]);
@@ -207,10 +208,10 @@ where
                     | GLWE::automorphism_tmp_bytes(module, &ct, &ct, &autokey),
             );
 
-            let mut sk: GLWESecret<Vec<u8>> = GLWESecret::alloc_from_infos(&ct);
+            let mut sk: GLWESecretOwned = GLWESecret::alloc_from_infos(&ct);
             sk.fill_ternary_prob(0.5, &mut source_xs);
 
-            let mut sk_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc_from_infos(module, &sk);
+            let mut sk_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc_from_infos(module, &sk);
             sk_prepared.prepare(module, &sk);
 
             autokey.encrypt_sk(
@@ -231,7 +232,7 @@ where
                 scratch.borrow(),
             );
 
-            let mut autokey_prepared: GLWEAutomorphismKeyPrepared<Vec<u8>, BE> =
+            let mut autokey_prepared: GLWEAutomorphismKeyPreparedOwned<BE> =
                 GLWEAutomorphismKeyPrepared::alloc_from_infos(module, &autokey);
             autokey_prepared.prepare(module, &autokey, scratch.borrow());
 

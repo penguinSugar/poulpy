@@ -8,7 +8,8 @@ use crate::{
     GGSWEncryptSk, GGSWExternalProduct, GGSWNoise, ScratchTakeCore,
     encryption::SIGMA,
     layouts::{
-        GGSW, GGSWInfos, GGSWLayout, GGSWPreparedFactory, GLWEInfos, GLWESecret, GLWESecretPreparedFactory,
+        GGSW, GGSWInfos, GGSWLayout, GGSWOwned, GGSWPreparedFactory, GGSWPreparedOwned, GLWEInfos, GLWESecret, GLWESecretOwned,
+        GLWESecretPreparedFactory, GLWESecretPreparedOwned,
         prepared::{GGSWPrepared, GLWESecretPrepared},
     },
     noise::noise_ggsw_product,
@@ -70,9 +71,9 @@ where
                 rank: rank.into(),
             };
 
-            let mut ggsw_in: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_in_infos);
-            let mut ggsw_out: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_out_infos);
-            let mut ggsw_apply: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_apply_infos);
+            let mut ggsw_in: GGSWOwned = GGSW::alloc_from_infos(&ggsw_in_infos);
+            let mut ggsw_out: GGSWOwned = GGSW::alloc_from_infos(&ggsw_out_infos);
+            let mut ggsw_apply: GGSWOwned = GGSW::alloc_from_infos(&ggsw_apply_infos);
             let mut pt_in: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
             let mut pt_apply: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
 
@@ -92,10 +93,10 @@ where
                     | GGSW::external_product_tmp_bytes(module, &ggsw_out_infos, &ggsw_in_infos, &ggsw_apply_infos),
             );
 
-            let mut sk: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank.into());
+            let mut sk: GLWESecretOwned = GLWESecret::alloc(n.into(), rank.into());
             sk.fill_ternary_prob(0.5, &mut source_xs);
 
-            let mut sk_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc(module, rank.into());
+            let mut sk_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(module, rank.into());
             sk_prepared.prepare(module, &sk);
 
             ggsw_apply.encrypt_sk(
@@ -116,7 +117,7 @@ where
                 scratch.borrow(),
             );
 
-            let mut ct_rhs_prepared: GGSWPrepared<Vec<u8>, BE> = GGSWPrepared::alloc_from_infos(module, &ggsw_apply);
+            let mut ct_rhs_prepared: GGSWPreparedOwned<BE> = GGSWPrepared::alloc_from_infos(module, &ggsw_apply);
             ct_rhs_prepared.prepare(module, &ggsw_apply, scratch.borrow());
 
             ggsw_out.external_product(module, &ggsw_in, &ct_rhs_prepared, scratch.borrow());
@@ -205,8 +206,8 @@ where
                 rank: rank.into(),
             };
 
-            let mut ggsw_out: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_out_infos);
-            let mut ggsw_apply: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_apply_infos);
+            let mut ggsw_out: GGSWOwned = GGSW::alloc_from_infos(&ggsw_out_infos);
+            let mut ggsw_apply: GGSWOwned = GGSW::alloc_from_infos(&ggsw_apply_infos);
 
             let mut pt_in: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
             let mut pt_apply: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
@@ -227,10 +228,10 @@ where
                     | GGSW::external_product_tmp_bytes(module, &ggsw_out_infos, &ggsw_out_infos, &ggsw_apply_infos),
             );
 
-            let mut sk: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank.into());
+            let mut sk: GLWESecretOwned = GLWESecret::alloc(n.into(), rank.into());
             sk.fill_ternary_prob(0.5, &mut source_xs);
 
-            let mut sk_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc(module, rank.into());
+            let mut sk_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(module, rank.into());
             sk_prepared.prepare(module, &sk);
 
             ggsw_apply.encrypt_sk(
@@ -251,7 +252,7 @@ where
                 scratch.borrow(),
             );
 
-            let mut ct_rhs_prepared: GGSWPrepared<Vec<u8>, BE> = GGSWPrepared::alloc_from_infos(module, &ggsw_apply);
+            let mut ct_rhs_prepared: GGSWPreparedOwned<BE> = GGSWPrepared::alloc_from_infos(module, &ggsw_apply);
             ct_rhs_prepared.prepare(module, &ggsw_apply, scratch.borrow());
 
             ggsw_out.external_product_inplace(module, &ct_rhs_prepared, scratch.borrow());

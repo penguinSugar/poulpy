@@ -10,7 +10,7 @@ use poulpy_core::{
 use crate::bin_fhe::blind_rotation::{BlindRotationAlgo, BlindRotationKey, BlindRotationKeyInfos};
 
 pub trait BlindRotationKeyPreparedFactory<BRA: BlindRotationAlgo, BE: Backend> {
-    fn blind_rotation_key_prepared_alloc<A>(&self, infos: &A) -> BlindRotationKeyPrepared<Vec<u8>, BRA, BE>
+    fn blind_rotation_key_prepared_alloc<A>(&self, infos: &A) -> BlindRotationKeyPreparedOwned<BRA, BE>
     where
         A: BlindRotationKeyInfos;
 
@@ -62,6 +62,8 @@ pub struct BlindRotationKeyPrepared<D: Data, BRT: BlindRotationAlgo, B: Backend>
     pub(crate) x_pow_a: Option<Vec<SvpPPolOwned<B>>>,
     pub(crate) _phantom: PhantomData<BRT>,
 }
+
+pub type BlindRotationKeyPreparedOwned<BRT, B> = BlindRotationKeyPrepared<Vec<u8>, BRT, B>;
 
 impl<D: Data, BRT: BlindRotationAlgo, B: Backend> BlindRotationKeyInfos for BlindRotationKeyPrepared<D, BRT, B> {
     fn n_glwe(&self) -> Degree {

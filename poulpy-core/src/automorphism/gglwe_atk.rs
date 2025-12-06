@@ -6,8 +6,8 @@ use poulpy_hal::{
 use crate::{
     GLWEKeyswitch, ScratchTakeCore,
     layouts::{
-        GGLWE, GGLWEInfos, GGLWEPreparedToRef, GGLWEToMut, GGLWEToRef, GLWE, GLWEAutomorphismKey, GetGaloisElement,
-        SetGaloisElement,
+        GGLWEInfos, GGLWEMut, GGLWEPreparedToRef, GGLWERef, GGLWEToMut, GGLWEToRef, GLWE, GLWEAutomorphismKey, GLWEMut, GLWERef,
+        GetGaloisElement, SetGaloisElement,
     },
 };
 
@@ -94,13 +94,13 @@ where
         let same_layout: bool = res.glwe_layout() == a.glwe_layout();
 
         {
-            let res: &mut GGLWE<&mut [u8]> = &mut res.to_mut();
-            let a: &GGLWE<&[u8]> = &a.to_ref();
+            let res: &mut GGLWEMut<'_> = &mut res.to_mut();
+            let a: &GGLWERef<'_> = &a.to_ref();
 
             for row in 0..res.dnum().as_usize() {
                 for col in 0..cols_in {
-                    let mut res_tmp: GLWE<&mut [u8]> = res.at_mut(row, col);
-                    let a_ct: GLWE<&[u8]> = a.at(row, col);
+                    let mut res_tmp: GLWEMut<'_> = res.at_mut(row, col);
+                    let a_ct: GLWERef<'_> = a.at(row, col);
 
                     if same_layout {
                         // Reverts the automorphism X^{-k}: (-pi^{-1}_{k}(s)a + s, a) to (-sa + pi_{k}(s), a)
@@ -153,10 +153,10 @@ where
         let p_inv: i64 = self.galois_element_inv(p);
 
         {
-            let res: &mut GGLWE<&mut [u8]> = &mut res.to_mut();
+            let res: &mut GGLWEMut<'_> = &mut res.to_mut();
             for row in 0..res.dnum().as_usize() {
                 for col in 0..cols_in {
-                    let mut res_tmp: GLWE<&mut [u8]> = res.at_mut(row, col);
+                    let mut res_tmp: GLWEMut<'_> = res.at_mut(row, col);
 
                     // Reverts the automorphism X^{-k}: (-pi^{-1}_{k}(s)a + s, a) to (-sa + pi_{k}(s), a)
                     for i in 0..cols_out {

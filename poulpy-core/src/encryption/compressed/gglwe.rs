@@ -8,7 +8,7 @@ use crate::{
     ScratchTakeCore,
     encryption::{GLWEEncryptSk, GLWEEncryptSkInternal, SIGMA},
     layouts::{
-        GGLWECompressedSeedMut, GGLWEInfos, GLWEPlaintext, GLWESecretPrepared, LWEInfos,
+        GGLWECompressedMut, GGLWECompressedSeedMut, GGLWEInfos, GLWEPlaintext, GLWESecretPreparedRef, LWEInfos,
         compressed::{GGLWECompressed, GGLWECompressedToMut},
         prepared::GLWESecretPreparedToRef,
     },
@@ -98,9 +98,9 @@ where
         let mut seeds: Vec<[u8; 32]> = vec![[0u8; 32]; res.seed_mut().len()];
 
         {
-            let res: &mut GGLWECompressed<&mut [u8]> = &mut res.to_mut();
+            let res: &mut GGLWECompressedMut<'_> = &mut res.to_mut();
             let pt: &ScalarZnxRef<'_> = &pt.to_ref();
-            let sk: &GLWESecretPrepared<&[u8], BE> = &sk.to_ref();
+            let sk: &GLWESecretPreparedRef<'_, BE> = &sk.to_ref();
 
             assert_eq!(
                 res.rank_in(),

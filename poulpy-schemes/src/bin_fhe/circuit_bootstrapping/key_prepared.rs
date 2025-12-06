@@ -18,8 +18,8 @@ use crate::bin_fhe::{
     circuit_bootstrapping::{CircuitBootstrappingKey, CircuitBootstrappingKeyInfos},
 };
 
-impl<BRA: BlindRotationAlgo, BE: Backend> CircuitBootstrappingKeyPrepared<Vec<u8>, BRA, BE> {
-    pub fn alloc_from_infos<A, M>(module: &M, infos: &A) -> CircuitBootstrappingKeyPrepared<Vec<u8>, BRA, BE>
+impl<BRA: BlindRotationAlgo, BE: Backend> CircuitBootstrappingKeyPreparedOwned<BRA, BE> {
+    pub fn alloc_from_infos<A, M>(module: &M, infos: &A) -> CircuitBootstrappingKeyPreparedOwned<BRA, BE>
     where
         A: CircuitBootstrappingKeyInfos,
         M: CircuitBootstrappingKeyPreparedFactory<BRA, BE>,
@@ -53,10 +53,7 @@ where
         + GGLWEToGGSWKeyPreparedFactory<BE>
         + GLWEAutomorphismKeyPreparedFactory<BE>,
 {
-    fn circuit_bootstrapping_key_prepared_alloc_from_infos<A>(
-        &self,
-        infos: &A,
-    ) -> CircuitBootstrappingKeyPrepared<Vec<u8>, BRA, BE>
+    fn circuit_bootstrapping_key_prepared_alloc_from_infos<A>(&self, infos: &A) -> CircuitBootstrappingKeyPreparedOwned<BRA, BE>
     where
         A: CircuitBootstrappingKeyInfos,
     {
@@ -160,3 +157,5 @@ impl<D: DataRef, BRA: BlindRotationAlgo, B: Backend> CircuitBootstrappingKeyInfo
         }
     }
 }
+
+pub type CircuitBootstrappingKeyPreparedOwned<BRA, B> = CircuitBootstrappingKeyPrepared<Vec<u8>, BRA, B>;

@@ -5,7 +5,9 @@ use poulpy_hal::{
 
 use crate::{
     GLWEKeyswitch, GLWERotate, ScratchTakeCore,
-    layouts::{GGLWEInfos, GGLWEPreparedToRef, GLWE, GLWEInfos, GLWELayout, GLWEToRef, LWE, LWEInfos, LWEToMut, Rank},
+    layouts::{
+        GGLWEInfos, GGLWEPreparedToRef, GLWE, GLWEInfos, GLWELayout, GLWERef, GLWEToRef, LWE, LWEInfos, LWEMut, LWEToMut, Rank,
+    },
 };
 
 pub trait LWESampleExtract
@@ -17,8 +19,8 @@ where
         R: LWEToMut,
         A: GLWEToRef,
     {
-        let res: &mut LWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWE<&[u8]> = &a.to_ref();
+        let res: &mut LWEMut<'_> = &mut res.to_mut();
+        let a: &GLWERef<'_> = &a.to_ref();
 
         assert!(res.n() <= a.n());
         assert_eq!(a.n(), self.n() as u32);
@@ -72,8 +74,8 @@ where
         K: GGLWEPreparedToRef<BE> + GGLWEInfos,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut LWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWE<&[u8]> = &a.to_ref();
+        let res: &mut LWEMut<'_> = &mut res.to_mut();
+        let a: &GLWERef<'_> = &a.to_ref();
 
         assert_eq!(a.n(), self.n() as u32);
         assert_eq!(key.n(), self.n() as u32);

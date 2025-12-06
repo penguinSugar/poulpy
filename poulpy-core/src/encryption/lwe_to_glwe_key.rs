@@ -7,7 +7,7 @@ use poulpy_hal::{
 use crate::{
     GGLWEEncryptSk, ScratchTakeCore,
     layouts::{
-        GGLWE, GGLWEInfos, GGLWEToMut, GLWESecret, GLWESecretPreparedFactory, GLWESecretPreparedToRef, LWEInfos, LWESecret,
+        GGLWE, GGLWEInfos, GGLWEToMut, GLWESecret, GLWESecretPreparedFactory, GLWESecretPreparedToRef, LWEInfos, LWESecretRef,
         LWESecretToRef, LWEToGLWEKey, Rank,
     },
 };
@@ -95,7 +95,7 @@ where
         S2: GLWESecretPreparedToRef<BE>,
         R: GGLWEToMut,
     {
-        let sk_lwe: &LWESecret<&[u8]> = &sk_lwe.to_ref();
+        let sk_lwe: &LWESecretRef<'_> = &sk_lwe.to_ref();
 
         assert!(sk_lwe.n().0 <= self.n() as u32);
 

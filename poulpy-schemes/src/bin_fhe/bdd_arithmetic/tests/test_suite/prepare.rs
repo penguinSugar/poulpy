@@ -1,6 +1,8 @@
 use poulpy_core::{
     GGSWNoise, GLWEDecrypt, GLWEEncryptSk, GLWENoise, SIGMA, ScratchTakeCore,
-    layouts::{GGSWInfos, GGSWLayout, GLWEInfos, GLWELayout, GLWESecretPreparedFactory, LWEInfos, prepared::GLWESecretPrepared},
+    layouts::{
+        GGSWInfos, GGSWLayout, GLWEInfos, GLWELayout, GLWESecretPreparedFactory, LWEInfos, prepared::GLWESecretPreparedOwned,
+    },
 };
 use poulpy_hal::{
     api::{ModuleNew, ScratchOwnedAlloc, ScratchOwnedBorrow},
@@ -11,11 +13,11 @@ use rand::RngCore;
 
 use crate::bin_fhe::{
     bdd_arithmetic::{
-        BDDKeyEncryptSk, BDDKeyPrepared, BDDKeyPreparedFactory, ExecuteBDDCircuit2WTo1W, FheUint, FheUintPrepare,
-        FheUintPrepareDebug, FheUintPreparedDebug, FheUintPreparedEncryptSk, FheUintPreparedFactory,
+        BDDKeyEncryptSk, BDDKeyPreparedFactory, BDDKeyPreparedOwned, ExecuteBDDCircuit2WTo1W, FheUint, FheUintOwned,
+        FheUintPrepare, FheUintPrepareDebug, FheUintPreparedDebug, FheUintPreparedEncryptSk, FheUintPreparedFactory,
         tests::test_suite::{TEST_GGSW_INFOS, TEST_GLWE_INFOS, TestContext},
     },
-    blind_rotation::{BlindRotationAlgo, BlindRotationKey, BlindRotationKeyFactory},
+    blind_rotation::{BlindRotationAlgo, BlindRotationKeyFactory, BlindRotationKeyOwned},
 };
 
 pub fn test_bdd_prepare<BRA: BlindRotationAlgo, BE: Backend>(test_context: &TestContext<BRA, BE>)
@@ -33,7 +35,7 @@ where
         + FheUintPrepare<BRA, BE>
         + ExecuteBDDCircuit2WTo1W<BE>
         + GLWEEncryptSk<BE>,
-    BlindRotationKey<Vec<u8>, BRA>: BlindRotationKeyFactory<BRA>,
+    BlindRotationKeyOwned<BRA>: BlindRotationKeyFactory<BRA>,
     ScratchOwned<BE>: ScratchOwnedAlloc<BE> + ScratchOwnedBorrow<BE>,
     Scratch<BE>: ScratchTakeCore<BE>,
 {
@@ -41,8 +43,8 @@ where
     let ggsw_infos: GGSWLayout = TEST_GGSW_INFOS;
 
     let module: &Module<BE> = &test_context.module;
-    let sk_glwe_prep: &GLWESecretPrepared<Vec<u8>, BE> = &test_context.sk_glwe;
-    let bdd_key_prepared: &BDDKeyPrepared<Vec<u8>, BRA, BE> = &test_context.bdd_key;
+    let sk_glwe_prep: &GLWESecretPreparedOwned<BE> = &test_context.sk_glwe;
+    let bdd_key_prepared: &BDDKeyPreparedOwned<BRA, BE> = &test_context.bdd_key;
 
     let mut source: Source = Source::new([6u8; 32]);
 
@@ -52,7 +54,7 @@ where
     let mut scratch: ScratchOwned<BE> = ScratchOwned::alloc(1 << 22);
 
     // GLWE(value)
-    let mut c_enc: FheUint<Vec<u8>, u32> = FheUint::alloc_from_infos(&glwe_infos);
+    let mut c_enc: FheUintOwned<u32> = FheUint::alloc_from_infos(&glwe_infos);
     let value: u32 = source.next_u32();
     c_enc.encrypt_sk(
         module,

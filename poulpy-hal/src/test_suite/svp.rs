@@ -86,8 +86,8 @@ where
             assert_eq!(svp_test.digest_u64(), svp_test_digest);
             assert_eq!(a.digest_u64(), a_digest);
 
-            let res_big_ref: crate::layouts::VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_idft_apply_consume(res_dft_ref);
-            let res_big_test: crate::layouts::VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_idft_apply_consume(res_dft_test);
+            let res_big_ref: crate::layouts::VecZnxBigOwned<BR> = module_ref.vec_znx_idft_apply_consume(res_dft_ref);
+            let res_big_test: crate::layouts::VecZnxBigOwned<BT> = module_test.vec_znx_idft_apply_consume(res_dft_test);
 
             let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
             let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
@@ -208,8 +208,8 @@ where
             assert_eq!(svp_test.digest_u64(), svp_test_digest);
             assert_eq!(a.digest_u64(), a_digest);
 
-            let res_big_ref: crate::layouts::VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_idft_apply_consume(res_dft_ref);
-            let res_big_test: crate::layouts::VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_idft_apply_consume(res_dft_test);
+            let res_big_ref: crate::layouts::VecZnxBigOwned<BR> = module_ref.vec_znx_idft_apply_consume(res_dft_ref);
+            let res_big_test: crate::layouts::VecZnxBigOwned<BT> = module_test.vec_znx_idft_apply_consume(res_dft_test);
 
             let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
             let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
@@ -335,8 +335,8 @@ where
             assert_eq!(svp_test.digest_u64(), svp_test_digest);
             assert_eq!(a.digest_u64(), a_digest);
 
-            let res_big_ref: crate::layouts::VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_idft_apply_consume(res_dft_ref);
-            let res_big_test: crate::layouts::VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_idft_apply_consume(res_dft_test);
+            let res_big_ref: crate::layouts::VecZnxBigOwned<BR> = module_ref.vec_znx_idft_apply_consume(res_dft_ref);
+            let res_big_test: crate::layouts::VecZnxBigOwned<BT> = module_test.vec_znx_idft_apply_consume(res_dft_test);
 
             let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
             let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
@@ -443,8 +443,8 @@ pub fn test_svp_apply_dft_to_dft_inplace<BR: Backend, BT: Backend>(
         assert_eq!(svp_ref.digest_u64(), svp_ref_digest);
         assert_eq!(svp_test.digest_u64(), svp_test_digest);
 
-        let res_big_ref: crate::layouts::VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_idft_apply_consume(res_dft_ref);
-        let res_big_test: crate::layouts::VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_idft_apply_consume(res_dft_test);
+        let res_big_ref: crate::layouts::VecZnxBigOwned<BR> = module_ref.vec_znx_idft_apply_consume(res_dft_ref);
+        let res_big_test: crate::layouts::VecZnxBigOwned<BT> = module_test.vec_znx_idft_apply_consume(res_dft_test);
 
         let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
         let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);

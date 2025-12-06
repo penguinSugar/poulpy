@@ -1,5 +1,6 @@
 use poulpy_core::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGSW, GGSWLayout, GLWE, GLWELayout, GLWESecret, Rank, TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGSW, GGSWLayout, GGSWOwned, GGSWPreparedOwned, GLWE, GLWELayout, GLWEOwned, GLWESecret,
+    GLWESecretOwned, GLWESecretPreparedOwned, Rank, TorusPrecision,
     prepared::{GGSWPrepared, GLWESecretPrepared},
 };
 use std::hint::black_box;
@@ -66,9 +67,9 @@ fn bench_external_product_glwe_fft64(c: &mut Criterion) {
             rank,
         };
 
-        let mut ct_ggsw: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_layout);
-        let mut ct_glwe_in: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_in_layout);
-        let mut ct_glwe_out: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_out_layout);
+        let mut ct_ggsw: GGSWOwned = GGSW::alloc_from_infos(&ggsw_layout);
+        let mut ct_glwe_in: GLWEOwned = GLWE::alloc_from_infos(&glwe_in_layout);
+        let mut ct_glwe_out: GLWEOwned = GLWE::alloc_from_infos(&glwe_out_layout);
         let pt_rgsw: ScalarZnxOwned = ScalarZnx::alloc(n.into(), 1);
 
         let mut scratch: ScratchOwned<BackendImpl> = ScratchOwned::alloc(
@@ -81,10 +82,10 @@ fn bench_external_product_glwe_fft64(c: &mut Criterion) {
         let mut source_xe = Source::new([0u8; 32]);
         let mut source_xa = Source::new([0u8; 32]);
 
-        let mut sk: GLWESecret<Vec<u8>> = GLWESecret::alloc_from_infos(&glwe_in_layout);
+        let mut sk: GLWESecretOwned = GLWESecret::alloc_from_infos(&glwe_in_layout);
         sk.fill_ternary_prob(0.5, &mut source_xs);
 
-        let mut sk_dft: GLWESecretPrepared<Vec<u8>, BackendImpl> = GLWESecretPrepared::alloc(&module, rank);
+        let mut sk_dft: GLWESecretPreparedOwned<BackendImpl> = GLWESecretPrepared::alloc(&module, rank);
         sk_dft.prepare(&module, &sk);
 
         ct_ggsw.encrypt_sk(
@@ -104,7 +105,7 @@ fn bench_external_product_glwe_fft64(c: &mut Criterion) {
             scratch.borrow(),
         );
 
-        let mut ggsw_prepared: GGSWPrepared<Vec<u8>, BackendImpl> = GGSWPrepared::alloc_from_infos(&module, &ct_ggsw);
+        let mut ggsw_prepared: GGSWPreparedOwned<BackendImpl> = GGSWPrepared::alloc_from_infos(&module, &ct_ggsw);
         ggsw_prepared.prepare(&module, &ct_ggsw, scratch.borrow());
 
         move || {
@@ -170,8 +171,8 @@ fn bench_external_product_glwe_inplace_fft64(c: &mut Criterion) {
             rank,
         };
 
-        let mut ct_ggsw: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_layout);
-        let mut ct_glwe: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_layout);
+        let mut ct_ggsw: GGSWOwned = GGSW::alloc_from_infos(&ggsw_layout);
+        let mut ct_glwe: GLWEOwned = GLWE::alloc_from_infos(&glwe_layout);
         let pt_rgsw: ScalarZnxOwned = ScalarZnx::alloc(n.into(), 1);
 
         let mut scratch: ScratchOwned<BackendImpl> = ScratchOwned::alloc(
@@ -184,10 +185,10 @@ fn bench_external_product_glwe_inplace_fft64(c: &mut Criterion) {
         let mut source_xe: Source = Source::new([0u8; 32]);
         let mut source_xa: Source = Source::new([0u8; 32]);
 
-        let mut sk: GLWESecret<Vec<u8>> = GLWESecret::alloc_from_infos(&glwe_layout);
+        let mut sk: GLWESecretOwned = GLWESecret::alloc_from_infos(&glwe_layout);
         sk.fill_ternary_prob(0.5, &mut source_xs);
 
-        let mut sk_dft: GLWESecretPrepared<Vec<u8>, BackendImpl> = GLWESecretPrepared::alloc(&module, rank);
+        let mut sk_dft: GLWESecretPreparedOwned<BackendImpl> = GLWESecretPrepared::alloc(&module, rank);
         sk_dft.prepare(&module, &sk);
 
         ct_ggsw.encrypt_sk(
@@ -207,7 +208,7 @@ fn bench_external_product_glwe_inplace_fft64(c: &mut Criterion) {
             scratch.borrow(),
         );
 
-        let mut ggsw_prepared: GGSWPrepared<Vec<u8>, BackendImpl> = GGSWPrepared::alloc_from_infos(&module, &ct_ggsw);
+        let mut ggsw_prepared: GGSWPreparedOwned<BackendImpl> = GGSWPrepared::alloc_from_infos(&module, &ct_ggsw);
         ggsw_prepared.prepare(&module, &ct_ggsw, scratch.borrow());
         move || {
             let scratch_borrow = scratch.borrow();

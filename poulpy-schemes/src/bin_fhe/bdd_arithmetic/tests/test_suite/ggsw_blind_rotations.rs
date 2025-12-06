@@ -1,8 +1,8 @@
 use poulpy_core::{
     GGSWEncryptSk, GGSWNoise, GLWEDecrypt, GLWEEncryptSk, SIGMA, ScratchTakeCore,
     layouts::{
-        Base2K, Dnum, Dsize, GGSW, GGSWInfos, GGSWLayout, GGSWPreparedFactory, GLWEInfos, GLWESecretPrepared,
-        GLWESecretPreparedFactory, LWEInfos, Rank, TorusPrecision,
+        Base2K, Dnum, Dsize, GGSW, GGSWInfos, GGSWLayout, GGSWOwned, GGSWPreparedFactory, GLWEInfos, GLWESecretPreparedFactory,
+        GLWESecretPreparedOwned, LWEInfos, Rank, TorusPrecision,
     },
 };
 use poulpy_hal::{
@@ -14,7 +14,7 @@ use rand::RngCore;
 
 use crate::bin_fhe::{
     bdd_arithmetic::{
-        FheUintPrepared, GGSWBlindRotation,
+        FheUintPrepared, FheUintPreparedOwned, GGSWBlindRotation,
         tests::test_suite::{TEST_FHEUINT_BASE2K, TEST_RANK, TestContext},
     },
     blind_rotation::BlindRotationAlgo,
@@ -35,7 +35,7 @@ where
     Scratch<BE>: ScratchTakeCore<BE>,
 {
     let module: &Module<BE> = &test_context.module;
-    let sk_glwe_prep: &GLWESecretPrepared<Vec<u8>, BE> = &test_context.sk_glwe;
+    let sk_glwe_prep: &GLWESecretPreparedOwned<BE> = &test_context.sk_glwe;
 
     let base2k: Base2K = TEST_FHEUINT_BASE2K.into();
     let rank: Rank = TEST_RANK.into();
@@ -65,7 +65,7 @@ where
     let mut source_xe: Source = Source::new([3u8; 32]);
 
     let mut scratch: ScratchOwned<BE> = ScratchOwned::alloc(1 << 22);
-    let mut res: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_res_infos);
+    let mut res: GGSWOwned = GGSW::alloc_from_infos(&ggsw_res_infos);
 
     let mut scalar: ScalarZnxOwned = ScalarZnx::alloc(module.n(), 1);
     scalar
@@ -76,7 +76,7 @@ where
 
     let k: u32 = source.next_u32();
 
-    let mut k_enc_prep: FheUintPrepared<Vec<u8>, u32, BE> =
+    let mut k_enc_prep: FheUintPreparedOwned<u32, BE> =
         FheUintPrepared::<Vec<u8>, u32, BE>::alloc_from_infos(module, &ggsw_k_infos);
     k_enc_prep.encrypt_sk(
         module,

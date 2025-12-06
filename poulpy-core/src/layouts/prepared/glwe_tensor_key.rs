@@ -1,8 +1,8 @@
 use poulpy_hal::layouts::{Backend, Data, DataMut, DataRef, Module, Scratch};
 
 use crate::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGLWEInfos, GGLWEPrepared, GGLWEPreparedFactory, GGLWEPreparedToMut, GGLWEPreparedToRef,
-    GGLWEToRef, GLWEInfos, LWEInfos, Rank, TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGLWEInfos, GGLWEPrepared, GGLWEPreparedFactory, GGLWEPreparedMut, GGLWEPreparedRef,
+    GGLWEPreparedToMut, GGLWEPreparedToRef, GGLWEToRef, GLWEInfos, LWEInfos, Rank, TorusPrecision,
 };
 
 #[derive(PartialEq, Eq)]
@@ -61,12 +61,12 @@ where
         dnum: Dnum,
         dsize: Dsize,
         rank: Rank,
-    ) -> GLWETensorKeyPrepared<Vec<u8>, B> {
+    ) -> GLWETensorKeyPreparedOwned<B> {
         let pairs: u32 = (((rank.as_u32() + 1) * rank.as_u32()) >> 1).max(1);
         GLWETensorKeyPrepared(self.alloc_gglwe_prepared(base2k, k, Rank(pairs), rank, dnum, dsize))
     }
 
-    fn alloc_tensor_key_prepared_from_infos<A>(&self, infos: &A) -> GLWETensorKeyPrepared<Vec<u8>, B>
+    fn alloc_tensor_key_prepared_from_infos<A>(&self, infos: &A) -> GLWETensorKeyPreparedOwned<B>
     where
         A: GGLWEInfos,
     {
@@ -172,11 +172,14 @@ impl<D: DataMut, B: Backend> GLWETensorKeyPrepared<D, B> {
     }
 }
 
+pub type GLWETensorKeyPreparedOwned<B> = GLWETensorKeyPrepared<Vec<u8>, B>;
+pub type GLWETensorKeyPreparedMut<'a, B> = GLWETensorKeyPrepared<&'a mut [u8], B>;
+
 impl<D: DataMut, B: Backend> GGLWEPreparedToMut<B> for GLWETensorKeyPrepared<D, B>
 where
     GGLWEPrepared<D, B>: GGLWEPreparedToMut<B>,
 {
-    fn to_mut(&mut self) -> GGLWEPrepared<&mut [u8], B> {
+    fn to_mut(&mut self) -> GGLWEPreparedMut<'_, B> {
         self.0.to_mut()
     }
 }
@@ -185,7 +188,7 @@ impl<D: DataRef, B: Backend> GGLWEPreparedToRef<B> for GLWETensorKeyPrepared<D, 
 where
     GGLWEPrepared<D, B>: GGLWEPreparedToRef<B>,
 {
-    fn to_ref(&self) -> GGLWEPrepared<&[u8], B> {
+    fn to_ref(&self) -> GGLWEPreparedRef<'_, B> {
         self.0.to_ref()
     }
 }

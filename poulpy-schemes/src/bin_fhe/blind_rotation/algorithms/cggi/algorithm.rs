@@ -10,7 +10,7 @@ use poulpy_hal::{
 
 use poulpy_core::{
     Distribution, GLWEAdd, GLWEExternalProduct, GLWEMulXpMinusOne, GLWENormalize, ScratchTakeCore,
-    layouts::{GGSWInfos, GLWE, GLWEInfos, GLWEToMut, LWE, LWEInfos, LWEToRef},
+    layouts::{GGSWInfos, GLWE, GLWEInfos, GLWEMut, GLWEToMut, LWE, LWEInfos, LWERef, LWEToRef},
 };
 
 use crate::bin_fhe::blind_rotation::{
@@ -162,7 +162,7 @@ fn execute_block_binary_extended<DataRes, DataIn, DataBrk, M, BE: Backend>(
     }
 
     let mut lwe_2n: Vec<i64> = vec![0i64; (lwe.n() + 1).as_usize()]; // TODO: from scratch space
-    let lwe_ref: LWE<&[u8]> = lwe.to_ref();
+    let lwe_ref: LWERef<'_> = lwe.to_ref();
 
     let two_n: usize = 2 * n_glwe;
     let two_n_ext: usize = 2 * lut.domain_size();
@@ -298,8 +298,8 @@ fn execute_block_binary<DataRes, DataIn, DataBrk, M, BE: Backend>(
 {
     let n_glwe: usize = brk.n_glwe().into();
     let mut lwe_2n: Vec<i64> = vec![0i64; (lwe.n() + 1).into()]; // TODO: from scratch space
-    let mut out_mut: GLWE<&mut [u8]> = res.to_mut();
-    let lwe_ref: LWE<&[u8]> = lwe.to_ref();
+    let mut out_mut: GLWEMut<'_> = res.to_mut();
+    let lwe_ref: LWERef<'_> = lwe.to_ref();
     let two_n: usize = n_glwe << 1;
     let base2k: usize = brk.base2k().into();
     let dnum: usize = brk.dnum().into();
@@ -428,8 +428,8 @@ fn execute_standard<DataRes, DataIn, DataBrk, M, BE: Backend>(
     }
 
     let mut lwe_2n: Vec<i64> = vec![0i64; (lwe.n() + 1).into()]; // TODO: from scratch space
-    let mut out_mut: GLWE<&mut [u8]> = res.to_mut();
-    let lwe_ref: LWE<&[u8]> = lwe.to_ref();
+    let mut out_mut: GLWEMut<'_> = res.to_mut();
+    let lwe_ref: LWERef<'_> = lwe.to_ref();
 
     mod_switch_2n(
         2 * lut.domain_size(),

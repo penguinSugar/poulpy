@@ -7,8 +7,8 @@ use poulpy_hal::{
 use crate::{
     GLWEEncryptSk, ScratchTakeCore,
     layouts::{
-        GGLWE, GGLWEInfos, GGLWEToMut, GLWEPlaintext, LWEInfos,
-        prepared::{GLWESecretPrepared, GLWESecretPreparedToRef},
+        GGLWE, GGLWEInfos, GGLWEMut, GGLWEToMut, GLWEPlaintext, GLWESecretPreparedRef, LWEInfos,
+        prepared::GLWESecretPreparedToRef,
     },
 };
 
@@ -99,9 +99,9 @@ where
         P: ScalarZnxToRef,
         S: GLWESecretPreparedToRef<BE>,
     {
-        let res: &mut GGLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GGLWEMut<'_> = &mut res.to_mut();
         let pt: &ScalarZnxRef<'_> = &pt.to_ref();
-        let sk: &GLWESecretPrepared<&[u8], BE> = &sk.to_ref();
+        let sk: &GLWESecretPreparedRef<'_, BE> = &sk.to_ref();
 
         assert_eq!(
             res.rank_in(),

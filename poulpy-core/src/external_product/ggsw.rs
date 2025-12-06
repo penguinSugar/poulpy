@@ -6,8 +6,8 @@ use poulpy_hal::{
 use crate::{
     GLWEExternalProduct, ScratchTakeCore,
     layouts::{
-        GGSW, GGSWInfos, GGSWToMut, GGSWToRef, GLWEInfos, LWEInfos,
-        prepared::{GGSWPrepared, GGSWPreparedToRef},
+        GGSW, GGSWInfos, GGSWMut, GGSWPreparedRef, GGSWRef, GGSWToMut, GGSWToRef, GLWEInfos, LWEInfos,
+        prepared::GGSWPreparedToRef,
     },
 };
 
@@ -31,9 +31,9 @@ where
         B: GGSWPreparedToRef<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
-        let a: &GGSW<&[u8]> = &a.to_ref();
-        let b: &GGSWPrepared<&[u8], BE> = &b.to_ref();
+        let res: &mut GGSWMut<'_> = &mut res.to_mut();
+        let a: &GGSWRef<'_> = &a.to_ref();
+        let b: &GGSWPreparedRef<'_, BE> = &b.to_ref();
 
         assert_eq!(
             res.rank(),
@@ -75,8 +75,8 @@ where
         A: GGSWPreparedToRef<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
-        let a: &GGSWPrepared<&[u8], BE> = &a.to_ref();
+        let res: &mut GGSWMut<'_> = &mut res.to_mut();
+        let a: &GGSWPreparedRef<'_, BE> = &a.to_ref();
 
         assert_eq!(res.n(), self.n() as u32);
         assert_eq!(a.n(), self.n() as u32);

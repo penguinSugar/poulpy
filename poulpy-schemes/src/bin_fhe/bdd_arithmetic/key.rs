@@ -1,8 +1,9 @@
 use crate::bin_fhe::bdd_arithmetic::FheUintPreparedDebug;
+use crate::bin_fhe::blind_rotation::BlindRotationKeyOwned;
 use crate::bin_fhe::circuit_bootstrapping::CircuitBootstrappingKeyInfos;
 use crate::bin_fhe::{
     bdd_arithmetic::{FheUint, UnsignedInteger},
-    blind_rotation::{BlindRotationAlgo, BlindRotationKey, BlindRotationKeyFactory},
+    blind_rotation::{BlindRotationAlgo, BlindRotationKeyFactory},
     circuit_bootstrapping::{
         CircuitBootstrappingKey, CircuitBootstrappingKeyEncryptSk, CircuitBootstrappingKeyLayout,
         CircuitBootstrappingKeyPrepared, CircuitBootstrappingKeyPreparedFactory,
@@ -11,8 +12,8 @@ use crate::bin_fhe::{
 
 use poulpy_core::GLWESwitchingKeyEncryptSk;
 use poulpy_core::layouts::{
-    GGLWEInfos, GLWEAutomorphismKeyHelper, GLWEAutomorphismKeyPrepared, GLWESecret, GLWESwitchingKey, GLWESwitchingKeyLayout,
-    GLWESwitchingKeyPrepared,
+    GGLWEInfos, GLWEAutomorphismKeyHelper, GLWEAutomorphismKeyPrepared, GLWESecret, GLWESecretOwned, GLWESwitchingKey,
+    GLWESwitchingKeyLayout, GLWESwitchingKeyPrepared,
 };
 use poulpy_core::{
     GLWEToLWESwitchingKeyEncryptSk, GetDistribution, ScratchTakeCore,
@@ -65,7 +66,7 @@ where
 
 impl<BRA: BlindRotationAlgo> BDDKey<Vec<u8>, BRA>
 where
-    BlindRotationKey<Vec<u8>, BRA>: BlindRotationKeyFactory<BRA>,
+    BlindRotationKeyOwned<BRA>: BlindRotationKeyFactory<BRA>,
 {
     pub fn alloc_from_infos<A>(infos: &A) -> Self
     where
@@ -128,7 +129,7 @@ where
         S1: GLWESecretToRef + GetDistribution + GLWEInfos,
     {
         if let Some(key) = &mut res.ks_glwe {
-            let mut sk_out: GLWESecret<Vec<u8>> = GLWESecret::alloc(sk_glwe.n(), key.rank_out());
+            let mut sk_out: GLWESecretOwned = GLWESecret::alloc(sk_glwe.n(), key.rank_out());
             sk_out.fill_ternary_prob(0.5, source_xe);
             key.encrypt_sk(self, sk_glwe, &sk_out, source_xa, source_xe, scratch);
             res.ks_lwe
@@ -219,7 +220,7 @@ pub trait BDDKeyPreparedFactory<BRA: BlindRotationAlgo, BE: Backend>
 where
     Self: Sized + CircuitBootstrappingKeyPreparedFactory<BRA, BE> + GLWEToLWEKeyPreparedFactory<BE>,
 {
-    fn alloc_bdd_key_from_infos<A>(&self, infos: &A) -> BDDKeyPrepared<Vec<u8>, BRA, BE>
+    fn alloc_bdd_key_from_infos<A>(&self, infos: &A) -> BDDKeyPreparedOwned<BRA, BE>
     where
         A: BDDKeyInfos,
     {
@@ -280,6 +281,8 @@ impl<BRA: BlindRotationAlgo, BE: Backend> BDDKeyPrepared<Vec<u8>, BRA, BE> {
         module.alloc_bdd_key_from_infos(infos)
     }
 }
+
+pub type BDDKeyPreparedOwned<BRA, BE> = BDDKeyPrepared<Vec<u8>, BRA, BE>;
 
 impl<D: DataRef, BRA: BlindRotationAlgo, BE: Backend> BDDKeyHelper<D, BRA, BE> for BDDKeyPrepared<D, BRA, BE> {
     fn get_cbt_key(

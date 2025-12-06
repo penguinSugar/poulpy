@@ -7,8 +7,8 @@ use crate::{
     GetDistribution, GetDistributionMut,
     dist::Distribution,
     layouts::{
-        Base2K, Degree, GLWEInfos, GLWEPrepared, GLWEPreparedFactory, GLWEPreparedToMut, GLWEPreparedToRef, GLWEToRef, GetDegree,
-        LWEInfos, Rank, TorusPrecision,
+        Base2K, Degree, GLWEInfos, GLWEPrepared, GLWEPreparedFactory, GLWEPreparedMut, GLWEPreparedRef, GLWEPreparedToMut,
+        GLWEPreparedToRef, GLWEToRef, GetDegree, LWEInfos, Rank, TorusPrecision,
     },
 };
 
@@ -58,14 +58,14 @@ pub trait GLWEPublicKeyPreparedFactory<B: Backend>
 where
     Self: GetDegree + GLWEPreparedFactory<B>,
 {
-    fn alloc_glwe_public_key_prepared(&self, base2k: Base2K, k: TorusPrecision, rank: Rank) -> GLWEPublicKeyPrepared<Vec<u8>, B> {
+    fn alloc_glwe_public_key_prepared(&self, base2k: Base2K, k: TorusPrecision, rank: Rank) -> GLWEPublicKeyPreparedOwned<B> {
         GLWEPublicKeyPrepared {
             key: self.alloc_glwe_prepared(base2k, k, rank),
             dist: Distribution::NONE,
         }
     }
 
-    fn alloc_glwe_public_key_prepared_from_infos<A>(&self, infos: &A) -> GLWEPublicKeyPrepared<Vec<u8>, B>
+    fn alloc_glwe_public_key_prepared_from_infos<A>(&self, infos: &A) -> GLWEPublicKeyPreparedOwned<B>
     where
         A: GLWEInfos,
     {
@@ -142,7 +142,7 @@ impl<D: DataMut, B: Backend> GLWEPreparedToMut<B> for GLWEPublicKeyPrepared<D, B
 where
     GLWEPrepared<D, B>: GLWEPreparedToMut<B>,
 {
-    fn to_mut(&mut self) -> GLWEPrepared<&mut [u8], B> {
+    fn to_mut(&mut self) -> GLWEPreparedMut<'_, B> {
         self.key.to_mut()
     }
 }
@@ -151,7 +151,10 @@ impl<D: DataRef, B: Backend> GLWEPreparedToRef<B> for GLWEPublicKeyPrepared<D, B
 where
     GLWEPrepared<D, B>: GLWEPreparedToRef<B>,
 {
-    fn to_ref(&self) -> GLWEPrepared<&[u8], B> {
+    fn to_ref(&self) -> GLWEPreparedRef<'_, B> {
         self.key.to_ref()
     }
 }
+
+pub type GLWEPublicKeyPreparedOwned<B> = GLWEPublicKeyPrepared<Vec<u8>, B>;
+pub type GLWEPublicKeyPreparedMut<'a, B> = GLWEPublicKeyPrepared<&'a mut [u8], B>;

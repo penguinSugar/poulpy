@@ -8,12 +8,11 @@ use poulpy_hal::{
 use poulpy_core::{
     GGSWExpandRows, GGSWFromGGLWE, GLWECopy, GLWEDecrypt, GLWENormalize, GLWEPacking, GLWERotate, GLWETrace, ScratchTakeCore,
     layouts::{
-        Dsize, GGLWE, GGLWEInfos, GGLWELayout, GGLWEPreparedToRef, GGSWInfos, GGSWToMut, GLWEAutomorphismKeyHelper, GLWEInfos,
-        GLWELayout, GLWESecretPreparedFactory, GLWEToMut, GLWEToRef, GetGaloisElement, LWEInfos, LWEToRef, Rank,
+        Dsize, GGLWE, GGLWEInfos, GGLWELayout, GGLWEPreparedToRef, GGSWInfos, GGSWMut, GGSWToMut, GLWE,
+        GLWEAutomorphismKeyHelper, GLWEInfos, GLWELayout, GLWEMut, GLWESecretPreparedFactory, GLWEToMut, GLWEToRef,
+        GetGaloisElement, LWEInfos, LWERef, LWEToRef, Rank,
     },
 };
-
-use poulpy_core::layouts::{GGSW, GLWE, LWE};
 
 use crate::bin_fhe::{
     blind_rotation::{
@@ -249,8 +248,8 @@ pub fn circuit_bootstrap_core<R, L, D, M, BRA: BlindRotationAlgo, BE: Backend>(
     ScratchOwned<BE>: ScratchOwnedAlloc<BE> + ScratchOwnedBorrow<BE>,
     Scratch<BE>: ScratchTakeCore<BE>,
 {
-    let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
-    let lwe: &LWE<&[u8]> = &lwe.to_ref();
+    let res: &mut GGSWMut<'_> = &mut res.to_mut();
+    let lwe: &LWERef<'_> = &lwe.to_ref();
 
     assert_eq!(res.n(), key.brk.n());
 
@@ -324,7 +323,7 @@ pub fn circuit_bootstrap_core<R, L, D, M, BRA: BlindRotationAlgo, BE: Backend>(
     let log_gap_in: usize = (usize::BITS - (gap * alpha - 1).leading_zeros()) as _;
 
     for i in 0..dnum_res {
-        let mut res_row: GLWE<&mut [u8]> = res.at_mut(i, 0);
+        let mut res_row: GLWEMut<'_> = res.at_mut(i, 0);
 
         if to_exponent {
             // Isolates i-th LUT and moves coefficients according to requested gap.
@@ -397,7 +396,7 @@ fn post_process<R, A, M, H, K, BE: Backend>(
             module.glwe_copy(ct, &a_trace);
         }
 
-        let mut cts: HashMap<usize, &mut GLWE<&mut [u8]>> = HashMap::new();
+        let mut cts: HashMap<usize, &mut GLWEMut<'_>> = HashMap::new();
         for (i, ct) in cts_vec.iter_mut().enumerate().take(steps) {
             cts.insert(i * (1 << log_gap_out), ct);
         }

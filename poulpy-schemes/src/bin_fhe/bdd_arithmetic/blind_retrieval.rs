@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use poulpy_core::{
     GLWECopy, ScratchTakeCore,
-    layouts::{GGSWInfos, GGSWPrepared, GLWE, GLWEInfos, GLWEToMut, GLWEToRef},
+    layouts::{GGSWInfos, GGSWPreparedRef, GLWE, GLWEInfos, GLWEOwned, GLWEToMut, GLWEToRef},
 };
 use poulpy_hal::layouts::{Backend, Module, Scratch};
 
@@ -117,7 +117,7 @@ impl GLWEBlindRetriever {
 }
 
 struct Accumulator {
-    data: GLWE<Vec<u8>>,
+    data: GLWEOwned,
     num: usize, // Number of accumulated values
 }
 
@@ -211,7 +211,7 @@ where
     {
         for i in 0..bit_mask {
             let t: usize = 1 << (bit_mask - i - 1);
-            let bit: &GGSWPrepared<&[u8], BE> = &bits.get_bit(bit_rsh + bit_mask - i - 1); // MSB -> LSB traversal
+            let bit: &GGSWPreparedRef<'_, BE> = &bits.get_bit(bit_rsh + bit_mask - i - 1); // MSB -> LSB traversal
             for j in 0..t {
                 if j + t < res.len() {
                     let (lo, hi) = res.split_at_mut(j + t);
@@ -235,7 +235,7 @@ where
     {
         for i in (0..bit_mask).rev() {
             let t: usize = 1 << (bit_mask - i - 1);
-            let bit: &GGSWPrepared<&[u8], BE> = &bits.get_bit(bit_rsh + bit_mask - i - 1); // MSB -> LSB traversal
+            let bit: &GGSWPreparedRef<'_, BE> = &bits.get_bit(bit_rsh + bit_mask - i - 1); // MSB -> LSB traversal
             for j in 0..t {
                 if j < res.len() && j + t < res.len() {
                     let (lo, hi) = res.split_at_mut(j + t);

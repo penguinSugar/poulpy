@@ -6,8 +6,8 @@ use poulpy_hal::{
 use crate::{
     encryption::{GLWEEncryptSk, GLWEEncryptSkInternal, SIGMA},
     layouts::{
-        GLWECompressedSeedMut, GLWEInfos, GLWEPlaintextToRef, LWEInfos,
-        compressed::{GLWECompressed, GLWECompressedToMut},
+        GLWECompressed, GLWECompressedSeedMut, GLWEInfos, GLWEPlaintextToRef, LWEInfos,
+        compressed::{GLWECompressedMut, GLWECompressedToMut},
         prepared::GLWESecretPreparedToRef,
     },
 };
@@ -85,7 +85,7 @@ where
         S: GLWESecretPreparedToRef<BE>,
     {
         {
-            let res: &mut GLWECompressed<&mut [u8]> = &mut res.to_mut();
+            let res: &mut GLWECompressedMut<'_> = &mut res.to_mut();
             let mut source_xa: Source = Source::new(seed_xa);
             let cols: usize = (res.rank() + 1).into();
 

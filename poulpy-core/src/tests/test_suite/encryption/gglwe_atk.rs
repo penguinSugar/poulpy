@@ -9,8 +9,9 @@ use crate::{
     GLWESwitchingKeyEncryptSk, ScratchTakeCore,
     encryption::SIGMA,
     layouts::{
-        GGLWEInfos, GLWEAutomorphismKey, GLWEAutomorphismKeyDecompress, GLWEAutomorphismKeyLayout, GLWEInfos, GLWESecret,
-        GLWESecretPreparedFactory, GLWESwitchingKeyDecompress, LWEInfos, compressed::GLWEAutomorphismKeyCompressed,
+        GGLWEInfos, GLWEAutomorphismKey, GLWEAutomorphismKeyCompressedOwned, GLWEAutomorphismKeyDecompress,
+        GLWEAutomorphismKeyLayout, GLWEAutomorphismKeyOwned, GLWEInfos, GLWESecret, GLWESecretOwned, GLWESecretPreparedFactory,
+        GLWESecretPreparedOwned, GLWESwitchingKeyDecompress, LWEInfos, compressed::GLWEAutomorphismKeyCompressed,
         prepared::GLWESecretPrepared,
     },
     noise::GGLWENoise,
@@ -47,7 +48,7 @@ where
                 rank: rank.into(),
             };
 
-            let mut atk: GLWEAutomorphismKey<Vec<u8>> = GLWEAutomorphismKey::alloc_from_infos(&atk_infos);
+            let mut atk: GLWEAutomorphismKeyOwned = GLWEAutomorphismKey::alloc_from_infos(&atk_infos);
 
             let mut source_xs: Source = Source::new([0u8; 32]);
             let mut source_xe: Source = Source::new([0u8; 32]);
@@ -57,7 +58,7 @@ where
                 module, &atk_infos,
             ));
 
-            let mut sk: GLWESecret<Vec<u8>> = GLWESecret::alloc_from_infos(&atk_infos);
+            let mut sk: GLWESecretOwned = GLWESecret::alloc_from_infos(&atk_infos);
             sk.fill_ternary_prob(0.5, &mut source_xs);
 
             let p = -5;
@@ -71,7 +72,7 @@ where
                 scratch.borrow(),
             );
 
-            let mut sk_out: GLWESecret<Vec<u8>> = sk.clone();
+            let mut sk_out: GLWESecretOwned = sk.clone();
             (0..atk.rank().into()).for_each(|i| {
                 module.vec_znx_automorphism(
                     module.galois_element_inv(p),
@@ -81,7 +82,7 @@ where
                     i,
                 );
             });
-            let mut sk_out_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc(module, sk_out.rank());
+            let mut sk_out_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(module, sk_out.rank());
             sk_out_prepared.prepare(module, &sk_out);
 
             let max_noise: f64 = SIGMA.log2() - (atk.k().as_usize() as f64) + 0.5;
@@ -139,7 +140,7 @@ where
                 rank: rank.into(),
             };
 
-            let mut atk_compressed: GLWEAutomorphismKeyCompressed<Vec<u8>> =
+            let mut atk_compressed: GLWEAutomorphismKeyCompressedOwned =
                 GLWEAutomorphismKeyCompressed::alloc_from_infos(&atk_infos);
 
             let mut source_xs: Source = Source::new([0u8; 32]);
@@ -149,7 +150,7 @@ where
                 module, &atk_infos,
             ));
 
-            let mut sk: GLWESecret<Vec<u8>> = GLWESecret::alloc_from_infos(&atk_infos);
+            let mut sk: GLWESecretOwned = GLWESecret::alloc_from_infos(&atk_infos);
             sk.fill_ternary_prob(0.5, &mut source_xs);
 
             let p: i64 = -5;
@@ -158,7 +159,7 @@ where
 
             atk_compressed.encrypt_sk(module, p, &sk, seed_xa, &mut source_xe, scratch.borrow());
 
-            let mut sk_out: GLWESecret<Vec<u8>> = sk.clone();
+            let mut sk_out: GLWESecretOwned = sk.clone();
             (0..atk_compressed.rank().into()).for_each(|i| {
                 module.vec_znx_automorphism(
                     module.galois_element_inv(p),
@@ -168,10 +169,10 @@ where
                     i,
                 );
             });
-            let mut sk_out_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc(module, sk_out.rank());
+            let mut sk_out_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(module, sk_out.rank());
             sk_out_prepared.prepare(module, &sk_out);
 
-            let mut atk: GLWEAutomorphismKey<Vec<u8>> = GLWEAutomorphismKey::alloc_from_infos(&atk_infos);
+            let mut atk: GLWEAutomorphismKeyOwned = GLWEAutomorphismKey::alloc_from_infos(&atk_infos);
             atk.decompress(module, &atk_compressed);
 
             let max_noise: f64 = SIGMA.log2() - (atk.k().as_usize() as f64) + 0.5;

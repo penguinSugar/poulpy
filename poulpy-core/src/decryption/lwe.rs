@@ -5,7 +5,7 @@ use poulpy_hal::{
 
 use crate::{
     ScratchTakeCore,
-    layouts::{LWE, LWEInfos, LWEPlaintext, LWEPlaintextToMut, LWESecret, LWESecretToRef, LWEToMut},
+    layouts::{LWE, LWEInfos, LWEMut, LWEPlaintextMut, LWEPlaintextToMut, LWESecretRef, LWESecretToRef, LWEToMut},
 };
 
 impl<DataSelf: DataRef + DataMut> LWE<DataSelf> {
@@ -40,9 +40,9 @@ where
         S: LWESecretToRef,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut LWE<&mut [u8]> = &mut res.to_mut();
-        let pt: &mut LWEPlaintext<&mut [u8]> = &mut pt.to_mut();
-        let sk: LWESecret<&[u8]> = sk.to_ref();
+        let res: &mut LWEMut<'_> = &mut res.to_mut();
+        let pt: &mut LWEPlaintextMut<'_> = &mut pt.to_mut();
+        let sk: LWESecretRef<'_> = sk.to_ref();
 
         #[cfg(debug_assertions)]
         {

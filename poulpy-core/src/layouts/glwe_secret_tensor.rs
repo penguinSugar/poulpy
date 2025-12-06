@@ -13,8 +13,8 @@ use crate::{
     ScratchTakeCore,
     dist::Distribution,
     layouts::{
-        Base2K, Degree, GLWEInfos, GLWESecret, GLWESecretPreparedFactory, GLWESecretToMut, GLWESecretToRef, LWEInfos, Rank,
-        TorusPrecision,
+        Base2K, Degree, GLWEInfos, GLWESecret, GLWESecretMut, GLWESecretPreparedFactory, GLWESecretRef, GLWESecretToMut,
+        GLWESecretToRef, LWEInfos, Rank, TorusPrecision,
     },
 };
 
@@ -83,7 +83,7 @@ impl<D: Data> GLWEInfos for GLWESecretTensor<D> {
 }
 
 impl<D: DataRef> GLWESecretToRef for GLWESecretTensor<D> {
-    fn to_ref(&self) -> GLWESecret<&[u8]> {
+    fn to_ref(&self) -> GLWESecretRef<'_> {
         GLWESecret {
             data: self.data.to_ref(),
             dist: self.dist,
@@ -92,7 +92,7 @@ impl<D: DataRef> GLWESecretToRef for GLWESecretTensor<D> {
 }
 
 impl<D: DataMut> GLWESecretToMut for GLWESecretTensor<D> {
-    fn to_mut(&mut self) -> GLWESecret<&mut [u8]> {
+    fn to_mut(&mut self) -> GLWESecretMut<'_> {
         GLWESecret {
             dist: self.dist,
             data: self.data.to_mut(),
@@ -127,6 +127,9 @@ impl GLWESecretTensor<Vec<u8>> {
         ScalarZnx::bytes_of(n.into(), Self::pairs(rank.into()))
     }
 }
+
+pub type GLWESecretTensorOwned = GLWESecretTensor<Vec<u8>>;
+pub type GLWESecretTensorMut<'a> = GLWESecretTensor<&'a mut [u8]>;
 
 impl<D: DataMut> GLWESecretTensor<D> {
     pub fn prepare<M, S, BE: Backend>(&mut self, module: &M, other: &S, scratch: &mut Scratch<BE>)
@@ -175,8 +178,8 @@ where
         R: GLWESecretToMut + GLWEInfos,
         A: GLWESecretToRef + GLWEInfos,
     {
-        let res: &mut GLWESecret<&mut [u8]> = &mut res.to_mut();
-        let a: &GLWESecret<&[u8]> = &a.to_ref();
+        let res: &mut GLWESecretMut<'_> = &mut res.to_mut();
+        let a: &GLWESecretRef<'_> = &a.to_ref();
 
         assert_eq!(res.rank(), GLWESecretTensor::pairs(a.rank().into()) as u32);
         assert_eq!(res.n(), self.n() as u32);

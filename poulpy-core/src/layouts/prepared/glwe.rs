@@ -3,7 +3,7 @@ use poulpy_hal::{
     layouts::{Backend, Data, DataMut, DataRef, Module, VecZnxDft, VecZnxDftToMut, VecZnxDftToRef, ZnxInfos},
 };
 
-use crate::layouts::{Base2K, Degree, GLWE, GLWEInfos, GLWEToRef, GetDegree, LWEInfos, Rank, TorusPrecision};
+use crate::layouts::{Base2K, Degree, GLWEInfos, GLWERef, GLWEToRef, GetDegree, LWEInfos, Rank, TorusPrecision};
 
 #[derive(PartialEq, Eq)]
 pub struct GLWEPrepared<D: Data, B: Backend> {
@@ -40,7 +40,7 @@ pub trait GLWEPreparedFactory<B: Backend>
 where
     Self: GetDegree + VecZnxDftAlloc<B> + VecZnxDftBytesOf + VecZnxDftApply<B>,
 {
-    fn alloc_glwe_prepared(&self, base2k: Base2K, k: TorusPrecision, rank: Rank) -> GLWEPrepared<Vec<u8>, B> {
+    fn alloc_glwe_prepared(&self, base2k: Base2K, k: TorusPrecision, rank: Rank) -> GLWEPreparedOwned<B> {
         GLWEPrepared {
             data: self.vec_znx_dft_alloc((rank + 1).into(), k.0.div_ceil(base2k.0) as usize),
             base2k,
@@ -48,7 +48,7 @@ where
         }
     }
 
-    fn alloc_glwe_prepared_from_infos<A>(&self, infos: &A) -> GLWEPrepared<Vec<u8>, B>
+    fn alloc_glwe_prepared_from_infos<A>(&self, infos: &A) -> GLWEPreparedOwned<B>
     where
         A: GLWEInfos,
     {
@@ -72,8 +72,8 @@ where
         O: GLWEToRef,
     {
         {
-            let mut res: GLWEPrepared<&mut [u8], B> = res.to_mut();
-            let other: GLWE<&[u8]> = other.to_ref();
+            let mut res: GLWEPreparedMut<'_, B> = res.to_mut();
+            let other: GLWERef<'_> = other.to_ref();
 
             assert_eq!(res.n(), self.ring_degree());
             assert_eq!(other.n(), self.ring_degree());
@@ -132,12 +132,16 @@ impl<D: DataMut, B: Backend> GLWEPrepared<D, B> {
     }
 }
 
+pub type GLWEPreparedOwned<B> = GLWEPrepared<Vec<u8>, B>;
+pub type GLWEPreparedRef<'a, B> = GLWEPrepared<&'a [u8], B>;
+pub type GLWEPreparedMut<'a, B> = GLWEPrepared<&'a mut [u8], B>;
+
 pub trait GLWEPreparedToMut<B: Backend> {
-    fn to_mut(&mut self) -> GLWEPrepared<&mut [u8], B>;
+    fn to_mut(&mut self) -> GLWEPreparedMut<'_, B>;
 }
 
 impl<D: DataMut, B: Backend> GLWEPreparedToMut<B> for GLWEPrepared<D, B> {
-    fn to_mut(&mut self) -> GLWEPrepared<&mut [u8], B> {
+    fn to_mut(&mut self) -> GLWEPreparedMut<'_, B> {
         GLWEPrepared {
             k: self.k,
             base2k: self.base2k,
@@ -147,11 +151,11 @@ impl<D: DataMut, B: Backend> GLWEPreparedToMut<B> for GLWEPrepared<D, B> {
 }
 
 pub trait GLWEPreparedToRef<B: Backend> {
-    fn to_ref(&self) -> GLWEPrepared<&[u8], B>;
+    fn to_ref(&self) -> GLWEPreparedRef<'_, B>;
 }
 
 impl<D: DataRef, B: Backend> GLWEPreparedToRef<B> for GLWEPrepared<D, B> {
-    fn to_ref(&self) -> GLWEPrepared<&[u8], B> {
+    fn to_ref(&self) -> GLWEPreparedRef<'_, B> {
         GLWEPrepared {
             data: self.data.to_ref(),
             k: self.k,

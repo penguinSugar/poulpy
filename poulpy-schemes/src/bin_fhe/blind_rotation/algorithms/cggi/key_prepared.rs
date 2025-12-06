@@ -11,15 +11,15 @@ use poulpy_core::{
 };
 
 use crate::bin_fhe::blind_rotation::{
-    BlindRotationKey, BlindRotationKeyInfos, BlindRotationKeyPrepared, BlindRotationKeyPreparedFactory, CGGI,
-    utils::set_xai_plus_y,
+    BlindRotationKey, BlindRotationKeyInfos, BlindRotationKeyPrepared, BlindRotationKeyPreparedFactory,
+    BlindRotationKeyPreparedOwned, CGGI, utils::set_xai_plus_y,
 };
 
 impl<BE: Backend> BlindRotationKeyPreparedFactory<CGGI, BE> for Module<BE>
 where
     Self: GGSWPreparedFactory<BE> + SvpPPolAlloc<BE> + SvpPrepare<BE>,
 {
-    fn blind_rotation_key_prepared_alloc<A>(&self, infos: &A) -> BlindRotationKeyPrepared<Vec<u8>, CGGI, BE>
+    fn blind_rotation_key_prepared_alloc<A>(&self, infos: &A) -> BlindRotationKeyPreparedOwned<CGGI, BE>
     where
         A: BlindRotationKeyInfos,
     {

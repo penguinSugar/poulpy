@@ -5,7 +5,7 @@ use poulpy_hal::{
 
 use crate::layouts::{
     Base2K, Degree, Dnum, Dsize, GGLWECompressed, GGLWECompressedToMut, GGLWECompressedToRef, GGLWEDecompress, GGLWEInfos,
-    GGLWEToGGSWKey, GGLWEToGGSWKeyToMut, GLWEInfos, LWEInfos, Rank, TorusPrecision,
+    GGLWEToGGSWKey, GGLWEToGGSWKeyMut, GGLWEToGGSWKeyToMut, GLWEInfos, LWEInfos, Rank, TorusPrecision,
 };
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 
@@ -185,8 +185,8 @@ where
         R: GGLWEToGGSWKeyToMut,
         O: GGLWEToGGSWKeyCompressedToRef,
     {
-        let res: &mut GGLWEToGGSWKey<&mut [u8]> = &mut res.to_mut();
-        let other: &GGLWEToGGSWKeyCompressed<&[u8]> = &other.to_ref();
+        let res: &mut GGLWEToGGSWKeyMut<'_> = &mut res.to_mut();
+        let other: &GGLWEToGGSWKeyCompressedRef<'_> = &other.to_ref();
 
         assert_eq!(res.keys.len(), other.keys.len());
 
@@ -206,15 +206,19 @@ impl<D: DataMut> GGLWEToGGSWKey<D> {
     }
 }
 
+pub type GGLWEToGGSWKeyCompressedOwned = GGLWEToGGSWKeyCompressed<Vec<u8>>;
+pub type GGLWEToGGSWKeyCompressedRef<'a> = GGLWEToGGSWKeyCompressed<&'a [u8]>;
+pub type GGLWEToGGSWKeyCompressedMut<'a> = GGLWEToGGSWKeyCompressed<&'a mut [u8]>;
+
 pub trait GGLWEToGGSWKeyCompressedToRef {
-    fn to_ref(&self) -> GGLWEToGGSWKeyCompressed<&[u8]>;
+    fn to_ref(&self) -> GGLWEToGGSWKeyCompressedRef<'_>;
 }
 
 impl<D: DataRef> GGLWEToGGSWKeyCompressedToRef for GGLWEToGGSWKeyCompressed<D>
 where
     GGLWECompressed<D>: GGLWECompressedToRef,
 {
-    fn to_ref(&self) -> GGLWEToGGSWKeyCompressed<&[u8]> {
+    fn to_ref(&self) -> GGLWEToGGSWKeyCompressedRef<'_> {
         GGLWEToGGSWKeyCompressed {
             keys: self.keys.iter().map(|c| c.to_ref()).collect(),
         }
@@ -222,14 +226,14 @@ where
 }
 
 pub trait GGLWEToGGSWKeyCompressedToMut {
-    fn to_mut(&mut self) -> GGLWEToGGSWKeyCompressed<&mut [u8]>;
+    fn to_mut(&mut self) -> GGLWEToGGSWKeyCompressedMut<'_>;
 }
 
 impl<D: DataMut> GGLWEToGGSWKeyCompressedToMut for GGLWEToGGSWKeyCompressed<D>
 where
     GGLWECompressed<D>: GGLWECompressedToMut,
 {
-    fn to_mut(&mut self) -> GGLWEToGGSWKeyCompressed<&mut [u8]> {
+    fn to_mut(&mut self) -> GGLWEToGGSWKeyCompressedMut<'_> {
         GGLWEToGGSWKeyCompressed {
             keys: self.keys.iter_mut().map(|c| c.to_mut()).collect(),
         }

@@ -1,8 +1,8 @@
 use poulpy_hal::layouts::{Backend, Data, DataMut, DataRef, Module, Scratch};
 
 use crate::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGLWEInfos, GGLWEToRef, GLWEInfos, GLWESwitchingKeyDegrees, GLWESwitchingKeyDegreesMut,
-    LWEInfos, Rank, TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGLWEInfos, GGLWEPreparedMut, GGLWEPreparedRef, GGLWEToRef, GLWEInfos, GLWESwitchingKeyDegrees,
+    GLWESwitchingKeyDegreesMut, LWEInfos, Rank, TorusPrecision,
     prepared::{GGLWEPrepared, GGLWEPreparedFactory, GGLWEPreparedToMut, GGLWEPreparedToRef},
 };
 
@@ -87,7 +87,7 @@ where
         rank_out: Rank,
         dnum: Dnum,
         dsize: Dsize,
-    ) -> GLWESwitchingKeyPrepared<Vec<u8>, B> {
+    ) -> GLWESwitchingKeyPreparedOwned<B> {
         GLWESwitchingKeyPrepared::<Vec<u8>, B> {
             key: self.alloc_gglwe_prepared(base2k, k, rank_in, rank_out, dnum, dsize),
             input_degree: Degree(0),
@@ -95,7 +95,7 @@ where
         }
     }
 
-    fn alloc_glwe_switching_key_prepared_from_infos<A>(&self, infos: &A) -> GLWESwitchingKeyPrepared<Vec<u8>, B>
+    fn alloc_glwe_switching_key_prepared_from_infos<A>(&self, infos: &A) -> GLWESwitchingKeyPreparedOwned<B>
     where
         A: GGLWEInfos,
     {
@@ -226,7 +226,7 @@ impl<D: DataRef, BE: Backend> GGLWEPreparedToRef<BE> for GLWESwitchingKeyPrepare
 where
     GGLWEPrepared<D, BE>: GGLWEPreparedToRef<BE>,
 {
-    fn to_ref(&self) -> GGLWEPrepared<&[u8], BE> {
+    fn to_ref(&self) -> GGLWEPreparedRef<'_, BE> {
         self.key.to_ref()
     }
 }
@@ -235,7 +235,10 @@ impl<D: DataRef, BE: Backend> GGLWEPreparedToMut<BE> for GLWESwitchingKeyPrepare
 where
     GGLWEPrepared<D, BE>: GGLWEPreparedToMut<BE>,
 {
-    fn to_mut(&mut self) -> GGLWEPrepared<&mut [u8], BE> {
+    fn to_mut(&mut self) -> GGLWEPreparedMut<'_, BE> {
         self.key.to_mut()
     }
 }
+
+pub type GLWESwitchingKeyPreparedOwned<B> = GLWESwitchingKeyPrepared<Vec<u8>, B>;
+pub type GLWESwitchingKeyPreparedMut<'a, B> = GLWESwitchingKeyPrepared<&'a mut [u8], B>;

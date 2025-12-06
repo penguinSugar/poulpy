@@ -6,7 +6,8 @@ use poulpy_hal::{
 };
 
 use crate::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGSW, GGSWInfos, GGSWToMut, GLWEInfos, LWEInfos, Rank, TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGSW, GGSWInfos, GGSWMut, GGSWToMut, GLWECompressedMut, GLWECompressedRef, GLWEInfos, LWEInfos,
+    Rank, TorusPrecision,
     compressed::{GLWECompressed, GLWEDecompress},
 };
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
@@ -182,7 +183,7 @@ impl GGSWCompressed<Vec<u8>> {
 }
 
 impl<D: DataRef> GGSWCompressed<D> {
-    pub fn at(&self, row: usize, col: usize) -> GLWECompressed<&[u8]> {
+    pub fn at(&self, row: usize, col: usize) -> GLWECompressedRef<'_> {
         let rank: usize = self.rank().into();
         GLWECompressed {
             data: self.data.at(row, col),
@@ -195,7 +196,7 @@ impl<D: DataRef> GGSWCompressed<D> {
 }
 
 impl<D: DataMut> GGSWCompressed<D> {
-    pub fn at_mut(&mut self, row: usize, col: usize) -> GLWECompressed<&mut [u8]> {
+    pub fn at_mut(&mut self, row: usize, col: usize) -> GLWECompressedMut<'_> {
         let rank: usize = self.rank().into();
         GLWECompressed {
             data: self.data.at_mut(row, col),
@@ -245,8 +246,8 @@ where
         R: GGSWToMut,
         O: GGSWCompressedToRef,
     {
-        let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
-        let other: &GGSWCompressed<&[u8]> = &other.to_ref();
+        let res: &mut GGSWMut<'_> = &mut res.to_mut();
+        let other: &GGSWCompressedRef<'_> = &other.to_ref();
 
         assert_eq!(res.rank(), other.rank());
         let dnum: usize = res.dnum().into();
@@ -272,12 +273,16 @@ impl<D: DataMut> GGSW<D> {
     }
 }
 
+pub type GGSWCompressedOwned = GGSWCompressed<Vec<u8>>;
+pub type GGSWCompressedRef<'a> = GGSWCompressed<&'a [u8]>;
+pub type GGSWCompressedMut<'a> = GGSWCompressed<&'a mut [u8]>;
+
 pub trait GGSWCompressedToMut {
-    fn to_mut(&mut self) -> GGSWCompressed<&mut [u8]>;
+    fn to_mut(&mut self) -> GGSWCompressedMut<'_>;
 }
 
 impl<D: DataMut> GGSWCompressedToMut for GGSWCompressed<D> {
-    fn to_mut(&mut self) -> GGSWCompressed<&mut [u8]> {
+    fn to_mut(&mut self) -> GGSWCompressedMut<'_> {
         GGSWCompressed {
             k: self.k(),
             base2k: self.base2k(),
@@ -290,11 +295,11 @@ impl<D: DataMut> GGSWCompressedToMut for GGSWCompressed<D> {
 }
 
 pub trait GGSWCompressedToRef {
-    fn to_ref(&self) -> GGSWCompressed<&[u8]>;
+    fn to_ref(&self) -> GGSWCompressedRef<'_>;
 }
 
 impl<D: DataRef> GGSWCompressedToRef for GGSWCompressed<D> {
-    fn to_ref(&self) -> GGSWCompressed<&[u8]> {
+    fn to_ref(&self) -> GGSWCompressedRef<'_> {
         GGSWCompressed {
             k: self.k(),
             base2k: self.base2k(),

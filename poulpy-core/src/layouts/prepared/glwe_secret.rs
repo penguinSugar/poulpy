@@ -6,7 +6,7 @@ use poulpy_hal::{
 use crate::{
     GetDistribution, GetDistributionMut,
     dist::Distribution,
-    layouts::{Base2K, Degree, GLWEInfos, GLWESecret, GLWESecretToRef, GetDegree, LWEInfos, Rank, TorusPrecision},
+    layouts::{Base2K, Degree, GLWEInfos, GLWESecretRef, GLWESecretToRef, GetDegree, LWEInfos, Rank, TorusPrecision},
 };
 
 pub struct GLWESecretPrepared<D: Data, B: Backend> {
@@ -53,13 +53,13 @@ pub trait GLWESecretPreparedFactory<B: Backend>
 where
     Self: GetDegree + SvpPPolBytesOf + SvpPPolAlloc<B> + SvpPrepare<B>,
 {
-    fn alloc_glwe_secret_prepared(&self, rank: Rank) -> GLWESecretPrepared<Vec<u8>, B> {
+    fn alloc_glwe_secret_prepared(&self, rank: Rank) -> GLWESecretPreparedOwned<B> {
         GLWESecretPrepared {
             data: self.svp_ppol_alloc(rank.into()),
             dist: Distribution::NONE,
         }
     }
-    fn alloc_glwe_secret_prepared_from_infos<A>(&self, infos: &A) -> GLWESecretPrepared<Vec<u8>, B>
+    fn alloc_glwe_secret_prepared_from_infos<A>(&self, infos: &A) -> GLWESecretPreparedOwned<B>
     where
         A: GLWEInfos,
     {
@@ -84,8 +84,8 @@ where
         O: GLWESecretToRef + GetDistribution,
     {
         {
-            let mut res: GLWESecretPrepared<&mut [u8], _> = res.to_mut();
-            let other: GLWESecret<&[u8]> = other.to_ref();
+            let mut res: GLWESecretPreparedMut<'_, _> = res.to_mut();
+            let other: GLWESecretRef<'_> = other.to_ref();
 
             for i in 0..res.rank().into() {
                 self.svp_prepare(&mut res.data, i, &other.data, i);
@@ -153,12 +153,16 @@ impl<D: DataMut, B: Backend> GLWESecretPrepared<D, B> {
     }
 }
 
+pub type GLWESecretPreparedOwned<B> = GLWESecretPrepared<Vec<u8>, B>;
+pub type GLWESecretPreparedRef<'a, B> = GLWESecretPrepared<&'a [u8], B>;
+pub type GLWESecretPreparedMut<'a, B> = GLWESecretPrepared<&'a mut [u8], B>;
+
 pub trait GLWESecretPreparedToRef<B: Backend> {
-    fn to_ref(&self) -> GLWESecretPrepared<&[u8], B>;
+    fn to_ref(&self) -> GLWESecretPreparedRef<'_, B>;
 }
 
 impl<D: DataRef, B: Backend> GLWESecretPreparedToRef<B> for GLWESecretPrepared<D, B> {
-    fn to_ref(&self) -> GLWESecretPrepared<&[u8], B> {
+    fn to_ref(&self) -> GLWESecretPreparedRef<'_, B> {
         GLWESecretPrepared {
             data: self.data.to_ref(),
             dist: self.dist,
@@ -170,11 +174,11 @@ pub trait GLWESecretPreparedToMut<B: Backend>
 where
     Self: GLWESecretPreparedToRef<B>,
 {
-    fn to_mut(&mut self) -> GLWESecretPrepared<&mut [u8], B>;
+    fn to_mut(&mut self) -> GLWESecretPreparedMut<'_, B>;
 }
 
 impl<D: DataMut, B: Backend> GLWESecretPreparedToMut<B> for GLWESecretPrepared<D, B> {
-    fn to_mut(&mut self) -> GLWESecretPrepared<&mut [u8], B> {
+    fn to_mut(&mut self) -> GLWESecretPreparedMut<'_, B> {
         GLWESecretPrepared {
             dist: self.dist,
             data: self.data.to_mut(),

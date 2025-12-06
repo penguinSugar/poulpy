@@ -1,8 +1,8 @@
 use poulpy_core::{
     GGSWEncryptSk, GLWEDecrypt, GLWEEncryptSk, ScratchTakeCore,
     layouts::{
-        Base2K, Dnum, Dsize, GGSWLayout, GGSWPreparedFactory, GLWE, GLWELayout, GLWEPlaintext, GLWESecretPrepared,
-        GLWESecretPreparedFactory, Rank, TorusPrecision,
+        Base2K, Dnum, Dsize, GGSWLayout, GGSWPreparedFactory, GLWE, GLWELayout, GLWEOwned, GLWEPlaintext, GLWEPlaintextOwned,
+        GLWESecretPreparedFactory, GLWESecretPreparedOwned, Rank, TorusPrecision,
     },
 };
 use poulpy_hal::{
@@ -14,7 +14,7 @@ use rand::RngCore;
 
 use crate::bin_fhe::{
     bdd_arithmetic::{
-        FheUintPrepared, GLWEBlindRotation,
+        FheUintPrepared, FheUintPreparedOwned, GLWEBlindRotation,
         tests::test_suite::{TEST_FHEUINT_BASE2K, TEST_RANK, TestContext},
     },
     blind_rotation::BlindRotationAlgo,
@@ -33,7 +33,7 @@ where
     Scratch<BE>: ScratchTakeCore<BE>,
 {
     let module: &Module<BE> = &test_context.module;
-    let sk_glwe_prep: &GLWESecretPrepared<Vec<u8>, BE> = &test_context.sk_glwe;
+    let sk_glwe_prep: &GLWESecretPreparedOwned<BE> = &test_context.sk_glwe;
 
     let base2k: Base2K = TEST_FHEUINT_BASE2K.into();
     let rank: Rank = TEST_RANK.into();
@@ -62,16 +62,16 @@ where
 
     let mut scratch: ScratchOwned<BE> = ScratchOwned::alloc(1 << 22);
 
-    let mut res: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_infos);
+    let mut res: GLWEOwned = GLWE::alloc_from_infos(&glwe_infos);
 
-    let mut test_glwe: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&glwe_infos);
+    let mut test_glwe: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&glwe_infos);
     let mut data: Vec<i64> = vec![0i64; module.n()];
     data.iter_mut().enumerate().for_each(|(i, x)| *x = i as i64);
     test_glwe.encode_vec_i64(&data, base2k.as_usize().into());
 
     let k: u32 = source.next_u32();
 
-    let mut k_enc_prep: FheUintPrepared<Vec<u8>, u32, BE> =
+    let mut k_enc_prep: FheUintPreparedOwned<u32, BE> =
         FheUintPrepared::<Vec<u8>, u32, BE>::alloc_from_infos(module, &ggsw_infos);
     k_enc_prep.encrypt_sk(
         module,
@@ -89,7 +89,7 @@ where
     // Starting bit
     let mut bit_start: usize = 0;
 
-    let mut pt: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&glwe_infos);
+    let mut pt: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&glwe_infos);
 
     for _ in 0..32_usize.div_ceil(module.log_n()) {
         // By how many bits to left shift

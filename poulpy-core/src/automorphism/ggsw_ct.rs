@@ -7,8 +7,8 @@ use crate::{
     GGSWExpandRows, ScratchTakeCore,
     automorphism::glwe_ct::GLWEAutomorphism,
     layouts::{
-        GGLWEInfos, GGLWEPreparedToRef, GGLWEToGGSWKeyPrepared, GGLWEToGGSWKeyPreparedToRef, GGSW, GGSWInfos, GGSWToMut,
-        GGSWToRef, GetGaloisElement,
+        GGLWEInfos, GGLWEPreparedToRef, GGLWEToGGSWKeyPreparedRef, GGLWEToGGSWKeyPreparedToRef, GGSW, GGSWInfos, GGSWMut,
+        GGSWRef, GGSWToMut, GGSWToRef, GetGaloisElement,
     },
 };
 
@@ -84,9 +84,9 @@ where
         assert!(res.dnum() <= a.dnum());
         assert!(scratch.available() >= self.ggsw_automorphism_tmp_bytes(res, a, key, tsk));
 
-        let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
-        let a: &GGSW<&[u8]> = &a.to_ref();
-        let tsk: &GGLWEToGGSWKeyPrepared<&[u8], BE> = &tsk.to_ref();
+        let res: &mut GGSWMut<'_> = &mut res.to_mut();
+        let a: &GGSWRef<'_> = &a.to_ref();
+        let tsk: &GGLWEToGGSWKeyPreparedRef<'_, BE> = &tsk.to_ref();
 
         // Keyswitch the j-th row of the col 0
         for row in 0..res.dnum().as_usize() {
@@ -105,8 +105,8 @@ where
         T: GGLWEToGGSWKeyPreparedToRef<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
-        let tsk: &GGLWEToGGSWKeyPrepared<&[u8], BE> = &tsk.to_ref();
+        let res: &mut GGSWMut<'_> = &mut res.to_mut();
+        let tsk: &GGLWEToGGSWKeyPreparedRef<'_, BE> = &tsk.to_ref();
 
         // Keyswitch the j-th row of the col 0
         for row in 0..res.dnum().as_usize() {

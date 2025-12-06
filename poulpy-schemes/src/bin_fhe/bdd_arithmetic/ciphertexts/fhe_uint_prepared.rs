@@ -5,8 +5,8 @@ use poulpy_core::layouts::{
     Base2K, Dnum, Dsize, GGSWInfos, GGSWPreparedFactory, GLWEInfos, LWEInfos, Rank, TorusPrecision, prepared::GGSWPrepared,
 };
 use poulpy_core::layouts::{
-    GGLWEInfos, GGLWEPreparedToRef, GGSW, GGSWLayout, GGSWPreparedToMut, GGSWPreparedToRef, GLWEAutomorphismKeyHelper,
-    GetGaloisElement, LWE,
+    GGLWEInfos, GGLWEPreparedToRef, GGSW, GGSWLayout, GGSWPreparedMut, GGSWPreparedRef, GGSWPreparedToMut, GGSWPreparedToRef,
+    GLWEAutomorphismKeyHelper, GetGaloisElement, LWE,
 };
 use poulpy_core::{GLWECopy, GLWEDecrypt, GLWEPacking, LWEFromGLWE};
 
@@ -33,30 +33,32 @@ pub struct FheUintPrepared<D: Data, T: UnsignedInteger, B: Backend> {
     pub(crate) _phantom: PhantomData<T>,
 }
 
+pub type FheUintPreparedOwned<T, B> = FheUintPrepared<Vec<u8>, T, B>;
+
 impl<T: UnsignedInteger, BE: Backend> FheUintPreparedFactory<T, BE> for Module<BE> where Self: Sized + GGSWPreparedFactory<BE> {}
 
 pub trait GetGGSWBit<BE: Backend>: Sync {
-    fn get_bit(&self, bit: usize) -> GGSWPrepared<&[u8], BE>;
+    fn get_bit(&self, bit: usize) -> GGSWPreparedRef<'_, BE>;
 }
 
 impl<D: DataRef, T: UnsignedInteger, BE: Backend> GetGGSWBit<BE> for FheUintPrepared<D, T, BE> {
-    fn get_bit(&self, bit: usize) -> GGSWPrepared<&[u8], BE> {
+    fn get_bit(&self, bit: usize) -> GGSWPreparedRef<'_, BE> {
         assert!(bit <= self.bits.len());
         self.bits[bit].to_ref()
     }
 }
 
 pub trait GetGGSWBitMut<T: UnsignedInteger, BE: Backend> {
-    fn get_bit(&mut self, bit: usize) -> GGSWPrepared<&mut [u8], BE>;
-    fn get_bits(&mut self, start: usize, count: usize) -> Vec<GGSWPrepared<&mut [u8], BE>>;
+    fn get_bit(&mut self, bit: usize) -> GGSWPreparedMut<'_, BE>;
+    fn get_bits(&mut self, start: usize, count: usize) -> Vec<GGSWPreparedMut<'_, BE>>;
 }
 
 impl<D: DataMut, T: UnsignedInteger, BE: Backend> GetGGSWBitMut<T, BE> for FheUintPrepared<D, T, BE> {
-    fn get_bit(&mut self, bit: usize) -> GGSWPrepared<&mut [u8], BE> {
+    fn get_bit(&mut self, bit: usize) -> GGSWPreparedMut<'_, BE> {
         assert!(bit <= self.bits.len());
         self.bits[bit].to_mut()
     }
-    fn get_bits(&mut self, start: usize, count: usize) -> Vec<GGSWPrepared<&mut [u8], BE>> {
+    fn get_bits(&mut self, start: usize, count: usize) -> Vec<GGSWPreparedMut<'_, BE>> {
         assert!(start + count <= self.bits.len());
         self.bits[start..start + count]
             .iter_mut()
@@ -82,7 +84,7 @@ where
         dnum: Dnum,
         dsize: Dsize,
         rank: Rank,
-    ) -> FheUintPrepared<Vec<u8>, T, BE> {
+    ) -> FheUintPreparedOwned<T, BE> {
         FheUintPrepared {
             bits: (0..T::BITS)
                 .map(|_| GGSWPrepared::alloc(self, base2k, k, dnum, dsize, rank))
@@ -91,7 +93,7 @@ where
         }
     }
 
-    fn alloc_fhe_uint_prepared_from_infos<A>(&self, infos: &A) -> FheUintPrepared<Vec<u8>, T, BE>
+    fn alloc_fhe_uint_prepared_from_infos<A>(&self, infos: &A) -> FheUintPreparedOwned<T, BE>
     where
         A: GGSWInfos,
     {
@@ -105,7 +107,7 @@ where
     }
 }
 
-impl<T: UnsignedInteger, BE: Backend> FheUintPrepared<Vec<u8>, T, BE> {
+impl<T: UnsignedInteger, BE: Backend> FheUintPreparedOwned<T, BE> {
     pub fn alloc_from_infos<A, M>(module: &M, infos: &A) -> Self
     where
         A: GGSWInfos,

@@ -223,15 +223,19 @@ impl<D: DataRef> WriterTo for GGLWEToGGSWKey<D> {
     }
 }
 
+pub type GGLWEToGGSWKeyOwned = GGLWEToGGSWKey<Vec<u8>>;
+pub type GGLWEToGGSWKeyRef<'a> = GGLWEToGGSWKey<&'a [u8]>;
+pub type GGLWEToGGSWKeyMut<'a> = GGLWEToGGSWKey<&'a mut [u8]>;
+
 pub trait GGLWEToGGSWKeyToRef {
-    fn to_ref(&self) -> GGLWEToGGSWKey<&[u8]>;
+    fn to_ref(&self) -> GGLWEToGGSWKeyRef<'_>;
 }
 
 impl<D: DataRef> GGLWEToGGSWKeyToRef for GGLWEToGGSWKey<D>
 where
     GGLWE<D>: GGLWEToRef,
 {
-    fn to_ref(&self) -> GGLWEToGGSWKey<&[u8]> {
+    fn to_ref(&self) -> GGLWEToGGSWKeyRef<'_> {
         GGLWEToGGSWKey {
             keys: self.keys.iter().map(|c| c.to_ref()).collect(),
         }
@@ -239,14 +243,14 @@ where
 }
 
 pub trait GGLWEToGGSWKeyToMut {
-    fn to_mut(&mut self) -> GGLWEToGGSWKey<&mut [u8]>;
+    fn to_mut(&mut self) -> GGLWEToGGSWKeyMut<'_>;
 }
 
 impl<D: DataMut> GGLWEToGGSWKeyToMut for GGLWEToGGSWKey<D>
 where
     GGLWE<D>: GGLWEToMut,
 {
-    fn to_mut(&mut self) -> GGLWEToGGSWKey<&mut [u8]> {
+    fn to_mut(&mut self) -> GGLWEToGGSWKeyMut<'_> {
         GGLWEToGGSWKey {
             keys: self.keys.iter_mut().map(|c| c.to_mut()).collect(),
         }

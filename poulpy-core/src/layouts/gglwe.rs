@@ -3,7 +3,7 @@ use poulpy_hal::{
     source::Source,
 };
 
-use crate::layouts::{Base2K, Degree, Dnum, Dsize, GLWE, GLWEInfos, LWEInfos, Rank, TorusPrecision};
+use crate::layouts::{Base2K, Degree, Dnum, Dsize, GLWE, GLWEInfos, GLWEMut, GLWERef, LWEInfos, Rank, TorusPrecision};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 
 use std::fmt;
@@ -170,7 +170,7 @@ impl<D: DataRef> fmt::Display for GGLWE<D> {
 }
 
 impl<D: DataRef> GGLWE<D> {
-    pub fn at(&self, row: usize, col: usize) -> GLWE<&[u8]> {
+    pub fn at(&self, row: usize, col: usize) -> GLWERef<'_> {
         GLWE {
             k: self.k,
             base2k: self.base2k,
@@ -180,7 +180,7 @@ impl<D: DataRef> GGLWE<D> {
 }
 
 impl<D: DataMut> GGLWE<D> {
-    pub fn at_mut(&mut self, row: usize, col: usize) -> GLWE<&mut [u8]> {
+    pub fn at_mut(&mut self, row: usize, col: usize) -> GLWEMut<'_> {
         GLWE {
             k: self.k,
             base2k: self.base2k,
@@ -282,12 +282,16 @@ impl GGLWE<Vec<u8>> {
     }
 }
 
+pub type GGLWEOwned = GGLWE<Vec<u8>>;
+pub type GGLWERef<'a> = GGLWE<&'a [u8]>;
+pub type GGLWEMut<'a> = GGLWE<&'a mut [u8]>;
+
 pub trait GGLWEToMut {
-    fn to_mut(&mut self) -> GGLWE<&mut [u8]>;
+    fn to_mut(&mut self) -> GGLWEMut<'_>;
 }
 
 impl<D: DataMut> GGLWEToMut for GGLWE<D> {
-    fn to_mut(&mut self) -> GGLWE<&mut [u8]> {
+    fn to_mut(&mut self) -> GGLWEMut<'_> {
         GGLWE {
             k: self.k(),
             base2k: self.base2k(),
@@ -298,11 +302,11 @@ impl<D: DataMut> GGLWEToMut for GGLWE<D> {
 }
 
 pub trait GGLWEToRef {
-    fn to_ref(&self) -> GGLWE<&[u8]>;
+    fn to_ref(&self) -> GGLWERef<'_>;
 }
 
 impl<D: DataRef> GGLWEToRef for GGLWE<D> {
-    fn to_ref(&self) -> GGLWE<&[u8]> {
+    fn to_ref(&self) -> GGLWERef<'_> {
         GGLWE {
             k: self.k(),
             base2k: self.base2k(),

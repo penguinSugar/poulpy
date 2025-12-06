@@ -3,7 +3,10 @@ use poulpy_hal::layouts::{Backend, DataMut, Module, Scratch};
 use crate::{
     GGSWExpandRows, ScratchTakeCore,
     keyswitching::GLWEKeyswitch,
-    layouts::{GGLWEInfos, GGLWEPreparedToRef, GGLWEToGGSWKeyPreparedToRef, GGSW, GGSWInfos, GGSWToMut, GGSWToRef, LWEInfos},
+    layouts::{
+        GGLWEInfos, GGLWEPreparedToRef, GGLWEToGGSWKeyPreparedToRef, GGSW, GGSWInfos, GGSWMut, GGSWRef, GGSWToMut, GGSWToRef,
+        LWEInfos,
+    },
 };
 
 impl GGSW<Vec<u8>> {
@@ -74,7 +77,7 @@ where
         T: GGLWEToGGSWKeyPreparedToRef<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GGSWMut<'_> = &mut res.to_mut();
 
         for row in 0..res.dnum().into() {
             // Key-switch column 0, i.e.
@@ -93,8 +96,8 @@ where
         T: GGLWEToGGSWKeyPreparedToRef<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
-        let a: &GGSW<&[u8]> = &a.to_ref();
+        let res: &mut GGSWMut<'_> = &mut res.to_mut();
+        let a: &GGSWRef<'_> = &a.to_ref();
 
         assert!(res.dnum() <= a.dnum());
         assert_eq!(res.dsize(), a.dsize());

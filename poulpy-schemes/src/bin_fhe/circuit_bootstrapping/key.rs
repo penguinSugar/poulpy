@@ -1,8 +1,9 @@
 use poulpy_core::{
     Distribution, GGLWEToGGSWKeyEncryptSk, GLWEAutomorphismKeyEncryptSk, GetDistribution, ScratchTakeCore,
     layouts::{
-        GGLWEInfos, GGLWEToGGSWKey, GGLWEToGGSWKeyLayout, GGSWInfos, GLWEAutomorphismKey, GLWEAutomorphismKeyLayout, GLWEInfos,
-        GLWESecretPreparedFactory, GLWESecretToRef, LWEInfos, LWESecretToRef, prepared::GLWESecretPrepared,
+        GGLWEInfos, GGLWEToGGSWKey, GGLWEToGGSWKeyLayout, GGLWEToGGSWKeyOwned, GGSWInfos, GLWEAutomorphismKey,
+        GLWEAutomorphismKeyLayout, GLWEAutomorphismKeyOwned, GLWEInfos, GLWESecretPreparedFactory, GLWESecretPreparedOwned,
+        GLWESecretToRef, LWEInfos, LWESecretToRef, prepared::GLWESecretPrepared,
     },
     trace_galois_elements,
 };
@@ -15,7 +16,7 @@ use poulpy_hal::{
 
 use crate::bin_fhe::blind_rotation::{
     BlindRotationAlgo, BlindRotationKey, BlindRotationKeyEncryptSk, BlindRotationKeyFactory, BlindRotationKeyInfos,
-    BlindRotationKeyLayout,
+    BlindRotationKeyLayout, BlindRotationKeyOwned,
 };
 
 pub trait CircuitBootstrappingKeyInfos {
@@ -74,7 +75,7 @@ impl<BRA: BlindRotationAlgo> CircuitBootstrappingKey<Vec<u8>, BRA> {
     pub fn alloc_from_infos<A>(infos: &A) -> Self
     where
         A: CircuitBootstrappingKeyInfos,
-        BlindRotationKey<Vec<u8>, BRA>: BlindRotationKeyFactory<BRA>,
+        BlindRotationKeyOwned<BRA>: BlindRotationKeyFactory<BRA>,
     {
         let atk_infos: &GLWEAutomorphismKeyLayout = &infos.atk_infos();
         let brk_infos: &BlindRotationKeyLayout = &infos.brk_infos();
@@ -82,7 +83,7 @@ impl<BRA: BlindRotationAlgo> CircuitBootstrappingKey<Vec<u8>, BRA> {
         let gal_els: Vec<i64> = trace_galois_elements(atk_infos.log_n(), 2 * atk_infos.n().as_usize() as i64);
 
         Self {
-            brk: <BlindRotationKey<Vec<u8>, BRA> as BlindRotationKeyFactory<BRA>>::blind_rotation_key_alloc(brk_infos),
+            brk: <BlindRotationKeyOwned<BRA> as BlindRotationKeyFactory<BRA>>::blind_rotation_key_alloc(brk_infos),
             atk: gal_els
                 .iter()
                 .map(|&gal_el| {
@@ -97,8 +98,8 @@ impl<BRA: BlindRotationAlgo> CircuitBootstrappingKey<Vec<u8>, BRA> {
 
 pub struct CircuitBootstrappingKey<D: Data, BRA: BlindRotationAlgo> {
     pub(crate) brk: BlindRotationKey<D, BRA>,
-    pub(crate) tsk: GGLWEToGGSWKey<Vec<u8>>,
-    pub(crate) atk: HashMap<i64, GLWEAutomorphismKey<Vec<u8>>>,
+    pub(crate) tsk: GGLWEToGGSWKeyOwned,
+    pub(crate) atk: HashMap<i64, GLWEAutomorphismKeyOwned>,
 }
 
 impl<D: DataMut, BRA: BlindRotationAlgo> CircuitBootstrappingKey<D, BRA> {
@@ -164,7 +165,7 @@ where
             atk.encrypt_sk(self, *p, sk_glwe, source_xa, source_xe, scratch);
         }
 
-        let mut sk_glwe_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc(self, brk_infos.rank());
+        let mut sk_glwe_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(self, brk_infos.rank());
         sk_glwe_prepared.prepare(self, sk_glwe);
 
         res.brk.encrypt_sk(
@@ -220,3 +221,5 @@ impl<D: DataRef, BRA: BlindRotationAlgo> CircuitBootstrappingKeyInfos for Circui
         }
     }
 }
+
+pub type CircuitBootstrappingKeyOwned<BRA> = CircuitBootstrappingKey<Vec<u8>, BRA>;

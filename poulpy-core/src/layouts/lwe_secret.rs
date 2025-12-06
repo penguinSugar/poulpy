@@ -92,12 +92,16 @@ impl<D: DataMut> LWESecret<D> {
     }
 }
 
+pub type LWESecretOwned = LWESecret<Vec<u8>>;
+pub type LWESecretRef<'a> = LWESecret<&'a [u8]>;
+pub type LWESecretMut<'a> = LWESecret<&'a mut [u8]>;
+
 pub trait LWESecretToRef {
-    fn to_ref(&self) -> LWESecret<&[u8]>;
+    fn to_ref(&self) -> LWESecretRef<'_>;
 }
 
 impl<D: DataRef> LWESecretToRef for LWESecret<D> {
-    fn to_ref(&self) -> LWESecret<&[u8]> {
+    fn to_ref(&self) -> LWESecretRef<'_> {
         LWESecret {
             dist: self.dist,
             data: self.data.to_ref(),
@@ -106,11 +110,11 @@ impl<D: DataRef> LWESecretToRef for LWESecret<D> {
 }
 
 pub trait LWESecretToMut {
-    fn to_mut(&mut self) -> LWESecret<&mut [u8]>;
+    fn to_mut(&mut self) -> LWESecretMut<'_>;
 }
 
 impl<D: DataMut> LWESecretToMut for LWESecret<D> {
-    fn to_mut(&mut self) -> LWESecret<&mut [u8]> {
+    fn to_mut(&mut self) -> LWESecretMut<'_> {
         LWESecret {
             dist: self.dist,
             data: self.data.to_mut(),

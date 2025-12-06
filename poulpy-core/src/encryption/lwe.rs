@@ -7,7 +7,7 @@ use poulpy_hal::{
 use crate::{
     ScratchTakeCore,
     encryption::{SIGMA, SIGMA_BOUND},
-    layouts::{LWE, LWEInfos, LWEPlaintext, LWEPlaintextToRef, LWESecret, LWESecretToRef, LWEToMut},
+    layouts::{LWE, LWEInfos, LWEMut, LWEPlaintextRef, LWEPlaintextToRef, LWESecretRef, LWESecretToRef, LWEToMut},
 };
 
 impl<DataSelf: DataMut> LWE<DataSelf> {
@@ -63,9 +63,9 @@ where
         S: LWESecretToRef,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut LWE<&mut [u8]> = &mut res.to_mut();
-        let pt: &LWEPlaintext<&[u8]> = &pt.to_ref();
-        let sk: &LWESecret<&[u8]> = &sk.to_ref();
+        let res: &mut LWEMut<'_> = &mut res.to_mut();
+        let pt: &LWEPlaintextRef<'_> = &pt.to_ref();
+        let sk: &LWESecretRef<'_> = &sk.to_ref();
 
         #[cfg(debug_assertions)]
         {

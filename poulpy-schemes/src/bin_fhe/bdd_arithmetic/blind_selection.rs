@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use poulpy_core::{
     GLWECopy, GLWEDecrypt, ScratchTakeCore,
-    layouts::{GGSWInfos, GGSWPrepared, GLWE, GLWEInfos, GLWEToMut},
+    layouts::{GGSWInfos, GGSWPreparedRef, GLWE, GLWEInfos, GLWEMut, GLWEToMut},
 };
 use poulpy_hal::layouts::{Backend, Module, Scratch, ZnxZero};
 
@@ -39,12 +39,12 @@ where
     {
         assert!(bit_rsh + bit_mask <= T::BITS as usize);
 
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
 
         for i in 0..bit_mask {
             let t: usize = 1 << (bit_mask - i - 1);
 
-            let bit: &GGSWPrepared<&[u8], BE> = &fhe_uint.get_bit(bit_rsh + bit_mask - i - 1); // MSB -> LSB traversal
+            let bit: &GGSWPreparedRef<'_, BE> = &fhe_uint.get_bit(bit_rsh + bit_mask - i - 1); // MSB -> LSB traversal
 
             for j in 0..t {
                 let hi: Option<&mut A> = a.remove(&j);

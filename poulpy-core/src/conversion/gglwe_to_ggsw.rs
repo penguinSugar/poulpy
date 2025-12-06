@@ -9,8 +9,8 @@ use poulpy_hal::{
 use crate::{
     GGLWEProduct, GLWECopy, ScratchTakeCore,
     layouts::{
-        GGLWE, GGLWEInfos, GGLWEToGGSWKeyPrepared, GGLWEToGGSWKeyPreparedToRef, GGLWEToRef, GGSW, GGSWInfos, GGSWToMut, GLWE,
-        GLWEInfos, LWEInfos,
+        GGLWE, GGLWEInfos, GGLWERef, GGLWEToGGSWKeyPreparedRef, GGLWEToGGSWKeyPreparedToRef, GGLWEToRef, GGSW, GGSWInfos,
+        GGSWMut, GGSWToMut, GLWEInfos, GLWERef, LWEInfos,
     },
 };
 
@@ -56,9 +56,9 @@ where
         T: GGLWEToGGSWKeyPreparedToRef<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
-        let a: &GGLWE<&[u8]> = &a.to_ref();
-        let tsk: &GGLWEToGGSWKeyPrepared<&[u8], BE> = &tsk.to_ref();
+        let res: &mut GGSWMut<'_> = &mut res.to_mut();
+        let a: &GGLWERef<'_> = &a.to_ref();
+        let tsk: &GGLWEToGGSWKeyPreparedRef<'_, BE> = &tsk.to_ref();
 
         assert_eq!(res.rank(), a.rank_out());
         assert_eq!(res.dnum(), a.dnum());
@@ -143,8 +143,8 @@ where
         T: GGLWEToGGSWKeyPreparedToRef<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
-        let tsk: &GGLWEToGGSWKeyPrepared<&[u8], BE> = &tsk.to_ref();
+        let res: &mut GGSWMut<'_> = &mut res.to_mut();
+        let tsk: &GGLWEToGGSWKeyPreparedRef<'_, BE> = &tsk.to_ref();
 
         let base2k_res: usize = res.base2k().into();
         let base2k_tsk: usize = tsk.base2k().into();
@@ -161,7 +161,7 @@ where
 
         // Keyswitch the j-th row of the col 0
         for row in 0..res.dnum().as_usize() {
-            let glwe_mi_1: &GLWE<&[u8]> = &res.at(row, 0);
+            let glwe_mi_1: &GLWERef<'_> = &res.at(row, 0);
 
             if base2k_res == base2k_tsk {
                 for col_i in 0..cols - 1 {
@@ -213,10 +213,10 @@ fn ggsw_expand_rows_internal<M, R, C, A, T, BE: Backend>(
     T: GGLWEToGGSWKeyPreparedToRef<BE>,
     Scratch<BE>: ScratchTakeCore<BE>,
 {
-    let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
+    let res: &mut GGSWMut<'_> = &mut res.to_mut();
     let a_0: &VecZnxRef<'_> = &a_0.to_ref();
     let a_dft: &VecZnxDftRef<'_, BE> = &a_dft.to_ref();
-    let tsk: &GGLWEToGGSWKeyPrepared<&[u8], BE> = &tsk.to_ref();
+    let tsk: &GGLWEToGGSWKeyPreparedRef<'_, BE> = &tsk.to_ref();
     let cols: usize = res.rank().as_usize() + 1;
 
     // Example for rank 3:

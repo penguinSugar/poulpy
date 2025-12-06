@@ -4,7 +4,7 @@ use poulpy_hal::{
 };
 
 use crate::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGLWE, GGLWEInfos, GGLWEToRef, GLWEInfos, GetDegree, LWEInfos, Rank, TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGLWEInfos, GGLWERef, GGLWEToRef, GLWEInfos, GetDegree, LWEInfos, Rank, TorusPrecision,
 };
 
 #[derive(PartialEq, Eq)]
@@ -69,7 +69,7 @@ where
         rank_out: Rank,
         dnum: Dnum,
         dsize: Dsize,
-    ) -> GGLWEPrepared<Vec<u8>, BE> {
+    ) -> GGLWEPreparedOwned<BE> {
         let size: usize = k.0.div_ceil(base2k.0) as usize;
         debug_assert!(
             size as u32 > dsize.0,
@@ -92,7 +92,7 @@ where
         }
     }
 
-    fn alloc_gglwe_prepared_from_infos<A>(&self, infos: &A) -> GGLWEPrepared<Vec<u8>, BE>
+    fn alloc_gglwe_prepared_from_infos<A>(&self, infos: &A) -> GGLWEPreparedOwned<BE>
     where
         A: GGLWEInfos,
     {
@@ -165,8 +165,8 @@ where
         R: GGLWEPreparedToMut<BE>,
         O: GGLWEToRef,
     {
-        let mut res: GGLWEPrepared<&mut [u8], BE> = res.to_mut();
-        let other: GGLWE<&[u8]> = other.to_ref();
+        let mut res: GGLWEPreparedMut<'_, BE> = res.to_mut();
+        let other: GGLWERef<'_> = other.to_ref();
 
         assert_eq!(res.n(), self.ring_degree());
         assert_eq!(other.n(), self.ring_degree());
@@ -250,12 +250,16 @@ impl<B: Backend> GGLWEPrepared<Vec<u8>, B> {
     }
 }
 
+pub type GGLWEPreparedOwned<B> = GGLWEPrepared<Vec<u8>, B>;
+pub type GGLWEPreparedRef<'a, B> = GGLWEPrepared<&'a [u8], B>;
+pub type GGLWEPreparedMut<'a, B> = GGLWEPrepared<&'a mut [u8], B>;
+
 pub trait GGLWEPreparedToMut<B: Backend> {
-    fn to_mut(&mut self) -> GGLWEPrepared<&mut [u8], B>;
+    fn to_mut(&mut self) -> GGLWEPreparedMut<'_, B>;
 }
 
 impl<D: DataMut, B: Backend> GGLWEPreparedToMut<B> for GGLWEPrepared<D, B> {
-    fn to_mut(&mut self) -> GGLWEPrepared<&mut [u8], B> {
+    fn to_mut(&mut self) -> GGLWEPreparedMut<'_, B> {
         GGLWEPrepared {
             k: self.k,
             base2k: self.base2k,
@@ -266,11 +270,11 @@ impl<D: DataMut, B: Backend> GGLWEPreparedToMut<B> for GGLWEPrepared<D, B> {
 }
 
 pub trait GGLWEPreparedToRef<B: Backend> {
-    fn to_ref(&self) -> GGLWEPrepared<&[u8], B>;
+    fn to_ref(&self) -> GGLWEPreparedRef<'_, B>;
 }
 
 impl<D: DataRef, B: Backend> GGLWEPreparedToRef<B> for GGLWEPrepared<D, B> {
-    fn to_ref(&self) -> GGLWEPrepared<&[u8], B> {
+    fn to_ref(&self) -> GGLWEPreparedRef<'_, B> {
         GGLWEPrepared {
             k: self.k,
             base2k: self.base2k,

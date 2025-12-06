@@ -5,7 +5,7 @@ use poulpy_hal::{
 
 use crate::{
     GLWEKeyswitch, ScratchTakeCore,
-    layouts::{GGLWEInfos, GGLWEPreparedToRef, GLWE, GLWEInfos, GLWELayout, GLWEToMut, LWE, LWEInfos, LWEToRef},
+    layouts::{GGLWEInfos, GGLWEPreparedToRef, GLWE, GLWEInfos, GLWELayout, GLWEMut, GLWEToMut, LWEInfos, LWERef, LWEToRef},
 };
 
 impl<BE: Backend> GLWEFromLWE<BE> for Module<BE>
@@ -41,8 +41,8 @@ where
         A: LWEToRef,
         K: GGLWEPreparedToRef<BE> + GGLWEInfos,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
-        let lwe: &LWE<&[u8]> = &lwe.to_ref();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
+        let lwe: &LWERef<'_> = &lwe.to_ref();
 
         assert_eq!(res.n(), self.n() as u32);
         assert_eq!(ksk.n(), self.n() as u32);

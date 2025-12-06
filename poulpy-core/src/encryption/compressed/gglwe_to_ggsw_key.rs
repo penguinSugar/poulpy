@@ -7,8 +7,8 @@ use poulpy_hal::{
 use crate::{
     GGLWECompressedEncryptSk, GetDistribution, ScratchTakeCore,
     layouts::{
-        GGLWEInfos, GGLWEToGGSWKeyCompressed, GGLWEToGGSWKeyCompressedToMut, GLWEInfos, GLWESecret, GLWESecretTensor,
-        GLWESecretTensorFactory, GLWESecretToRef,
+        GGLWEInfos, GGLWEToGGSWKeyCompressed, GGLWEToGGSWKeyCompressedMut, GGLWEToGGSWKeyCompressedToMut, GLWEInfos, GLWESecret,
+        GLWESecretTensor, GLWESecretTensorFactory, GLWESecretToRef,
         prepared::{GLWESecretPrepared, GLWESecretPreparedFactory},
     },
 };
@@ -87,7 +87,7 @@ where
         assert_eq!(res.rank(), sk.rank());
         assert_eq!(res.n(), sk.n());
 
-        let res: &mut GGLWEToGGSWKeyCompressed<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GGLWEToGGSWKeyCompressedMut<'_> = &mut res.to_mut();
         let rank: usize = res.rank_out().as_usize();
 
         let (mut sk_prepared, scratch_1) = scratch.take_glwe_secret_prepared(self, res.rank());

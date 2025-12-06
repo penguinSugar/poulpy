@@ -9,15 +9,15 @@ use std::marker::PhantomData;
 
 use poulpy_core::{
     Distribution, GGSWEncryptSk, GetDistribution, ScratchTakeCore,
-    layouts::{GGSW, GGSWInfos, GLWEInfos, GLWESecretPreparedToRef, LWEInfos, LWESecret, LWESecretToRef},
+    layouts::{GGSW, GGSWInfos, GLWEInfos, GLWESecretPreparedToRef, LWEInfos, LWESecretRef, LWESecretToRef},
 };
 
 use crate::bin_fhe::blind_rotation::{
-    BlindRotationKey, BlindRotationKeyEncryptSk, BlindRotationKeyFactory, BlindRotationKeyInfos, CGGI,
+    BlindRotationKey, BlindRotationKeyEncryptSk, BlindRotationKeyFactory, BlindRotationKeyInfos, BlindRotationKeyOwned, CGGI,
 };
 
 impl<D: DataRef> BlindRotationKeyFactory<CGGI> for BlindRotationKey<D, CGGI> {
-    fn blind_rotation_key_alloc<A>(infos: &A) -> BlindRotationKey<Vec<u8>, CGGI>
+    fn blind_rotation_key_alloc<A>(infos: &A) -> BlindRotationKeyOwned<CGGI>
     where
         A: BlindRotationKeyInfos,
     {
@@ -65,7 +65,7 @@ where
         }
 
         {
-            let sk_lwe: &LWESecret<&[u8]> = &sk_lwe.to_ref();
+            let sk_lwe: &LWESecretRef<'_> = &sk_lwe.to_ref();
 
             res.dist = sk_lwe.dist();
 

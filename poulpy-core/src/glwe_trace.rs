@@ -6,7 +6,7 @@ use poulpy_hal::{
 use crate::{
     GLWEAutomorphism, GLWECopy, GLWENormalize, GLWEShift, ScratchTakeCore,
     layouts::{
-        GGLWEInfos, GGLWELayout, GGLWEPreparedToRef, GLWE, GLWEAutomorphismKeyHelper, GLWEInfos, GLWELayout, GLWEToMut,
+        GGLWEInfos, GGLWELayout, GGLWEPreparedToRef, GLWE, GLWEAutomorphismKeyHelper, GLWEInfos, GLWELayout, GLWEMut, GLWEToMut,
         GLWEToRef, GetGaloisElement, LWEInfos,
     },
 };
@@ -144,7 +144,7 @@ where
         K: GGLWEPreparedToRef<BE> + GetGaloisElement + GGLWEInfos,
         H: GLWEAutomorphismKeyHelper<K, BE>,
     {
-        let res: &mut GLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GLWEMut<'_> = &mut res.to_mut();
 
         let ksk_infos: &GGLWELayout = &keys.automorphism_key_infos();
         let log_n: usize = self.log_n();

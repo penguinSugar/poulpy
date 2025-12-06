@@ -4,8 +4,9 @@ use poulpy_hal::{
 };
 
 use crate::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGLWECompressed, GGLWECompressedSeedMut, GGLWECompressedToMut, GGLWECompressedToRef,
-    GGLWEDecompress, GGLWEInfos, GGLWEToMut, GLWEInfos, GLWETensorKey, LWEInfos, Rank, TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGLWECompressed, GGLWECompressedMut, GGLWECompressedRef, GGLWECompressedSeedMut,
+    GGLWECompressedToMut, GGLWECompressedToRef, GGLWEDecompress, GGLWEInfos, GGLWEToMut, GLWEInfos, GLWETensorKey, LWEInfos,
+    Rank, TorusPrecision,
 };
 use std::fmt;
 
@@ -169,7 +170,7 @@ impl<D: DataMut> GGLWECompressedToMut for GLWETensorKeyCompressed<D>
 where
     GGLWECompressed<D>: GGLWECompressedToMut,
 {
-    fn to_mut(&mut self) -> GGLWECompressed<&mut [u8]> {
+    fn to_mut(&mut self) -> GGLWECompressedMut<'_> {
         self.0.to_mut()
     }
 }
@@ -178,7 +179,9 @@ impl<D: DataRef> GGLWECompressedToRef for GLWETensorKeyCompressed<D>
 where
     GGLWECompressed<D>: GGLWECompressedToRef,
 {
-    fn to_ref(&self) -> GGLWECompressed<&[u8]> {
+    fn to_ref(&self) -> GGLWECompressedRef<'_> {
         self.0.to_ref()
     }
 }
+
+pub type GLWETensorKeyCompressedOwned = GLWETensorKeyCompressed<Vec<u8>>;

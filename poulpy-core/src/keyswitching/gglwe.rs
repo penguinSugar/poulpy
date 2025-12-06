@@ -3,7 +3,9 @@ use poulpy_hal::layouts::{Backend, DataMut, Module, Scratch};
 use crate::{
     ScratchTakeCore,
     keyswitching::GLWEKeyswitch,
-    layouts::{GGLWE, GGLWEInfos, GGLWEPreparedToRef, GGLWEToMut, GGLWEToRef, GLWEAutomorphismKey, GLWESwitchingKey},
+    layouts::{
+        GGLWE, GGLWEInfos, GGLWEMut, GGLWEPreparedToRef, GGLWERef, GGLWEToMut, GGLWEToRef, GLWEAutomorphismKey, GLWESwitchingKey,
+    },
 };
 
 impl GLWEAutomorphismKey<Vec<u8>> {
@@ -163,8 +165,8 @@ where
         );
         assert_eq!(res.base2k(), a.base2k());
 
-        let res: &mut GGLWE<&mut [u8]> = &mut res.to_mut();
-        let a: &GGLWE<&[u8]> = &a.to_ref();
+        let res: &mut GGLWEMut<'_> = &mut res.to_mut();
+        let a: &GGLWERef<'_> = &a.to_ref();
 
         for row in 0..res.dnum().into() {
             for col in 0..res.rank_in().into() {
@@ -179,7 +181,7 @@ where
         A: GGLWEPreparedToRef<BE> + GGLWEInfos,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GGLWE<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GGLWEMut<'_> = &mut res.to_mut();
 
         assert_eq!(
             res.rank_out(),

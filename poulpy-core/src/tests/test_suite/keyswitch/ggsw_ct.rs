@@ -8,9 +8,10 @@ use crate::{
     GGLWEToGGSWKeyEncryptSk, GGSWEncryptSk, GGSWKeyswitch, GGSWNoise, GLWESwitchingKeyEncryptSk, ScratchTakeCore,
     encryption::SIGMA,
     layouts::{
-        GGLWEToGGSWKey, GGLWEToGGSWKeyPrepared, GGLWEToGGSWKeyPreparedFactory, GGSW, GGSWInfos, GGSWLayout, GLWEInfos,
-        GLWESecret, GLWESecretPreparedFactory, GLWESwitchingKey, GLWESwitchingKeyLayout, GLWESwitchingKeyPreparedFactory,
-        GLWETensorKeyLayout,
+        GGLWEToGGSWKey, GGLWEToGGSWKeyOwned, GGLWEToGGSWKeyPrepared, GGLWEToGGSWKeyPreparedFactory, GGLWEToGGSWKeyPreparedOwned,
+        GGSW, GGSWInfos, GGSWLayout, GGSWOwned, GLWEInfos, GLWESecret, GLWESecretOwned, GLWESecretPreparedFactory,
+        GLWESecretPreparedOwned, GLWESwitchingKey, GLWESwitchingKeyLayout, GLWESwitchingKeyOwned,
+        GLWESwitchingKeyPreparedFactory, GLWESwitchingKeyPreparedOwned, GLWETensorKeyLayout,
         prepared::{GLWESecretPrepared, GLWESwitchingKeyPrepared},
     },
     noise::noise_ggsw_keyswitch,
@@ -85,10 +86,10 @@ where
                 rank_out: rank.into(),
             };
 
-            let mut ggsw_in: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_in_infos);
-            let mut ggsw_out: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_out_infos);
-            let mut tsk: GGLWEToGGSWKey<Vec<u8>> = GGLWEToGGSWKey::alloc_from_infos(&tsk_infos);
-            let mut ksk: GLWESwitchingKey<Vec<u8>> = GLWESwitchingKey::alloc_from_infos(&ksk_apply_infos);
+            let mut ggsw_in: GGSWOwned = GGSW::alloc_from_infos(&ggsw_in_infos);
+            let mut ggsw_out: GGSWOwned = GGSW::alloc_from_infos(&ggsw_out_infos);
+            let mut tsk: GGLWEToGGSWKeyOwned = GGLWEToGGSWKey::alloc_from_infos(&tsk_infos);
+            let mut ksk: GLWESwitchingKeyOwned = GLWESwitchingKey::alloc_from_infos(&ksk_apply_infos);
             let mut pt_scalar: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
 
             let mut source_xs: Source = Source::new([0u8; 32]);
@@ -110,16 +111,16 @@ where
 
             let var_xs: f64 = 0.5;
 
-            let mut sk_in: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank.into());
+            let mut sk_in: GLWESecretOwned = GLWESecret::alloc(n.into(), rank.into());
             sk_in.fill_ternary_prob(var_xs, &mut source_xs);
 
-            let mut sk_in_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc(module, rank.into());
+            let mut sk_in_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(module, rank.into());
             sk_in_prepared.prepare(module, &sk_in);
 
-            let mut sk_out: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank.into());
+            let mut sk_out: GLWESecretOwned = GLWESecret::alloc(n.into(), rank.into());
             sk_out.fill_ternary_prob(var_xs, &mut source_xs);
 
-            let mut sk_out_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc(module, rank.into());
+            let mut sk_out_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(module, rank.into());
             sk_out_prepared.prepare(module, &sk_out);
 
             ksk.encrypt_sk(
@@ -149,11 +150,10 @@ where
                 scratch.borrow(),
             );
 
-            let mut ksk_prepared: GLWESwitchingKeyPrepared<Vec<u8>, BE> =
-                GLWESwitchingKeyPrepared::alloc_from_infos(module, &ksk);
+            let mut ksk_prepared: GLWESwitchingKeyPreparedOwned<BE> = GLWESwitchingKeyPrepared::alloc_from_infos(module, &ksk);
             ksk_prepared.prepare(module, &ksk, scratch.borrow());
 
-            let mut tsk_prepared: GGLWEToGGSWKeyPrepared<Vec<u8>, BE> = GGLWEToGGSWKeyPrepared::alloc_from_infos(module, &tsk);
+            let mut tsk_prepared: GGLWEToGGSWKeyPreparedOwned<BE> = GGLWEToGGSWKeyPrepared::alloc_from_infos(module, &tsk);
             tsk_prepared.prepare(module, &tsk, scratch.borrow());
 
             ggsw_out.keyswitch(
@@ -259,9 +259,9 @@ where
                 rank_out: rank.into(),
             };
 
-            let mut ggsw_out: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_out_infos);
-            let mut tsk: GGLWEToGGSWKey<Vec<u8>> = GGLWEToGGSWKey::alloc_from_infos(&tsk_infos);
-            let mut ksk: GLWESwitchingKey<Vec<u8>> = GLWESwitchingKey::alloc_from_infos(&ksk_apply_infos);
+            let mut ggsw_out: GGSWOwned = GGSW::alloc_from_infos(&ggsw_out_infos);
+            let mut tsk: GGLWEToGGSWKeyOwned = GGLWEToGGSWKey::alloc_from_infos(&tsk_infos);
+            let mut ksk: GLWESwitchingKeyOwned = GLWESwitchingKey::alloc_from_infos(&ksk_apply_infos);
             let mut pt_scalar: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
 
             let mut source_xs: Source = Source::new([0u8; 32]);
@@ -283,16 +283,16 @@ where
 
             let var_xs: f64 = 0.5;
 
-            let mut sk_in: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank.into());
+            let mut sk_in: GLWESecretOwned = GLWESecret::alloc(n.into(), rank.into());
             sk_in.fill_ternary_prob(var_xs, &mut source_xs);
 
-            let mut sk_in_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc(module, rank.into());
+            let mut sk_in_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(module, rank.into());
             sk_in_prepared.prepare(module, &sk_in);
 
-            let mut sk_out: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank.into());
+            let mut sk_out: GLWESecretOwned = GLWESecret::alloc(n.into(), rank.into());
             sk_out.fill_ternary_prob(var_xs, &mut source_xs);
 
-            let mut sk_out_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc(module, rank.into());
+            let mut sk_out_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(module, rank.into());
             sk_out_prepared.prepare(module, &sk_out);
 
             ksk.encrypt_sk(
@@ -322,11 +322,10 @@ where
                 scratch.borrow(),
             );
 
-            let mut ksk_prepared: GLWESwitchingKeyPrepared<Vec<u8>, BE> =
-                GLWESwitchingKeyPrepared::alloc_from_infos(module, &ksk);
+            let mut ksk_prepared: GLWESwitchingKeyPreparedOwned<BE> = GLWESwitchingKeyPrepared::alloc_from_infos(module, &ksk);
             ksk_prepared.prepare(module, &ksk, scratch.borrow());
 
-            let mut tsk_prepared: GGLWEToGGSWKeyPrepared<Vec<u8>, BE> = GGLWEToGGSWKeyPrepared::alloc_from_infos(module, &tsk);
+            let mut tsk_prepared: GGLWEToGGSWKeyPreparedOwned<BE> = GGLWEToGGSWKeyPrepared::alloc_from_infos(module, &tsk);
             tsk_prepared.prepare(module, &tsk, scratch.borrow());
 
             ggsw_out.keyswitch_inplace(module, &ksk_prepared, &tsk_prepared, scratch.borrow());

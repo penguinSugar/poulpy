@@ -3,9 +3,9 @@ use std::collections::HashMap;
 use poulpy_hal::layouts::{Backend, Data, DataMut, DataRef, Module, Scratch};
 
 use crate::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGLWEInfos, GGLWELayout, GGLWEPrepared, GGLWEPreparedFactory, GGLWEPreparedToMut,
-    GGLWEPreparedToRef, GGLWEToRef, GLWEAutomorphismKeyHelper, GLWEInfos, GetGaloisElement, LWEInfos, Rank, SetGaloisElement,
-    TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGLWEInfos, GGLWELayout, GGLWEPrepared, GGLWEPreparedFactory, GGLWEPreparedMut,
+    GGLWEPreparedRef, GGLWEPreparedToMut, GGLWEPreparedToRef, GGLWEToRef, GLWEAutomorphismKeyHelper, GLWEInfos, GetGaloisElement,
+    LWEInfos, Rank, SetGaloisElement, TorusPrecision,
 };
 
 impl<K, BE: Backend> GLWEAutomorphismKeyHelper<K, BE> for HashMap<i64, K>
@@ -94,14 +94,14 @@ where
         rank: Rank,
         dnum: Dnum,
         dsize: Dsize,
-    ) -> GLWEAutomorphismKeyPrepared<Vec<u8>, B> {
+    ) -> GLWEAutomorphismKeyPreparedOwned<B> {
         GLWEAutomorphismKeyPrepared::<Vec<u8>, B> {
             key: self.alloc_gglwe_prepared(base2k, k, rank, rank, dnum, dsize),
             p: 0,
         }
     }
 
-    fn alloc_glwe_automorphism_key_prepared_from_infos<A>(&self, infos: &A) -> GLWEAutomorphismKeyPrepared<Vec<u8>, B>
+    fn alloc_glwe_automorphism_key_prepared_from_infos<A>(&self, infos: &A) -> GLWEAutomorphismKeyPreparedOwned<B>
     where
         A: GGLWEInfos,
     {
@@ -219,13 +219,15 @@ impl<D: DataMut, B: Backend> GLWEAutomorphismKeyPrepared<D, B> {
 }
 
 impl<D: DataMut, B: Backend> GGLWEPreparedToMut<B> for GLWEAutomorphismKeyPrepared<D, B> {
-    fn to_mut(&mut self) -> GGLWEPrepared<&mut [u8], B> {
+    fn to_mut(&mut self) -> GGLWEPreparedMut<'_, B> {
         self.key.to_mut()
     }
 }
 
 impl<D: DataRef, BE: Backend> GGLWEPreparedToRef<BE> for GLWEAutomorphismKeyPrepared<D, BE> {
-    fn to_ref(&self) -> GGLWEPrepared<&[u8], BE> {
+    fn to_ref(&self) -> GGLWEPreparedRef<'_, BE> {
         self.key.to_ref()
     }
 }
+
+pub type GLWEAutomorphismKeyPreparedOwned<B> = GLWEAutomorphismKeyPrepared<Vec<u8>, B>;

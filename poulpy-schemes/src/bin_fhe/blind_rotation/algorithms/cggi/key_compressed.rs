@@ -2,7 +2,10 @@ use std::marker::PhantomData;
 
 use poulpy_core::{
     Distribution, GGSWCompressedEncryptSk, GetDistribution, ScratchTakeCore,
-    layouts::{GGSWCompressed, GGSWInfos, GLWEInfos, GLWESecretPreparedToRef, LWEInfos, LWESecret, LWESecretToRef},
+    layouts::{
+        GGSWCompressed, GGSWCompressedOwned, GGSWInfos, GLWEInfos, GLWESecretPreparedToRef, LWEInfos, LWESecretRef,
+        LWESecretToRef,
+    },
 };
 use poulpy_hal::{
     layouts::{
@@ -12,16 +15,16 @@ use poulpy_hal::{
 };
 
 use crate::bin_fhe::blind_rotation::{
-    BlindRotationKeyCompressed, BlindRotationKeyCompressedEncryptSk, BlindRotationKeyCompressedFactory, BlindRotationKeyInfos,
-    CGGI,
+    BlindRotationKeyCompressed, BlindRotationKeyCompressedEncryptSk, BlindRotationKeyCompressedFactory,
+    BlindRotationKeyCompressedOwned, BlindRotationKeyInfos, CGGI,
 };
 
 impl<D: DataRef> BlindRotationKeyCompressedFactory<CGGI> for BlindRotationKeyCompressed<D, CGGI> {
-    fn blind_rotation_key_compressed_alloc<A>(infos: &A) -> BlindRotationKeyCompressed<Vec<u8>, CGGI>
+    fn blind_rotation_key_compressed_alloc<A>(infos: &A) -> BlindRotationKeyCompressedOwned<CGGI>
     where
         A: BlindRotationKeyInfos,
     {
-        let mut data: Vec<GGSWCompressed<Vec<u8>>> = Vec::with_capacity(infos.n_lwe().into());
+        let mut data: Vec<GGSWCompressedOwned> = Vec::with_capacity(infos.n_lwe().into());
         (0..infos.n_lwe().as_usize()).for_each(|_| data.push(GGSWCompressed::alloc_from_infos(infos)));
         BlindRotationKeyCompressed {
             keys: data,
@@ -68,7 +71,7 @@ where
         }
 
         {
-            let sk_lwe: &LWESecret<&[u8]> = &sk_lwe.to_ref();
+            let sk_lwe: &LWESecretRef<'_> = &sk_lwe.to_ref();
 
             let mut source_xa: Source = Source::new(seed_xa);
 

@@ -4,7 +4,8 @@ use poulpy_hal::{
 };
 
 use crate::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGLWE, GGLWEInfos, GGLWEToMut, GGLWEToRef, GLWE, GLWEInfos, LWEInfos, Rank, TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGLWE, GGLWEInfos, GGLWEMut, GGLWERef, GGLWEToMut, GGLWEToRef, GLWEInfos, GLWEMut, GLWERef,
+    LWEInfos, Rank, TorusPrecision,
 };
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 
@@ -215,25 +216,25 @@ impl GLWESwitchingKey<Vec<u8>> {
 }
 
 impl<D: DataMut> GGLWEToMut for GLWESwitchingKey<D> {
-    fn to_mut(&mut self) -> GGLWE<&mut [u8]> {
+    fn to_mut(&mut self) -> GGLWEMut<'_> {
         self.key.to_mut()
     }
 }
 
 impl<D: DataRef> GGLWEToRef for GLWESwitchingKey<D> {
-    fn to_ref(&self) -> GGLWE<&[u8]> {
+    fn to_ref(&self) -> GGLWERef<'_> {
         self.key.to_ref()
     }
 }
 
 impl<D: DataRef> GLWESwitchingKey<D> {
-    pub fn at(&self, row: usize, col: usize) -> GLWE<&[u8]> {
+    pub fn at(&self, row: usize, col: usize) -> GLWERef<'_> {
         self.key.at(row, col)
     }
 }
 
 impl<D: DataMut> GLWESwitchingKey<D> {
-    pub fn at_mut(&mut self, row: usize, col: usize) -> GLWE<&mut [u8]> {
+    pub fn at_mut(&mut self, row: usize, col: usize) -> GLWEMut<'_> {
         self.key.at_mut(row, col)
     }
 }
@@ -253,3 +254,5 @@ impl<D: DataRef> WriterTo for GLWESwitchingKey<D> {
         self.key.write_to(writer)
     }
 }
+
+pub type GLWESwitchingKeyOwned = GLWESwitchingKey<Vec<u8>>;

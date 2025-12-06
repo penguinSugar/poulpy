@@ -1,6 +1,6 @@
 use poulpy_core::{
     GLWECopy, GLWERotate, ScratchTakeCore,
-    layouts::{GGSW, GGSWInfos, GGSWToMut, GGSWToRef, GLWE, GLWEInfos, GLWEToMut, GLWEToRef, LWEInfos},
+    layouts::{GGSWInfos, GGSWMut, GGSWRef, GGSWToMut, GGSWToRef, GLWE, GLWEInfos, GLWEMut, GLWEToMut, GLWEToRef, LWEInfos},
 };
 use poulpy_hal::{
     api::{VecZnxAddScalarInplace, VecZnxNormalizeInplace},
@@ -44,7 +44,7 @@ where
         K: GetGGSWBit<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GGSWMut<'_> = &mut res.to_mut();
 
         for col in 0..(res.rank() + 1).into() {
             for row in 0..res.dnum().into() {
@@ -79,8 +79,8 @@ where
         K: GetGGSWBit<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
-        let a: &GGSW<&[u8]> = &a.to_ref();
+        let res: &mut GGSWMut<'_> = &mut res.to_mut();
+        let a: &GGSWRef<'_> = &a.to_ref();
 
         assert!(res.dnum() <= a.dnum());
         assert_eq!(res.dsize(), a.dsize());
@@ -126,7 +126,7 @@ where
         K: GetGGSWBit<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GGSWMut<'_> = &mut res.to_mut();
         let test_vector: &ScalarZnxRef<'_> = &test_vector.to_ref();
 
         let base2k: usize = res.base2k().into();
@@ -195,7 +195,7 @@ where
         K: GetGGSWBit<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let mut res: GLWE<&mut [u8]> = res.to_mut();
+        let mut res: GLWEMut<'_> = res.to_mut();
 
         let (mut tmp_res, scratch_1) = scratch.take_glwe(&res);
 

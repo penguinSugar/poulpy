@@ -156,12 +156,16 @@ impl LWE<Vec<u8>> {
     }
 }
 
+pub type LWEOwned = LWE<Vec<u8>>;
+pub type LWERef<'a> = LWE<&'a [u8]>;
+pub type LWEMut<'a> = LWE<&'a mut [u8]>;
+
 pub trait LWEToRef {
-    fn to_ref(&self) -> LWE<&[u8]>;
+    fn to_ref(&self) -> LWERef<'_>;
 }
 
 impl<D: DataRef> LWEToRef for LWE<D> {
-    fn to_ref(&self) -> LWE<&[u8]> {
+    fn to_ref(&self) -> LWERef<'_> {
         LWE {
             k: self.k,
             base2k: self.base2k,
@@ -172,11 +176,11 @@ impl<D: DataRef> LWEToRef for LWE<D> {
 
 pub trait LWEToMut {
     #[allow(dead_code)]
-    fn to_mut(&mut self) -> LWE<&mut [u8]>;
+    fn to_mut(&mut self) -> LWEMut<'_>;
 }
 
 impl<D: DataMut> LWEToMut for LWE<D> {
-    fn to_mut(&mut self) -> LWE<&mut [u8]> {
+    fn to_mut(&mut self) -> LWEMut<'_> {
         LWE {
             k: self.k,
             base2k: self.base2k,

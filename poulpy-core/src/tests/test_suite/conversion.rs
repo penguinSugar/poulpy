@@ -9,9 +9,11 @@ use crate::{
     GLWEDecrypt, GLWEEncryptSk, GLWEFromLWE, GLWENoise, GLWENormalize, GLWEToLWESwitchingKeyEncryptSk, LWEDecrypt, LWEEncryptSk,
     LWEFromGLWE, LWEToGLWESwitchingKeyEncryptSk, SIGMA, ScratchTakeCore,
     layouts::{
-        Base2K, Degree, Dnum, GLWE, GLWELayout, GLWEPlaintext, GLWESecret, GLWESecretPreparedFactory, GLWEToLWEKey,
-        GLWEToLWEKeyLayout, GLWEToLWEKeyPrepared, GLWEToLWEKeyPreparedFactory, LWE, LWEInfos, LWELayout, LWEPlaintext, LWESecret,
-        LWEToGLWEKey, LWEToGLWEKeyLayout, LWEToGLWEKeyPrepared, LWEToGLWEKeyPreparedFactory, Rank, TorusPrecision,
+        Base2K, Degree, Dnum, GLWE, GLWELayout, GLWEOwned, GLWEPlaintext, GLWEPlaintextOwned, GLWESecret, GLWESecretOwned,
+        GLWESecretPreparedFactory, GLWESecretPreparedOwned, GLWEToLWEKey, GLWEToLWEKeyLayout, GLWEToLWEKeyOwned,
+        GLWEToLWEKeyPrepared, GLWEToLWEKeyPreparedFactory, GLWEToLWEKeyPreparedOwned, LWE, LWEInfos, LWELayout, LWEOwned,
+        LWEPlaintext, LWEPlaintextOwned, LWESecret, LWESecretOwned, LWEToGLWEKey, LWEToGLWEKeyLayout, LWEToGLWEKeyOwned,
+        LWEToGLWEKeyPrepared, LWEToGLWEKeyPreparedFactory, LWEToGLWEKeyPreparedOwned, Rank, TorusPrecision,
         prepared::GLWESecretPrepared,
     },
 };
@@ -49,21 +51,21 @@ where
                 rank: Rank(rank as u32),
             };
 
-            let mut sk: GLWESecret<Vec<u8>> = GLWESecret::alloc(module.n().into(), rank.into());
+            let mut sk: GLWESecretOwned = GLWESecret::alloc(module.n().into(), rank.into());
             sk.fill_ternary_prob(0.5, &mut source_xs);
 
-            let mut sk_prep: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc_from_infos(module, &sk);
+            let mut sk_prep: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc_from_infos(module, &sk);
             sk_prep.prepare(module, &sk);
 
             let mut scratch: ScratchOwned<BE> = ScratchOwned::alloc(
                 GLWE::encrypt_sk_tmp_bytes(module, &glwe_infos_in).max(module.glwe_noise_tmp_bytes(&glwe_infos_out)),
             );
 
-            let mut ct_in: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_infos_in);
-            let mut ct_out: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_infos_out);
+            let mut ct_in: GLWEOwned = GLWE::alloc_from_infos(&glwe_infos_in);
+            let mut ct_out: GLWEOwned = GLWE::alloc_from_infos(&glwe_infos_out);
 
-            let pt_in: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&glwe_infos_in);
-            let pt_out: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&glwe_infos_out);
+            let pt_in: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&glwe_infos_in);
+            let pt_out: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&glwe_infos_out);
 
             ct_in.encrypt_sk(
                 module,
@@ -147,21 +149,21 @@ where
             | GLWE::decrypt_tmp_bytes(module, &glwe_infos),
     );
 
-    let mut sk_glwe: GLWESecret<Vec<u8>> = GLWESecret::alloc_from_infos(&glwe_infos);
+    let mut sk_glwe: GLWESecretOwned = GLWESecret::alloc_from_infos(&glwe_infos);
     sk_glwe.fill_ternary_prob(0.5, &mut source_xs);
 
-    let mut sk_glwe_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc_from_infos(module, &sk_glwe);
+    let mut sk_glwe_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc_from_infos(module, &sk_glwe);
     sk_glwe_prepared.prepare(module, &sk_glwe);
 
-    let mut sk_lwe: LWESecret<Vec<u8>> = LWESecret::alloc(n_lwe);
+    let mut sk_lwe: LWESecretOwned = LWESecret::alloc(n_lwe);
     sk_lwe.fill_ternary_prob(0.5, &mut source_xs);
 
     let data: i64 = 17;
 
-    let mut lwe_pt: LWEPlaintext<Vec<u8>> = LWEPlaintext::alloc_from_infos(&lwe_infos);
+    let mut lwe_pt: LWEPlaintextOwned = LWEPlaintext::alloc_from_infos(&lwe_infos);
     lwe_pt.encode_i64(data, k_lwe_pt);
 
-    let mut lwe_ct: LWE<Vec<u8>> = LWE::alloc_from_infos(&lwe_infos);
+    let mut lwe_ct: LWEOwned = LWE::alloc_from_infos(&lwe_infos);
     lwe_ct.encrypt_sk(
         module,
         &lwe_pt,
@@ -171,7 +173,7 @@ where
         scratch.borrow(),
     );
 
-    let mut ksk: LWEToGLWEKey<Vec<u8>> = LWEToGLWEKey::alloc_from_infos(&lwe_to_glwe_infos);
+    let mut ksk: LWEToGLWEKeyOwned = LWEToGLWEKey::alloc_from_infos(&lwe_to_glwe_infos);
 
     ksk.encrypt_sk(
         module,
@@ -182,14 +184,14 @@ where
         scratch.borrow(),
     );
 
-    let mut glwe_ct: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_infos);
+    let mut glwe_ct: GLWEOwned = GLWE::alloc_from_infos(&glwe_infos);
 
-    let mut ksk_prepared: LWEToGLWEKeyPrepared<Vec<u8>, BE> = LWEToGLWEKeyPrepared::alloc_from_infos(module, &ksk);
+    let mut ksk_prepared: LWEToGLWEKeyPreparedOwned<BE> = LWEToGLWEKeyPrepared::alloc_from_infos(module, &ksk);
     ksk_prepared.prepare(module, &ksk, scratch.borrow());
 
     glwe_ct.from_lwe(module, &lwe_ct, &ksk_prepared, scratch.borrow());
 
-    let mut glwe_pt: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&glwe_infos);
+    let mut glwe_pt: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&glwe_infos);
     glwe_ct.decrypt(module, &mut glwe_pt, &sk_glwe_prepared, scratch.borrow());
 
     let mut lwe_pt_conv = LWEPlaintext::alloc(glwe_pt.base2k(), lwe_pt.k());
@@ -259,23 +261,23 @@ where
             | GLWE::decrypt_tmp_bytes(module, &glwe_infos),
     );
 
-    let mut sk_glwe: GLWESecret<Vec<u8>> = GLWESecret::alloc_from_infos(&glwe_infos);
+    let mut sk_glwe: GLWESecretOwned = GLWESecret::alloc_from_infos(&glwe_infos);
     sk_glwe.fill_ternary_prob(0.5, &mut source_xs);
 
-    let mut sk_glwe_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc_from_infos(module, &sk_glwe);
+    let mut sk_glwe_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc_from_infos(module, &sk_glwe);
     sk_glwe_prepared.prepare(module, &sk_glwe);
 
-    let mut sk_lwe: LWESecret<Vec<u8>> = LWESecret::alloc(n_lwe);
+    let mut sk_lwe: LWESecretOwned = LWESecret::alloc(n_lwe);
     sk_lwe.fill_ternary_prob(0.5, &mut source_xs);
 
     let a_idx: usize = 1;
 
     let mut data: Vec<i64> = vec![0i64; module.n()];
     data[a_idx] = 17;
-    let mut glwe_pt: GLWEPlaintext<Vec<u8>> = GLWEPlaintext::alloc_from_infos(&glwe_infos);
+    let mut glwe_pt: GLWEPlaintextOwned = GLWEPlaintext::alloc_from_infos(&glwe_infos);
     glwe_pt.encode_vec_i64(&data, k_lwe_pt);
 
-    let mut glwe_ct: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_infos);
+    let mut glwe_ct: GLWEOwned = GLWE::alloc_from_infos(&glwe_infos);
     glwe_ct.encrypt_sk(
         module,
         &glwe_pt,
@@ -285,7 +287,7 @@ where
         scratch.borrow(),
     );
 
-    let mut ksk: GLWEToLWEKey<Vec<u8>> = GLWEToLWEKey::alloc_from_infos(&glwe_to_lwe_infos);
+    let mut ksk: GLWEToLWEKeyOwned = GLWEToLWEKey::alloc_from_infos(&glwe_to_lwe_infos);
 
     ksk.encrypt_sk(
         module,
@@ -296,14 +298,14 @@ where
         scratch.borrow(),
     );
 
-    let mut lwe_ct: LWE<Vec<u8>> = LWE::alloc_from_infos(&lwe_infos);
+    let mut lwe_ct: LWEOwned = LWE::alloc_from_infos(&lwe_infos);
 
-    let mut ksk_prepared: GLWEToLWEKeyPrepared<Vec<u8>, BE> = GLWEToLWEKeyPrepared::alloc_from_infos(module, &ksk);
+    let mut ksk_prepared: GLWEToLWEKeyPreparedOwned<BE> = GLWEToLWEKeyPrepared::alloc_from_infos(module, &ksk);
     ksk_prepared.prepare(module, &ksk, scratch.borrow());
 
     lwe_ct.from_glwe(module, &glwe_ct, a_idx, &ksk_prepared, scratch.borrow());
 
-    let mut lwe_pt: LWEPlaintext<Vec<u8>> = LWEPlaintext::alloc_from_infos(&lwe_infos);
+    let mut lwe_pt: LWEPlaintextOwned = LWEPlaintext::alloc_from_infos(&lwe_infos);
     lwe_ct.decrypt(module, &mut lwe_pt, &sk_lwe, scratch.borrow());
 
     let mut glwe_pt_conv = GLWEPlaintext::alloc(glwe_ct.n(), lwe_pt.base2k(), lwe_pt.k());

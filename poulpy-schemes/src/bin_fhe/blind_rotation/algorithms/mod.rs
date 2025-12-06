@@ -5,7 +5,7 @@ pub use cggi::*;
 use itertools::izip;
 use poulpy_core::{
     ScratchTakeCore,
-    layouts::{GGSWInfos, GLWE, GLWEInfos, LWE, LWEInfos},
+    layouts::{GGSWInfos, GLWE, GLWEInfos, LWE, LWEInfos, LWERef},
 };
 use poulpy_hal::layouts::{Backend, DataMut, DataRef, Scratch, ZnxView};
 
@@ -75,7 +75,7 @@ impl<BE: Backend, BRA: BlindRotationAlgo> BlindRotationKeyPrepared<Vec<u8>, BRA,
     }
 }
 
-pub fn mod_switch_2n(n: usize, res: &mut [i64], lwe: &LWE<&[u8]>, rot_dir: LookUpTableRotationDirection) {
+pub fn mod_switch_2n(n: usize, res: &mut [i64], lwe: &LWERef<'_>, rot_dir: LookUpTableRotationDirection) {
     let base2k: usize = lwe.base2k().into();
 
     let log2n: usize = usize::BITS as usize - (n - 1).leading_zeros() as usize + 1;

@@ -8,7 +8,8 @@ use crate::{
     GGLWECompressedEncryptSk, ScratchTakeCore,
     layouts::{
         GGLWECompressedSeedMut, GGLWECompressedToMut, GGLWEInfos, GLWEInfos, GLWESecret, GLWESecretPrepared,
-        GLWESecretPreparedFactory, GLWESecretToRef, LWEInfos, SetGaloisElement, compressed::GLWEAutomorphismKeyCompressed,
+        GLWESecretPreparedFactory, GLWESecretRef, GLWESecretToRef, LWEInfos, SetGaloisElement,
+        compressed::GLWEAutomorphismKeyCompressed,
     },
 };
 
@@ -85,7 +86,7 @@ where
         R: GGLWECompressedToMut + GGLWECompressedSeedMut + SetGaloisElement + GGLWEInfos,
         S: GLWESecretToRef + GLWEInfos,
     {
-        let sk: &GLWESecret<&[u8]> = &sk.to_ref();
+        let sk: &GLWESecretRef<'_> = &sk.to_ref();
         assert_eq!(res.n(), sk.n());
         assert_eq!(res.rank_out(), res.rank_in());
         assert_eq!(sk.rank(), res.rank_out());

@@ -1,8 +1,8 @@
 use poulpy_hal::layouts::{Backend, Data, DataMut, DataRef, Module, Scratch};
 
 use crate::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGLWEInfos, GGLWEPrepared, GGLWEPreparedToMut, GGLWEPreparedToRef, GGLWEToRef, GLWEInfos,
-    GLWESwitchingKeyDegrees, GLWESwitchingKeyDegreesMut, LWEInfos, Rank, TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGLWEInfos, GGLWEPreparedMut, GGLWEPreparedRef, GGLWEPreparedToMut, GGLWEPreparedToRef,
+    GGLWEToRef, GLWEInfos, GLWESwitchingKeyDegrees, GLWESwitchingKeyDegreesMut, LWEInfos, Rank, TorusPrecision,
     prepared::{GLWESwitchingKeyPrepared, GLWESwitchingKeyPreparedFactory},
 };
 
@@ -62,10 +62,10 @@ where
         k: TorusPrecision,
         rank_out: Rank,
         dnum: Dnum,
-    ) -> LWEToGLWEKeyPrepared<Vec<u8>, B> {
+    ) -> LWEToGLWEKeyPreparedOwned<B> {
         LWEToGLWEKeyPrepared(self.alloc_glwe_switching_key_prepared(base2k, k, Rank(1), rank_out, dnum, Dsize(1)))
     }
-    fn alloc_lwe_to_glwe_key_prepared_from_infos<A>(&self, infos: &A) -> LWEToGLWEKeyPrepared<Vec<u8>, B>
+    fn alloc_lwe_to_glwe_key_prepared_from_infos<A>(&self, infos: &A) -> LWEToGLWEKeyPreparedOwned<B>
     where
         A: GGLWEInfos,
     {
@@ -177,7 +177,7 @@ impl<D: DataRef, B: Backend> GGLWEPreparedToRef<B> for LWEToGLWEKeyPrepared<D, B
 where
     GLWESwitchingKeyPrepared<D, B>: GGLWEPreparedToRef<B>,
 {
-    fn to_ref(&self) -> GGLWEPrepared<&[u8], B> {
+    fn to_ref(&self) -> GGLWEPreparedRef<'_, B> {
         self.0.to_ref()
     }
 }
@@ -186,10 +186,12 @@ impl<D: DataMut, B: Backend> GGLWEPreparedToMut<B> for LWEToGLWEKeyPrepared<D, B
 where
     GLWESwitchingKeyPrepared<D, B>: GGLWEPreparedToMut<B>,
 {
-    fn to_mut(&mut self) -> GGLWEPrepared<&mut [u8], B> {
+    fn to_mut(&mut self) -> GGLWEPreparedMut<'_, B> {
         self.0.to_mut()
     }
 }
+
+pub type LWEToGLWEKeyPreparedOwned<B> = LWEToGLWEKeyPrepared<Vec<u8>, B>;
 
 impl<D: DataMut, B: Backend> GLWESwitchingKeyDegreesMut for LWEToGLWEKeyPrepared<D, B> {
     fn input_degree(&mut self) -> &mut Degree {

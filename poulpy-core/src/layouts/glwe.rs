@@ -111,7 +111,7 @@ impl<D: Data> GLWEInfos for GLWE<D> {
 }
 
 impl<D: DataRef> ToOwnedDeep for GLWE<D> {
-    type Owned = GLWE<Vec<u8>>;
+    type Owned = GLWEOwned;
     fn to_owned_deep(&self) -> Self::Owned {
         GLWE {
             data: self.data.to_owned_deep(),
@@ -189,12 +189,16 @@ impl<D: DataRef> WriterTo for GLWE<D> {
     }
 }
 
+pub type GLWEOwned = GLWE<Vec<u8>>;
+pub type GLWERef<'a> = GLWE<&'a [u8]>;
+pub type GLWEMut<'a> = GLWE<&'a mut [u8]>;
+
 pub trait GLWEToRef: Sized {
-    fn to_ref(&self) -> GLWE<&[u8]>;
+    fn to_ref(&self) -> GLWERef<'_>;
 }
 
 impl<D: DataRef> GLWEToRef for GLWE<D> {
-    fn to_ref(&self) -> GLWE<&[u8]> {
+    fn to_ref(&self) -> GLWERef<'_> {
         GLWE {
             k: self.k,
             base2k: self.base2k,
@@ -204,11 +208,11 @@ impl<D: DataRef> GLWEToRef for GLWE<D> {
 }
 
 pub trait GLWEToMut: GLWEToRef {
-    fn to_mut(&mut self) -> GLWE<&mut [u8]>;
+    fn to_mut(&mut self) -> GLWEMut<'_>;
 }
 
 impl<D: DataMut> GLWEToMut for GLWE<D> {
-    fn to_mut(&mut self) -> GLWE<&mut [u8]> {
+    fn to_mut(&mut self) -> GLWEMut<'_> {
         GLWE {
             k: self.k,
             base2k: self.base2k,

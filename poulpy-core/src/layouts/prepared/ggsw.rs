@@ -4,7 +4,7 @@ use poulpy_hal::{
 };
 
 use crate::layouts::{
-    Base2K, Degree, Dnum, Dsize, GGSW, GGSWInfos, GGSWToRef, GLWEInfos, GetDegree, LWEInfos, Rank, TorusPrecision,
+    Base2K, Degree, Dnum, Dsize, GGSWInfos, GGSWRef, GGSWToRef, GLWEInfos, GetDegree, LWEInfos, Rank, TorusPrecision,
 };
 
 #[derive(PartialEq, Eq)]
@@ -60,7 +60,7 @@ where
         dnum: Dnum,
         dsize: Dsize,
         rank: Rank,
-    ) -> GGSWPrepared<Vec<u8>, B> {
+    ) -> GGSWPreparedOwned<B> {
         let size: usize = k.0.div_ceil(base2k.0) as usize;
         debug_assert!(
             size as u32 > dsize.0,
@@ -88,7 +88,7 @@ where
         }
     }
 
-    fn alloc_ggsw_prepared_from_infos<A>(&self, infos: &A) -> GGSWPrepared<Vec<u8>, B>
+    fn alloc_ggsw_prepared_from_infos<A>(&self, infos: &A) -> GGSWPreparedOwned<B>
     where
         A: GGSWInfos,
     {
@@ -151,8 +151,8 @@ where
         R: GGSWPreparedToMut<B>,
         O: GGSWToRef,
     {
-        let mut res: GGSWPrepared<&mut [u8], B> = res.to_mut();
-        let other: GGSW<&[u8]> = other.to_ref();
+        let mut res: GGSWPreparedMut<'_, B> = res.to_mut();
+        let other: GGSWRef<'_> = other.to_ref();
         assert_eq!(res.n(), self.ring_degree());
         assert_eq!(other.n(), self.ring_degree());
         assert_eq!(res.k, other.k);
@@ -232,12 +232,16 @@ impl<D: DataMut, B: Backend> GGSWPrepared<D, B> {
     }
 }
 
+pub type GGSWPreparedOwned<B> = GGSWPrepared<Vec<u8>, B>;
+pub type GGSWPreparedRef<'a, B> = GGSWPrepared<&'a [u8], B>;
+pub type GGSWPreparedMut<'a, B> = GGSWPrepared<&'a mut [u8], B>;
+
 pub trait GGSWPreparedToMut<B: Backend> {
-    fn to_mut(&mut self) -> GGSWPrepared<&mut [u8], B>;
+    fn to_mut(&mut self) -> GGSWPreparedMut<'_, B>;
 }
 
 impl<D: DataMut, B: Backend> GGSWPreparedToMut<B> for GGSWPrepared<D, B> {
-    fn to_mut(&mut self) -> GGSWPrepared<&mut [u8], B> {
+    fn to_mut(&mut self) -> GGSWPreparedMut<'_, B> {
         GGSWPrepared {
             base2k: self.base2k,
             k: self.k,
@@ -248,11 +252,11 @@ impl<D: DataMut, B: Backend> GGSWPreparedToMut<B> for GGSWPrepared<D, B> {
 }
 
 pub trait GGSWPreparedToRef<B: Backend> {
-    fn to_ref(&self) -> GGSWPrepared<&[u8], B>;
+    fn to_ref(&self) -> GGSWPreparedRef<'_, B>;
 }
 
 impl<D: DataRef, B: Backend> GGSWPreparedToRef<B> for GGSWPrepared<D, B> {
-    fn to_ref(&self) -> GGSWPrepared<&[u8], B> {
+    fn to_ref(&self) -> GGSWPreparedRef<'_, B> {
         GGSWPrepared {
             base2k: self.base2k,
             k: self.k,

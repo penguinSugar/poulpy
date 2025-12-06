@@ -144,11 +144,11 @@ impl<D: DataMut> GLWESecret<D> {
 }
 
 pub trait GLWESecretToMut {
-    fn to_mut(&mut self) -> GLWESecret<&mut [u8]>;
+    fn to_mut(&mut self) -> GLWESecretMut<'_>;
 }
 
 impl<D: DataMut> GLWESecretToMut for GLWESecret<D> {
-    fn to_mut(&mut self) -> GLWESecret<&mut [u8]> {
+    fn to_mut(&mut self) -> GLWESecretMut<'_> {
         GLWESecret {
             dist: self.dist,
             data: self.data.to_mut(),
@@ -156,12 +156,16 @@ impl<D: DataMut> GLWESecretToMut for GLWESecret<D> {
     }
 }
 
+pub type GLWESecretOwned = GLWESecret<Vec<u8>>;
+pub type GLWESecretRef<'a> = GLWESecret<&'a [u8]>;
+pub type GLWESecretMut<'a> = GLWESecret<&'a mut [u8]>;
+
 pub trait GLWESecretToRef {
-    fn to_ref(&self) -> GLWESecret<&[u8]>;
+    fn to_ref(&self) -> GLWESecretRef<'_>;
 }
 
 impl<D: DataRef> GLWESecretToRef for GLWESecret<D> {
-    fn to_ref(&self) -> GLWESecret<&[u8]> {
+    fn to_ref(&self) -> GLWESecretRef<'_> {
         GLWESecret {
             data: self.data.to_ref(),
             dist: self.dist,

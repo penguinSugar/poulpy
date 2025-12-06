@@ -7,7 +7,8 @@ use poulpy_hal::{
 use crate::{
     LWEDecrypt, LWEEncryptSk, LWEKeySwitch, LWESwitchingKeyEncrypt, ScratchTakeCore,
     layouts::{
-        LWE, LWELayout, LWEPlaintext, LWESecret, LWESwitchingKey, LWESwitchingKeyLayout, LWESwitchingKeyPreparedFactory,
+        LWE, LWELayout, LWEOwned, LWEPlaintext, LWEPlaintextOwned, LWESecret, LWESecretOwned, LWESwitchingKey,
+        LWESwitchingKeyLayout, LWESwitchingKeyOwned, LWESwitchingKeyPreparedFactory, LWESwitchingKeyPreparedOwned,
         prepared::LWESwitchingKeyPrepared,
     },
 };
@@ -64,18 +65,18 @@ where
             | LWE::keyswitch_tmp_bytes(module, &lwe_out_infos, &lwe_in_infos, &key_apply_infos),
     );
 
-    let mut sk_lwe_in: LWESecret<Vec<u8>> = LWESecret::alloc(n_lwe_in.into());
+    let mut sk_lwe_in: LWESecretOwned = LWESecret::alloc(n_lwe_in.into());
     sk_lwe_in.fill_ternary_prob(0.5, &mut source_xs);
 
-    let mut sk_lwe_out: LWESecret<Vec<u8>> = LWESecret::alloc(n_lwe_out.into());
+    let mut sk_lwe_out: LWESecretOwned = LWESecret::alloc(n_lwe_out.into());
     sk_lwe_out.fill_ternary_prob(0.5, &mut source_xs);
 
     let data: i64 = 17;
 
-    let mut lwe_pt_in: LWEPlaintext<Vec<u8>> = LWEPlaintext::alloc(base2k_in.into(), k_lwe_pt.into());
+    let mut lwe_pt_in: LWEPlaintextOwned = LWEPlaintext::alloc(base2k_in.into(), k_lwe_pt.into());
     lwe_pt_in.encode_i64(data, k_lwe_pt.into());
 
-    let mut lwe_ct_in: LWE<Vec<u8>> = LWE::alloc_from_infos(&lwe_in_infos);
+    let mut lwe_ct_in: LWEOwned = LWE::alloc_from_infos(&lwe_in_infos);
     lwe_ct_in.encrypt_sk(
         module,
         &lwe_pt_in,
@@ -85,7 +86,7 @@ where
         scratch.borrow(),
     );
 
-    let mut ksk: LWESwitchingKey<Vec<u8>> = LWESwitchingKey::alloc_from_infos(&key_apply_infos);
+    let mut ksk: LWESwitchingKeyOwned = LWESwitchingKey::alloc_from_infos(&key_apply_infos);
 
     ksk.encrypt_sk(
         module,
@@ -96,17 +97,17 @@ where
         scratch.borrow(),
     );
 
-    let mut lwe_ct_out: LWE<Vec<u8>> = LWE::alloc_from_infos(&lwe_out_infos);
+    let mut lwe_ct_out: LWEOwned = LWE::alloc_from_infos(&lwe_out_infos);
 
-    let mut ksk_prepared: LWESwitchingKeyPrepared<Vec<u8>, BE> = LWESwitchingKeyPrepared::alloc_from_infos(module, &ksk);
+    let mut ksk_prepared: LWESwitchingKeyPreparedOwned<BE> = LWESwitchingKeyPrepared::alloc_from_infos(module, &ksk);
     ksk_prepared.prepare(module, &ksk, scratch.borrow());
 
     lwe_ct_out.keyswitch(module, &lwe_ct_in, &ksk_prepared, scratch.borrow());
 
-    let mut lwe_pt_out: LWEPlaintext<Vec<u8>> = LWEPlaintext::alloc_from_infos(&lwe_out_infos);
+    let mut lwe_pt_out: LWEPlaintextOwned = LWEPlaintext::alloc_from_infos(&lwe_out_infos);
     lwe_ct_out.decrypt(module, &mut lwe_pt_out, &sk_lwe_out, scratch.borrow());
 
-    let mut lwe_pt_want: LWEPlaintext<Vec<u8>> = LWEPlaintext::alloc_from_infos(&lwe_out_infos);
+    let mut lwe_pt_want: LWEPlaintextOwned = LWEPlaintext::alloc_from_infos(&lwe_out_infos);
     module.vec_znx_normalize(
         base2k_out,
         lwe_pt_want.data_mut(),

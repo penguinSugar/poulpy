@@ -7,8 +7,8 @@ use crate::{
     GLWEAdd, GLWEAutomorphism, GLWECopy, GLWENormalize, GLWERotate, GLWEShift, GLWESub, ScratchTakeCore,
     glwe_trace::GLWETrace,
     layouts::{
-        GGLWEInfos, GGLWEPreparedToRef, GLWE, GLWEAutomorphismKeyHelper, GLWEInfos, GLWEToMut, GLWEToRef, GetGaloisElement,
-        LWEInfos,
+        GGLWEInfos, GGLWEPreparedToRef, GLWE, GLWEAutomorphismKeyHelper, GLWEInfos, GLWEOwned, GLWEToMut, GLWEToRef,
+        GetGaloisElement, LWEInfos,
     },
 };
 
@@ -25,7 +25,7 @@ pub struct GLWEPacker {
 /// [Accumulator] stores intermediate packing result.
 /// There are Log(N) such accumulators in a [GLWEPacker].
 struct Accumulator {
-    data: GLWE<Vec<u8>>,
+    data: GLWEOwned,
     value: bool,   // Implicit flag for zero ciphertext
     control: bool, // Can be combined with incoming value
 }
@@ -140,7 +140,7 @@ impl GLWEPacker {
     {
         assert!(self.counter as u32 == self.accumulators[0].data.n());
 
-        let out: &GLWE<Vec<u8>> = &self.accumulators[module.log_n() - self.log_batch - 1].data;
+        let out: &GLWEOwned = &self.accumulators[module.log_n() - self.log_batch - 1].data;
 
         if out.base2k() == res.base2k() {
             module.glwe_copy(res, out)
@@ -276,7 +276,7 @@ fn pack_core<A, K, H, M, BE: Backend>(
         } else {
             pack_core(
                 module,
-                None::<&GLWE<Vec<u8>>>,
+                None::<&GLWEOwned>,
                 acc_next,
                 i + 1,
                 auto_keys,
@@ -317,7 +317,7 @@ fn combine<B, K, H, M, BE: Backend>(
     Scratch<BE>: ScratchTakeCore<BE>,
 {
     let log_n: usize = acc.data.n().log2();
-    let a: &mut GLWE<Vec<u8>> = &mut acc.data;
+    let a: &mut GLWEOwned = &mut acc.data;
 
     let gal_el: i64 = if i == 0 {
         -1

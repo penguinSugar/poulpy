@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use poulpy_core::{
     GLWECopy, GLWEPacking, ScratchTakeCore,
-    layouts::{GGLWEInfos, GGLWEPreparedToRef, GGSWPrepared, GLWEAutomorphismKeyHelper, GetGaloisElement},
+    layouts::{GGLWEInfos, GGLWEPreparedToRef, GGSWPreparedRef, GLWEAutomorphismKeyHelper, GetGaloisElement},
 };
 use poulpy_hal::{
     api::ModuleLogN,
@@ -85,7 +85,7 @@ struct FheUintHelper<'a, T: UnsignedInteger, BE: Backend> {
 }
 
 impl<'a, T: UnsignedInteger, BE: Backend> GetGGSWBit<BE> for FheUintHelper<'a, T, BE> {
-    fn get_bit(&self, bit: usize) -> GGSWPrepared<&[u8], BE> {
+    fn get_bit(&self, bit: usize) -> GGSWPreparedRef<'_, BE> {
         let lo: usize = bit % T::BITS as usize;
         let hi: usize = bit / T::BITS as usize;
         self.data[hi].get_bit(lo)

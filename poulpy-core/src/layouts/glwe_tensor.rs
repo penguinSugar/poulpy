@@ -115,12 +115,15 @@ impl GLWETensor<Vec<u8>> {
     }
 }
 
+pub type GLWETensorRef<'a> = GLWETensor<&'a [u8]>;
+pub type GLWETensorMut<'a> = GLWETensor<&'a mut [u8]>;
+
 pub trait GLWETensorToRef {
-    fn to_ref(&self) -> GLWETensor<&[u8]>;
+    fn to_ref(&self) -> GLWETensorRef<'_>;
 }
 
 impl<D: DataRef> GLWETensorToRef for GLWETensor<D> {
-    fn to_ref(&self) -> GLWETensor<&[u8]> {
+    fn to_ref(&self) -> GLWETensorRef<'_> {
         GLWETensor {
             k: self.k,
             base2k: self.base2k,
@@ -131,11 +134,11 @@ impl<D: DataRef> GLWETensorToRef for GLWETensor<D> {
 }
 
 pub trait GLWETensorToMut {
-    fn to_mut(&mut self) -> GLWETensor<&mut [u8]>;
+    fn to_mut(&mut self) -> GLWETensorMut<'_>;
 }
 
 impl<D: DataMut> GLWETensorToMut for GLWETensor<D> {
-    fn to_mut(&mut self) -> GLWETensor<&mut [u8]> {
+    fn to_mut(&mut self) -> GLWETensorMut<'_> {
         GLWETensor {
             k: self.k,
             base2k: self.base2k,

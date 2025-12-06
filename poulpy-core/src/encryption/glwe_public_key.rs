@@ -6,10 +6,7 @@ use poulpy_hal::{
 
 use crate::{
     Distribution, GLWEEncryptSk, GetDistribution, GetDistributionMut, ScratchTakeCore,
-    layouts::{
-        GLWE, GLWEInfos, GLWEPublicKey, GLWEToMut,
-        prepared::{GLWESecretPrepared, GLWESecretPreparedToRef},
-    },
+    layouts::{GLWE, GLWEInfos, GLWEOwned, GLWEPublicKey, GLWESecretPreparedRef, GLWEToMut, prepared::GLWESecretPreparedToRef},
 };
 
 impl<D: DataMut> GLWEPublicKey<D> {
@@ -41,7 +38,7 @@ where
         S: GLWESecretPreparedToRef<BE> + GetDistribution,
     {
         {
-            let sk: &GLWESecretPrepared<&[u8], BE> = &sk.to_ref();
+            let sk: &GLWESecretPreparedRef<'_, BE> = &sk.to_ref();
 
             assert_eq!(res.n(), self.n() as u32);
             assert_eq!(sk.n(), self.n() as u32);
@@ -53,7 +50,7 @@ where
             // Its ok to allocate scratch space here since pk is usually generated only once.
             let mut scratch: ScratchOwned<BE> = ScratchOwned::alloc(self.glwe_encrypt_sk_tmp_bytes(res));
 
-            let mut tmp: GLWE<Vec<u8>> = GLWE::alloc_from_infos(res);
+            let mut tmp: GLWEOwned = GLWE::alloc_from_infos(res);
 
             tmp.encrypt_zero_sk(self, sk, source_xa, source_xe, scratch.borrow());
         }

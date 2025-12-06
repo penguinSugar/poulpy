@@ -8,8 +8,8 @@ use crate::{
     GGLWEKeyswitch, GGLWENoise, GLWESwitchingKeyEncryptSk, ScratchTakeCore,
     encryption::SIGMA,
     layouts::{
-        GGLWEInfos, GLWESecret, GLWESecretPreparedFactory, GLWESwitchingKey, GLWESwitchingKeyLayout,
-        GLWESwitchingKeyPreparedFactory,
+        GGLWEInfos, GLWESecret, GLWESecretOwned, GLWESecretPreparedFactory, GLWESecretPreparedOwned, GLWESwitchingKey,
+        GLWESwitchingKeyLayout, GLWESwitchingKeyOwned, GLWESwitchingKeyPreparedFactory, GLWESwitchingKeyPreparedOwned,
         prepared::{GLWESecretPrepared, GLWESwitchingKeyPrepared},
     },
     noise::log2_std_noise_gglwe_product,
@@ -74,9 +74,9 @@ where
                         rank_out: rank_out_s1s2.into(),
                     };
 
-                    let mut gglwe_s0s1: GLWESwitchingKey<Vec<u8>> = GLWESwitchingKey::alloc_from_infos(&gglwe_s0s1_infos);
-                    let mut gglwe_s1s2: GLWESwitchingKey<Vec<u8>> = GLWESwitchingKey::alloc_from_infos(&gglwe_s1s2_infos);
-                    let mut gglwe_s0s2: GLWESwitchingKey<Vec<u8>> = GLWESwitchingKey::alloc_from_infos(&gglwe_s0s2_infos);
+                    let mut gglwe_s0s1: GLWESwitchingKeyOwned = GLWESwitchingKey::alloc_from_infos(&gglwe_s0s1_infos);
+                    let mut gglwe_s1s2: GLWESwitchingKeyOwned = GLWESwitchingKey::alloc_from_infos(&gglwe_s1s2_infos);
+                    let mut gglwe_s0s2: GLWESwitchingKeyOwned = GLWESwitchingKey::alloc_from_infos(&gglwe_s0s2_infos);
 
                     let mut source_xs: Source = Source::new([0u8; 32]);
                     let mut source_xe: Source = Source::new([0u8; 32]);
@@ -94,17 +94,16 @@ where
                         &gglwe_s1s2_infos,
                     ));
 
-                    let mut sk0: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank_in_s0s1.into());
+                    let mut sk0: GLWESecretOwned = GLWESecret::alloc(n.into(), rank_in_s0s1.into());
                     sk0.fill_ternary_prob(0.5, &mut source_xs);
 
-                    let mut sk1: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank_out_s0s1.into());
+                    let mut sk1: GLWESecretOwned = GLWESecret::alloc(n.into(), rank_out_s0s1.into());
                     sk1.fill_ternary_prob(0.5, &mut source_xs);
 
-                    let mut sk2: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank_out_s1s2.into());
+                    let mut sk2: GLWESecretOwned = GLWESecret::alloc(n.into(), rank_out_s1s2.into());
                     sk2.fill_ternary_prob(0.5, &mut source_xs);
 
-                    let mut sk2_prepared: GLWESecretPrepared<Vec<u8>, BE> =
-                        GLWESecretPrepared::alloc(module, rank_out_s1s2.into());
+                    let mut sk2_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(module, rank_out_s1s2.into());
                     sk2_prepared.prepare(module, &sk2);
 
                     // gglwe_{s1}(s0) = s0 -> s1
@@ -127,7 +126,7 @@ where
                         scratch_enc.borrow(),
                     );
 
-                    let mut gglwe_s1s2_prepared: GLWESwitchingKeyPrepared<Vec<u8>, BE> =
+                    let mut gglwe_s1s2_prepared: GLWESwitchingKeyPreparedOwned<BE> =
                         GLWESwitchingKeyPrepared::alloc_from_infos(module, &gglwe_s1s2);
                     gglwe_s1s2_prepared.prepare(module, &gglwe_s1s2, scratch_apply.borrow());
 
@@ -227,8 +226,8 @@ where
                     rank_out: rank_out.into(),
                 };
 
-                let mut gglwe_s0s1: GLWESwitchingKey<Vec<u8>> = GLWESwitchingKey::alloc_from_infos(&gglwe_s0s1_infos);
-                let mut gglwe_s1s2: GLWESwitchingKey<Vec<u8>> = GLWESwitchingKey::alloc_from_infos(&gglwe_s1s2_infos);
+                let mut gglwe_s0s1: GLWESwitchingKeyOwned = GLWESwitchingKey::alloc_from_infos(&gglwe_s0s1_infos);
+                let mut gglwe_s1s2: GLWESwitchingKeyOwned = GLWESwitchingKey::alloc_from_infos(&gglwe_s1s2_infos);
 
                 let mut source_xs: Source = Source::new([0u8; 32]);
                 let mut source_xe: Source = Source::new([0u8; 32]);
@@ -247,16 +246,16 @@ where
 
                 let var_xs: f64 = 0.5;
 
-                let mut sk0: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank_in.into());
+                let mut sk0: GLWESecretOwned = GLWESecret::alloc(n.into(), rank_in.into());
                 sk0.fill_ternary_prob(var_xs, &mut source_xs);
 
-                let mut sk1: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank_out.into());
+                let mut sk1: GLWESecretOwned = GLWESecret::alloc(n.into(), rank_out.into());
                 sk1.fill_ternary_prob(var_xs, &mut source_xs);
 
-                let mut sk2: GLWESecret<Vec<u8>> = GLWESecret::alloc(n.into(), rank_out.into());
+                let mut sk2: GLWESecretOwned = GLWESecret::alloc(n.into(), rank_out.into());
                 sk2.fill_ternary_prob(var_xs, &mut source_xs);
 
-                let mut sk2_prepared: GLWESecretPrepared<Vec<u8>, BE> = GLWESecretPrepared::alloc(module, rank_out.into());
+                let mut sk2_prepared: GLWESecretPreparedOwned<BE> = GLWESecretPrepared::alloc(module, rank_out.into());
                 sk2_prepared.prepare(module, &sk2);
 
                 // gglwe_{s1}(s0) = s0 -> s1
@@ -279,14 +278,14 @@ where
                     scratch_enc.borrow(),
                 );
 
-                let mut gglwe_s1s2_prepared: GLWESwitchingKeyPrepared<Vec<u8>, BE> =
+                let mut gglwe_s1s2_prepared: GLWESwitchingKeyPreparedOwned<BE> =
                     GLWESwitchingKeyPrepared::alloc_from_infos(module, &gglwe_s1s2);
                 gglwe_s1s2_prepared.prepare(module, &gglwe_s1s2, scratch_apply.borrow());
 
                 // gglwe_{s1}(s0) (x) gglwe_{s2}(s1) = gglwe_{s2}(s0)
                 gglwe_s0s1.keyswitch_inplace(module, &gglwe_s1s2_prepared, scratch_apply.borrow());
 
-                let gglwe_s0s2: GLWESwitchingKey<Vec<u8>> = gglwe_s0s1;
+                let gglwe_s0s2: GLWESwitchingKeyOwned = gglwe_s0s1;
 
                 let max_noise: f64 = log2_std_noise_gglwe_product(
                     n as f64,

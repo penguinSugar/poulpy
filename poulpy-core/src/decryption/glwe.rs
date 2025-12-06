@@ -7,8 +7,8 @@ use poulpy_hal::{
 };
 
 use crate::layouts::{
-    GLWE, GLWEInfos, GLWEPlaintext, GLWEPlaintextToMut, GLWEToRef, LWEInfos,
-    prepared::{GLWESecretPrepared, GLWESecretPreparedToRef},
+    GLWE, GLWEInfos, GLWEPlaintextMut, GLWEPlaintextToMut, GLWERef, GLWEToRef, LWEInfos,
+    prepared::{GLWESecretPreparedRef, GLWESecretPreparedToRef},
 };
 
 impl GLWE<Vec<u8>> {
@@ -62,9 +62,9 @@ where
         S: GLWESecretPreparedToRef<BE>,
         Scratch<BE>: ScratchTakeBasic,
     {
-        let res: &GLWE<&[u8]> = &res.to_ref();
-        let pt: &mut GLWEPlaintext<&mut [u8]> = &mut pt.to_ref();
-        let sk: &GLWESecretPrepared<&[u8], BE> = &sk.to_ref();
+        let res: &GLWERef<'_> = &res.to_ref();
+        let pt: &mut GLWEPlaintextMut<'_> = &mut pt.to_ref();
+        let sk: &GLWESecretPreparedRef<'_, BE> = &sk.to_ref();
 
         #[cfg(debug_assertions)]
         {

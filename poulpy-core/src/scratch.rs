@@ -6,8 +6,11 @@ use poulpy_hal::{
 use crate::{
     dist::Distribution,
     layouts::{
-        Degree, GGLWE, GGLWEInfos, GGLWELayout, GGSW, GGSWInfos, GLWE, GLWEAutomorphismKey, GLWEInfos, GLWEPlaintext,
-        GLWEPrepared, GLWEPublicKey, GLWESecret, GLWESecretTensor, GLWESwitchingKey, GLWETensorKey, LWE, LWEInfos, Rank,
+        Degree, GGLWE, GGLWEInfos, GGLWELayout, GGLWEMut, GGLWEPreparedMut, GGSW, GGSWInfos, GGSWMut, GGSWPreparedMut, GLWE,
+        GLWEAutomorphismKey, GLWEInfos, GLWEMut, GLWEPlaintext, GLWEPlaintextMut, GLWEPrepared, GLWEPreparedMut, GLWEPublicKey,
+        GLWEPublicKeyMut, GLWEPublicKeyPreparedMut, GLWESecret, GLWESecretMut, GLWESecretPreparedMut, GLWESecretTensor,
+        GLWESecretTensorMut, GLWESwitchingKey, GLWESwitchingKeyPreparedMut, GLWETensorKey, GLWETensorKeyMut,
+        GLWETensorKeyPreparedMut, LWE, LWEInfos, LWEMut, Rank,
         prepared::{
             GGLWEPrepared, GGSWPrepared, GLWEAutomorphismKeyPrepared, GLWEPublicKeyPrepared, GLWESecretPrepared,
             GLWESwitchingKeyPrepared, GLWETensorKeyPrepared,
@@ -19,7 +22,7 @@ pub trait ScratchTakeCore<B: Backend>
 where
     Self: ScratchTakeBasic + ScratchAvailable + ScratchFromBytes<B>,
 {
-    fn take_lwe<A>(&mut self, infos: &A) -> (LWE<&mut [u8]>, &mut Self)
+    fn take_lwe<A>(&mut self, infos: &A) -> (LWEMut<'_>, &mut Self)
     where
         A: LWEInfos,
     {
@@ -34,7 +37,7 @@ where
         )
     }
 
-    fn take_glwe<A>(&mut self, infos: &A) -> (GLWE<&mut [u8]>, &mut Self)
+    fn take_glwe<A>(&mut self, infos: &A) -> (GLWEMut<'_>, &mut Self)
     where
         A: GLWEInfos,
     {
@@ -49,12 +52,12 @@ where
         )
     }
 
-    fn take_glwe_slice<A>(&mut self, size: usize, infos: &A) -> (Vec<GLWE<&mut [u8]>>, &mut Self)
+    fn take_glwe_slice<A>(&mut self, size: usize, infos: &A) -> (Vec<GLWEMut<'_>>, &mut Self)
     where
         A: GLWEInfos,
     {
         let mut scratch: &mut Self = self;
-        let mut cts: Vec<GLWE<&mut [u8]>> = Vec::with_capacity(size);
+        let mut cts: Vec<GLWEMut<'_>> = Vec::with_capacity(size);
         for _ in 0..size {
             let (ct, new_scratch) = scratch.take_glwe(infos);
             scratch = new_scratch;
@@ -63,7 +66,7 @@ where
         (cts, scratch)
     }
 
-    fn take_glwe_plaintext<A>(&mut self, infos: &A) -> (GLWEPlaintext<&mut [u8]>, &mut Self)
+    fn take_glwe_plaintext<A>(&mut self, infos: &A) -> (GLWEPlaintextMut<'_>, &mut Self)
     where
         A: GLWEInfos,
     {
@@ -78,7 +81,7 @@ where
         )
     }
 
-    fn take_gglwe<A>(&mut self, infos: &A) -> (GGLWE<&mut [u8]>, &mut Self)
+    fn take_gglwe<A>(&mut self, infos: &A) -> (GGLWEMut<'_>, &mut Self)
     where
         A: GGLWEInfos,
     {
@@ -100,7 +103,7 @@ where
         )
     }
 
-    fn take_gglwe_prepared<A, M>(&mut self, module: &M, infos: &A) -> (GGLWEPrepared<&mut [u8], B>, &mut Self)
+    fn take_gglwe_prepared<A, M>(&mut self, module: &M, infos: &A) -> (GGLWEPreparedMut<'_, B>, &mut Self)
     where
         A: GGLWEInfos,
         M: ModuleN + VmpPMatBytesOf,
@@ -124,7 +127,7 @@ where
         )
     }
 
-    fn take_ggsw<A>(&mut self, infos: &A) -> (GGSW<&mut [u8]>, &mut Self)
+    fn take_ggsw<A>(&mut self, infos: &A) -> (GGSWMut<'_>, &mut Self)
     where
         A: GGSWInfos,
     {
@@ -146,7 +149,7 @@ where
         )
     }
 
-    fn take_ggsw_prepared<A, M>(&mut self, module: &M, infos: &A) -> (GGSWPrepared<&mut [u8], B>, &mut Self)
+    fn take_ggsw_prepared<A, M>(&mut self, module: &M, infos: &A) -> (GGSWPreparedMut<'_, B>, &mut Self)
     where
         A: GGSWInfos,
         M: ModuleN + VmpPMatBytesOf,
@@ -170,12 +173,12 @@ where
         )
     }
 
-    fn take_ggsw_slice<A>(&mut self, size: usize, infos: &A) -> (Vec<GGSW<&mut [u8]>>, &mut Self)
+    fn take_ggsw_slice<A>(&mut self, size: usize, infos: &A) -> (Vec<GGSWMut<'_>>, &mut Self)
     where
         A: GGSWInfos,
     {
         let mut scratch: &mut Self = self;
-        let mut cts: Vec<GGSW<&mut [u8]>> = Vec::with_capacity(size);
+        let mut cts: Vec<GGSWMut<'_>> = Vec::with_capacity(size);
         for _ in 0..size {
             let (ct, new_scratch) = scratch.take_ggsw(infos);
             scratch = new_scratch;
@@ -184,18 +187,13 @@ where
         (cts, scratch)
     }
 
-    fn take_ggsw_prepared_slice<A, M>(
-        &mut self,
-        module: &M,
-        size: usize,
-        infos: &A,
-    ) -> (Vec<GGSWPrepared<&mut [u8], B>>, &mut Self)
+    fn take_ggsw_prepared_slice<A, M>(&mut self, module: &M, size: usize, infos: &A) -> (Vec<GGSWPreparedMut<'_, B>>, &mut Self)
     where
         A: GGSWInfos,
         M: ModuleN + VmpPMatBytesOf,
     {
         let mut scratch: &mut Self = self;
-        let mut cts: Vec<GGSWPrepared<&mut [u8], B>> = Vec::with_capacity(size);
+        let mut cts: Vec<GGSWPreparedMut<'_, B>> = Vec::with_capacity(size);
         for _ in 0..size {
             let (ct, new_scratch) = scratch.take_ggsw_prepared(module, infos);
             scratch = new_scratch;
@@ -204,7 +202,7 @@ where
         (cts, scratch)
     }
 
-    fn take_glwe_public_key<A>(&mut self, infos: &A) -> (GLWEPublicKey<&mut [u8]>, &mut Self)
+    fn take_glwe_public_key<A>(&mut self, infos: &A) -> (GLWEPublicKeyMut<'_>, &mut Self)
     where
         A: GLWEInfos,
     {
@@ -218,7 +216,7 @@ where
         )
     }
 
-    fn take_glwe_public_key_prepared<A, M>(&mut self, module: &M, infos: &A) -> (GLWEPublicKeyPrepared<&mut [u8], B>, &mut Self)
+    fn take_glwe_public_key_prepared<A, M>(&mut self, module: &M, infos: &A) -> (GLWEPublicKeyPreparedMut<'_, B>, &mut Self)
     where
         A: GLWEInfos,
         M: ModuleN + VecZnxDftBytesOf,
@@ -233,7 +231,7 @@ where
         )
     }
 
-    fn take_glwe_prepared<A, M>(&mut self, module: &M, infos: &A) -> (GLWEPrepared<&mut [u8], B>, &mut Self)
+    fn take_glwe_prepared<A, M>(&mut self, module: &M, infos: &A) -> (GLWEPreparedMut<'_, B>, &mut Self)
     where
         A: GLWEInfos,
         M: ModuleN + VecZnxDftBytesOf,
@@ -250,7 +248,7 @@ where
         )
     }
 
-    fn take_glwe_secret(&mut self, n: Degree, rank: Rank) -> (GLWESecret<&mut [u8]>, &mut Self) {
+    fn take_glwe_secret(&mut self, n: Degree, rank: Rank) -> (GLWESecretMut<'_>, &mut Self) {
         let (data, scratch) = self.take_scalar_znx(n.into(), rank.into());
         (
             GLWESecret {
@@ -261,7 +259,7 @@ where
         )
     }
 
-    fn take_glwe_secret_tensor(&mut self, n: Degree, rank: Rank) -> (GLWESecretTensor<&mut [u8]>, &mut Self) {
+    fn take_glwe_secret_tensor(&mut self, n: Degree, rank: Rank) -> (GLWESecretTensorMut<'_>, &mut Self) {
         let (data, scratch) = self.take_scalar_znx(n.into(), GLWESecretTensor::pairs(rank.into()));
         (
             GLWESecretTensor {
@@ -273,7 +271,7 @@ where
         )
     }
 
-    fn take_glwe_secret_prepared<M>(&mut self, module: &M, rank: Rank) -> (GLWESecretPrepared<&mut [u8], B>, &mut Self)
+    fn take_glwe_secret_prepared<M>(&mut self, module: &M, rank: Rank) -> (GLWESecretPreparedMut<'_, B>, &mut Self)
     where
         M: ModuleN + SvpPPolBytesOf,
     {
@@ -302,11 +300,7 @@ where
         )
     }
 
-    fn take_glwe_switching_key_prepared<A, M>(
-        &mut self,
-        module: &M,
-        infos: &A,
-    ) -> (GLWESwitchingKeyPrepared<&mut [u8], B>, &mut Self)
+    fn take_glwe_switching_key_prepared<A, M>(&mut self, module: &M, infos: &A) -> (GLWESwitchingKeyPreparedMut<'_, B>, &mut Self)
     where
         A: GGLWEInfos,
         M: ModuleN + VmpPMatBytesOf,
@@ -345,7 +339,7 @@ where
         (GLWEAutomorphismKeyPrepared { key: data, p: 0 }, scratch)
     }
 
-    fn take_glwe_tensor_key<A, M>(&mut self, infos: &A) -> (GLWETensorKey<&mut [u8]>, &mut Self)
+    fn take_glwe_tensor_key<A, M>(&mut self, infos: &A) -> (GLWETensorKeyMut<'_>, &mut Self)
     where
         A: GGLWEInfos,
     {
@@ -362,7 +356,7 @@ where
         (GLWETensorKey(data), scratch)
     }
 
-    fn take_glwe_tensor_key_prepared<A, M>(&mut self, module: &M, infos: &A) -> (GLWETensorKeyPrepared<&mut [u8], B>, &mut Self)
+    fn take_glwe_tensor_key_prepared<A, M>(&mut self, module: &M, infos: &A) -> (GLWETensorKeyPreparedMut<'_, B>, &mut Self)
     where
         A: GGLWEInfos,
         M: ModuleN + VmpPMatBytesOf,

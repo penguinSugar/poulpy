@@ -2,7 +2,9 @@ use std::fmt;
 
 use poulpy_hal::layouts::{Data, DataMut, DataRef, VecZnx, VecZnxToMut, VecZnxToRef, ZnxInfos};
 
-use crate::layouts::{Base2K, Degree, GLWE, GLWEInfos, GLWEToMut, GLWEToRef, LWEInfos, Rank, SetGLWEInfos, TorusPrecision};
+use crate::layouts::{
+    Base2K, Degree, GLWE, GLWEInfos, GLWEMut, GLWERef, GLWEToMut, GLWEToRef, LWEInfos, Rank, SetGLWEInfos, TorusPrecision,
+};
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub struct GLWEPlaintextLayout {
@@ -112,7 +114,7 @@ impl GLWEPlaintext<Vec<u8>> {
 }
 
 impl<D: DataRef> GLWEToRef for GLWEPlaintext<D> {
-    fn to_ref(&self) -> GLWE<&[u8]> {
+    fn to_ref(&self) -> GLWERef<'_> {
         GLWE {
             k: self.k,
             base2k: self.base2k,
@@ -122,7 +124,7 @@ impl<D: DataRef> GLWEToRef for GLWEPlaintext<D> {
 }
 
 impl<D: DataMut> GLWEToMut for GLWEPlaintext<D> {
-    fn to_mut(&mut self) -> GLWE<&mut [u8]> {
+    fn to_mut(&mut self) -> GLWEMut<'_> {
         GLWE {
             k: self.k,
             base2k: self.base2k,
@@ -131,12 +133,16 @@ impl<D: DataMut> GLWEToMut for GLWEPlaintext<D> {
     }
 }
 
+pub type GLWEPlaintextOwned = GLWEPlaintext<Vec<u8>>;
+pub type GLWEPlaintextRef<'a> = GLWEPlaintext<&'a [u8]>;
+pub type GLWEPlaintextMut<'a> = GLWEPlaintext<&'a mut [u8]>;
+
 pub trait GLWEPlaintextToRef {
-    fn to_ref(&self) -> GLWEPlaintext<&[u8]>;
+    fn to_ref(&self) -> GLWEPlaintextRef<'_>;
 }
 
 impl<D: DataRef> GLWEPlaintextToRef for GLWEPlaintext<D> {
-    fn to_ref(&self) -> GLWEPlaintext<&[u8]> {
+    fn to_ref(&self) -> GLWEPlaintextRef<'_> {
         GLWEPlaintext {
             data: self.data.to_ref(),
             base2k: self.base2k,
@@ -146,11 +152,11 @@ impl<D: DataRef> GLWEPlaintextToRef for GLWEPlaintext<D> {
 }
 
 pub trait GLWEPlaintextToMut {
-    fn to_ref(&mut self) -> GLWEPlaintext<&mut [u8]>;
+    fn to_ref(&mut self) -> GLWEPlaintextMut<'_>;
 }
 
 impl<D: DataMut> GLWEPlaintextToMut for GLWEPlaintext<D> {
-    fn to_ref(&mut self) -> GLWEPlaintext<&mut [u8]> {
+    fn to_ref(&mut self) -> GLWEPlaintextMut<'_> {
         GLWEPlaintext {
             base2k: self.base2k,
             k: self.k,

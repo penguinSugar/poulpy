@@ -1,6 +1,6 @@
 use poulpy_core::{
     GLWEAdd, GLWEDecrypt, GLWEEncryptSk, GLWERotate, GLWESub, GLWETrace,
-    layouts::{GLWELayout, GLWESecretPrepared},
+    layouts::{GLWELayout, GLWESecretPreparedOwned},
 };
 use poulpy_hal::{
     api::{ScratchOwnedAlloc, ScratchOwnedBorrow},
@@ -11,7 +11,7 @@ use rand::RngCore;
 
 use crate::bin_fhe::{
     bdd_arithmetic::{
-        BDDKeyPrepared, FheUint, ScratchTakeBDD, ToBits,
+        BDDKeyPreparedOwned, FheUint, FheUintOwned, ScratchTakeBDD, ToBits,
         tests::test_suite::{TEST_GLWE_INFOS, TestContext},
     },
     blind_rotation::BlindRotationAlgo,
@@ -26,15 +26,15 @@ where
     let glwe_infos: GLWELayout = TEST_GLWE_INFOS;
 
     let module: &Module<BE> = &test_context.module;
-    let sk: &GLWESecretPrepared<Vec<u8>, BE> = &test_context.sk_glwe;
-    let keys: &BDDKeyPrepared<Vec<u8>, BRA, BE> = &test_context.bdd_key;
+    let sk: &GLWESecretPreparedOwned<BE> = &test_context.sk_glwe;
+    let keys: &BDDKeyPreparedOwned<BRA, BE> = &test_context.bdd_key;
 
     let mut source_xa: Source = Source::new([2u8; 32]);
     let mut source_xe: Source = Source::new([3u8; 32]);
 
     let mut scratch: ScratchOwned<BE> = ScratchOwned::alloc(1 << 22);
 
-    let mut a_enc: FheUint<Vec<u8>, u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
+    let mut a_enc: FheUintOwned<u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
 
     for j in 0..3 {
         let a: u32 = 0x8483_8281;
@@ -90,17 +90,17 @@ where
     let glwe_infos: GLWELayout = TEST_GLWE_INFOS;
 
     let module: &Module<BE> = &test_context.module;
-    let sk: &GLWESecretPrepared<Vec<u8>, BE> = &test_context.sk_glwe;
-    let keys: &BDDKeyPrepared<Vec<u8>, BRA, BE> = &test_context.bdd_key;
+    let sk: &GLWESecretPreparedOwned<BE> = &test_context.sk_glwe;
+    let keys: &BDDKeyPreparedOwned<BRA, BE> = &test_context.bdd_key;
 
     let mut source_xa: Source = Source::new([2u8; 32]);
     let mut source_xe: Source = Source::new([3u8; 32]);
 
     let mut scratch: ScratchOwned<BE> = ScratchOwned::alloc(1 << 22);
 
-    let mut a_enc: FheUint<Vec<u8>, u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
-    let mut b_enc: FheUint<Vec<u8>, u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
-    let mut c_enc: FheUint<Vec<u8>, u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
+    let mut a_enc: FheUintOwned<u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
+    let mut b_enc: FheUintOwned<u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
+    let mut c_enc: FheUintOwned<u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
 
     let a: u32 = 0xFFFFFFFF;
     let b: u32 = 0xAABBCCDD;
@@ -147,17 +147,17 @@ where
     let glwe_infos: GLWELayout = TEST_GLWE_INFOS;
 
     let module: &Module<BE> = &test_context.module;
-    let sk: &GLWESecretPrepared<Vec<u8>, BE> = &test_context.sk_glwe;
-    let keys: &BDDKeyPrepared<Vec<u8>, BRA, BE> = &test_context.bdd_key;
+    let sk: &GLWESecretPreparedOwned<BE> = &test_context.sk_glwe;
+    let keys: &BDDKeyPreparedOwned<BRA, BE> = &test_context.bdd_key;
 
     let mut source_xa: Source = Source::new([2u8; 32]);
     let mut source_xe: Source = Source::new([3u8; 32]);
 
     let mut scratch: ScratchOwned<BE> = ScratchOwned::alloc(1 << 22);
 
-    let mut a_enc: FheUint<Vec<u8>, u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
-    let mut b_enc: FheUint<Vec<u8>, u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
-    let mut c_enc: FheUint<Vec<u8>, u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
+    let mut a_enc: FheUintOwned<u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
+    let mut b_enc: FheUintOwned<u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
+    let mut c_enc: FheUintOwned<u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
 
     let a: u32 = 0xFFFFFFFF;
     let b: u32 = 0xAABBCCDD;
@@ -201,16 +201,16 @@ where
     let glwe_infos: GLWELayout = TEST_GLWE_INFOS;
 
     let module: &Module<BE> = &test_context.module;
-    let sk: &GLWESecretPrepared<Vec<u8>, BE> = &test_context.sk_glwe;
-    let keys: &BDDKeyPrepared<Vec<u8>, BRA, BE> = &test_context.bdd_key;
+    let sk: &GLWESecretPreparedOwned<BE> = &test_context.sk_glwe;
+    let keys: &BDDKeyPreparedOwned<BRA, BE> = &test_context.bdd_key;
 
     let mut source_xa: Source = Source::new([2u8; 32]);
     let mut source_xe: Source = Source::new([3u8; 32]);
 
     let mut scratch: ScratchOwned<BE> = ScratchOwned::alloc(1 << 22);
 
-    let mut a_enc: FheUint<Vec<u8>, u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
-    let mut c_enc: FheUint<Vec<u8>, u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
+    let mut a_enc: FheUintOwned<u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
+    let mut c_enc: FheUintOwned<u32> = FheUint::<Vec<u8>, u32>::alloc_from_infos(&glwe_infos);
 
     let a: u32 = source_xa.next_u32();
 

@@ -7,8 +7,8 @@ use poulpy_hal::{
 use crate::{
     GGLWEEncryptSk, GetDistribution, ScratchTakeCore,
     layouts::{
-        GGLWEInfos, GGLWEToGGSWKey, GGLWEToGGSWKeyToMut, GLWEInfos, GLWESecret, GLWESecretTensor, GLWESecretTensorFactory,
-        GLWESecretToRef,
+        GGLWEInfos, GGLWEToGGSWKey, GGLWEToGGSWKeyMut, GGLWEToGGSWKeyToMut, GLWEInfos, GLWESecret, GLWESecretTensor,
+        GLWESecretTensorFactory, GLWESecretToRef,
         prepared::{GLWESecretPrepared, GLWESecretPreparedFactory},
     },
 };
@@ -84,7 +84,7 @@ where
         R: GGLWEToGGSWKeyToMut,
         S: GLWESecretToRef + GetDistribution + GLWEInfos,
     {
-        let res: &mut GGLWEToGGSWKey<&mut [u8]> = &mut res.to_mut();
+        let res: &mut GGLWEToGGSWKeyMut<'_> = &mut res.to_mut();
 
         let rank: usize = res.rank_out().as_usize();
 

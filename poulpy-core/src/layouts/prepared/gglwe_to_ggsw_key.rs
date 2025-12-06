@@ -2,7 +2,7 @@ use poulpy_hal::layouts::{Backend, Data, DataMut, DataRef, Module, Scratch};
 
 use crate::layouts::{
     Base2K, Degree, Dnum, Dsize, GGLWEInfos, GGLWEPrepared, GGLWEPreparedFactory, GGLWEPreparedToMut, GGLWEPreparedToRef,
-    GGLWEToGGSWKey, GGLWEToGGSWKeyToRef, GLWEInfos, LWEInfos, Rank, TorusPrecision,
+    GGLWEToGGSWKeyRef, GGLWEToGGSWKeyToRef, GLWEInfos, LWEInfos, Rank, TorusPrecision,
 };
 
 pub struct GGLWEToGGSWKeyPrepared<D: Data, BE: Backend> {
@@ -52,7 +52,7 @@ impl<D: Data, BE: Backend> GGLWEInfos for GGLWEToGGSWKeyPrepared<D, BE> {
 }
 
 pub trait GGLWEToGGSWKeyPreparedFactory<BE: Backend> {
-    fn alloc_gglwe_to_ggsw_key_prepared_from_infos<A>(&self, infos: &A) -> GGLWEToGGSWKeyPrepared<Vec<u8>, BE>
+    fn alloc_gglwe_to_ggsw_key_prepared_from_infos<A>(&self, infos: &A) -> GGLWEToGGSWKeyPreparedOwned<BE>
     where
         A: GGLWEInfos;
 
@@ -63,7 +63,7 @@ pub trait GGLWEToGGSWKeyPreparedFactory<BE: Backend> {
         rank: Rank,
         dnum: Dnum,
         dsize: Dsize,
-    ) -> GGLWEToGGSWKeyPrepared<Vec<u8>, BE>;
+    ) -> GGLWEToGGSWKeyPreparedOwned<BE>;
 
     fn bytes_of_gglwe_to_ggsw_from_infos<A>(&self, infos: &A) -> usize
     where
@@ -85,7 +85,7 @@ impl<BE: Backend> GGLWEToGGSWKeyPreparedFactory<BE> for Module<BE>
 where
     Self: GGLWEPreparedFactory<BE>,
 {
-    fn alloc_gglwe_to_ggsw_key_prepared_from_infos<A>(&self, infos: &A) -> GGLWEToGGSWKeyPrepared<Vec<u8>, BE>
+    fn alloc_gglwe_to_ggsw_key_prepared_from_infos<A>(&self, infos: &A) -> GGLWEToGGSWKeyPreparedOwned<BE>
     where
         A: GGLWEInfos,
     {
@@ -110,7 +110,7 @@ where
         rank: Rank,
         dnum: Dnum,
         dsize: Dsize,
-    ) -> GGLWEToGGSWKeyPrepared<Vec<u8>, BE> {
+    ) -> GGLWEToGGSWKeyPreparedOwned<BE> {
         GGLWEToGGSWKeyPrepared {
             keys: (0..rank.as_usize())
                 .map(|_| self.alloc_gglwe_prepared(base2k, k, rank, rank, dnum, dsize))
@@ -152,8 +152,8 @@ where
         R: GGLWEToGGSWKeyPreparedToMut<BE>,
         O: GGLWEToGGSWKeyToRef,
     {
-        let res: &mut GGLWEToGGSWKeyPrepared<&mut [u8], BE> = &mut res.to_mut();
-        let other: &GGLWEToGGSWKey<&[u8]> = &other.to_ref();
+        let res: &mut GGLWEToGGSWKeyPreparedMut<'_, BE> = &mut res.to_mut();
+        let other: &GGLWEToGGSWKeyRef<'_> = &other.to_ref();
 
         assert_eq!(res.keys.len(), other.keys.len());
 
@@ -221,15 +221,19 @@ impl<D: DataRef, BE: Backend> GGLWEToGGSWKeyPrepared<D, BE> {
     }
 }
 
+pub type GGLWEToGGSWKeyPreparedOwned<B> = GGLWEToGGSWKeyPrepared<Vec<u8>, B>;
+pub type GGLWEToGGSWKeyPreparedRef<'a, B> = GGLWEToGGSWKeyPrepared<&'a [u8], B>;
+pub type GGLWEToGGSWKeyPreparedMut<'a, B> = GGLWEToGGSWKeyPrepared<&'a mut [u8], B>;
+
 pub trait GGLWEToGGSWKeyPreparedToRef<BE: Backend> {
-    fn to_ref(&self) -> GGLWEToGGSWKeyPrepared<&[u8], BE>;
+    fn to_ref(&self) -> GGLWEToGGSWKeyPreparedRef<'_, BE>;
 }
 
 impl<D: DataRef, BE: Backend> GGLWEToGGSWKeyPreparedToRef<BE> for GGLWEToGGSWKeyPrepared<D, BE>
 where
     GGLWEPrepared<D, BE>: GGLWEPreparedToRef<BE>,
 {
-    fn to_ref(&self) -> GGLWEToGGSWKeyPrepared<&[u8], BE> {
+    fn to_ref(&self) -> GGLWEToGGSWKeyPreparedRef<'_, BE> {
         GGLWEToGGSWKeyPrepared {
             keys: self.keys.iter().map(|c| c.to_ref()).collect(),
         }
@@ -237,14 +241,14 @@ where
 }
 
 pub trait GGLWEToGGSWKeyPreparedToMut<BE: Backend> {
-    fn to_mut(&mut self) -> GGLWEToGGSWKeyPrepared<&mut [u8], BE>;
+    fn to_mut(&mut self) -> GGLWEToGGSWKeyPreparedMut<'_, BE>;
 }
 
 impl<D: DataMut, BE: Backend> GGLWEToGGSWKeyPreparedToMut<BE> for GGLWEToGGSWKeyPrepared<D, BE>
 where
     GGLWEPrepared<D, BE>: GGLWEPreparedToMut<BE>,
 {
-    fn to_mut(&mut self) -> GGLWEToGGSWKeyPrepared<&mut [u8], BE> {
+    fn to_mut(&mut self) -> GGLWEToGGSWKeyPreparedMut<'_, BE> {
         GGLWEToGGSWKeyPrepared {
             keys: self.keys.iter_mut().map(|c| c.to_mut()).collect(),
         }
