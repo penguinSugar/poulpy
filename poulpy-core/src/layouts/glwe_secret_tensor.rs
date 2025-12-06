@@ -4,8 +4,8 @@ use poulpy_hal::{
         VecZnxDftApply, VecZnxDftBytesOf, VecZnxIdftApplyTmpA,
     },
     layouts::{
-        Backend, Data, DataMut, DataRef, Module, ScalarZnx, ScalarZnxToMut, ScalarZnxToRef, Scratch, ZnxInfos, ZnxView,
-        ZnxViewMut,
+        Backend, Data, DataMut, DataRef, Module, ScalarZnx, ScalarZnxMut, ScalarZnxRef, ScalarZnxToMut, ScalarZnxToRef, Scratch,
+        ZnxInfos, ZnxView, ZnxViewMut,
     },
 };
 
@@ -49,7 +49,7 @@ impl<D: Data> LWEInfos for GLWESecretTensor<D> {
 }
 
 impl<D: DataRef> GLWESecretTensor<D> {
-    pub fn at(&self, mut i: usize, mut j: usize) -> ScalarZnx<&[u8]> {
+    pub fn at(&self, mut i: usize, mut j: usize) -> ScalarZnxRef<'_> {
         if i > j {
             std::mem::swap(&mut i, &mut j);
         };
@@ -63,7 +63,7 @@ impl<D: DataRef> GLWESecretTensor<D> {
 }
 
 impl<D: DataMut> GLWESecretTensor<D> {
-    pub fn at_mut(&mut self, mut i: usize, mut j: usize) -> ScalarZnx<&mut [u8]> {
+    pub fn at_mut(&mut self, mut i: usize, mut j: usize) -> ScalarZnxMut<'_> {
         if i > j {
             std::mem::swap(&mut i, &mut j);
         };

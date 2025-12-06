@@ -16,7 +16,7 @@ use poulpy_cpu_ref::FFT64Ref as BackendImpl;
 
 use poulpy_hal::{
     api::{ModuleNew, ScratchOwnedAlloc, ScratchOwnedBorrow, VecZnxNormalizeInplace},
-    layouts::{Module, ScalarZnx, ScratchOwned, ZnxView, ZnxViewMut},
+    layouts::{Module, ScalarZnx, ScalarZnxOwned, ScratchOwned, ZnxView, ZnxViewMut},
     source::Source,
 };
 
@@ -208,7 +208,7 @@ fn main() {
     println!("CBT: {} ms", now.elapsed().as_millis());
 
     // Allocate "ideal" GGSW(data) plaintext
-    let mut pt_ggsw: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n_glwe, 1);
+    let mut pt_ggsw: ScalarZnxOwned = ScalarZnx::alloc(n_glwe, 1);
     pt_ggsw.at_mut(0, 0)[0] = data;
 
     // Prints noise of GGSW(data)

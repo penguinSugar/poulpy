@@ -4,7 +4,10 @@ use criterion::{BenchmarkId, Criterion};
 
 use crate::{
     api::{ModuleNew, ScratchOwnedAlloc, ScratchOwnedBorrow, VecZnxLsh, VecZnxLshInplace, VecZnxRsh, VecZnxRshInplace},
-    layouts::{Backend, FillUniform, Module, ScratchOwned, VecZnx, VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut},
+    layouts::{
+        Backend, FillUniform, Module, ScratchOwned, VecZnx, VecZnxMut, VecZnxOwned, VecZnxRef, VecZnxToMut, VecZnxToRef,
+        ZnxInfos, ZnxView, ZnxViewMut,
+    },
     reference::{
         vec_znx::vec_znx_copy,
         znx::{
@@ -30,7 +33,7 @@ where
         + ZnxNormalizeFirstStepInplace
         + ZnxNormalizeFinalStepInplace,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let mut res: VecZnxMut<'_> = res.to_mut();
 
     let n: usize = res.n();
     let cols: usize = res.cols();
@@ -85,8 +88,8 @@ where
     A: VecZnxToRef,
     ZNXARI: ZnxZero + ZnxNormalizeFirstStep + ZnxNormalizeMiddleStep + ZnxNormalizeFirstStep + ZnxCopy + ZnxNormalizeFinalStep,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
-    let a: VecZnx<&[u8]> = a.to_ref();
+    let mut res: VecZnxMut<'_> = res.to_mut();
+    let a: VecZnxRef<'_> = a.to_ref();
 
     let res_size: usize = res.size();
     let a_size = a.size();
@@ -161,7 +164,7 @@ where
         + ZnxNormalizeFirstStepInplace
         + ZnxNormalizeFinalStepInplace,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let mut res: VecZnxMut<'_> = res.to_mut();
     let n: usize = res.n();
     let cols: usize = res.cols();
     let size: usize = res.size();
@@ -250,8 +253,8 @@ where
         + ZnxNormalizeFirstStepInplace
         + ZnxNormalizeFinalStepInplace,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
-    let a: VecZnx<&[u8]> = a.to_ref();
+    let mut res: VecZnxMut<'_> = res.to_mut();
+    let a: VecZnxRef<'_> = a.to_ref();
 
     let res_size: usize = res.size();
     let a_size: usize = a.size();
@@ -370,8 +373,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut b: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         let mut scratch: ScratchOwned<B> = ScratchOwned::alloc(n * size_of::<i64>());
 
@@ -420,8 +423,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut res: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         let mut scratch: ScratchOwned<B> = ScratchOwned::alloc(n * size_of::<i64>());
 
@@ -470,8 +473,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut b: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         let mut scratch: ScratchOwned<B> = ScratchOwned::alloc(n * size_of::<i64>());
 
@@ -520,8 +523,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut res: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         let mut scratch: ScratchOwned<B> = ScratchOwned::alloc(n * size_of::<i64>());
 
@@ -549,7 +552,7 @@ where
 #[cfg(test)]
 mod tests {
     use crate::{
-        layouts::{FillUniform, VecZnx, ZnxView},
+        layouts::{FillUniform, VecZnx, VecZnxOwned, ZnxView},
         reference::{
             vec_znx::{
                 vec_znx_copy, vec_znx_lsh, vec_znx_lsh_inplace, vec_znx_normalize_inplace, vec_znx_rsh, vec_znx_rsh_inplace,
@@ -566,9 +569,9 @@ mod tests {
         let cols: usize = 2;
         let size: usize = 7;
 
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         let mut source: Source = Source::new([0u8; 32]);
 
@@ -601,8 +604,8 @@ mod tests {
 
         let res_size: usize = 7;
 
-        let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-        let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+        let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+        let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
         let mut carry: Vec<i64> = vec![0i64; n];
 
@@ -613,7 +616,7 @@ mod tests {
         let zero: Vec<i64> = vec![0i64; n];
 
         for a_size in [res_size - 1, res_size, res_size + 1] {
-            let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+            let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
 
             for k in 0..res_size * base2k {
                 a.fill_uniform(50, &mut source);

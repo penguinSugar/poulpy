@@ -1,6 +1,9 @@
 use crate::{
     cast_mut,
-    layouts::{DataViewMut, MatZnx, MatZnxToRef, VecZnx, VecZnxToRef, VmpPMatToMut, ZnxView, ZnxViewMut},
+    layouts::{
+        Backend, DataViewMut, MatZnxRef, MatZnxToRef, VecZnxDft, VecZnxDftMut, VecZnxDftRef, VecZnxDftToMut, VecZnxDftToRef,
+        VecZnxRef, VecZnxToRef, VmpPMatRef, VmpPMatToMut, VmpPMatToRef, ZnxInfos, ZnxView, ZnxViewMut,
+    },
     oep::VecZnxDftAllocBytesImpl,
     reference::fft64::{
         reim::{ReimDFTExecute, ReimFFTTable, ReimFromZnx, ReimZero},
@@ -8,8 +11,6 @@ use crate::{
         vec_znx_dft::vec_znx_dft_apply,
     },
 };
-
-use crate::layouts::{Backend, VecZnxDft, VecZnxDftToMut, VecZnxDftToRef, VmpPMat, VmpPMatToRef, ZnxInfos};
 
 pub fn vmp_prepare_tmp_bytes(n: usize) -> usize {
     n * size_of::<i64>()
@@ -21,8 +22,8 @@ where
     R: VmpPMatToMut<BE>,
     A: MatZnxToRef,
 {
-    let mut res: crate::layouts::VmpPMat<&mut [u8], BE> = pmat.to_mut();
-    let a: MatZnx<&[u8]> = mat.to_ref();
+    let mut res: crate::layouts::VmpPMatMut<'_, BE> = pmat.to_mut();
+    let a: MatZnxRef<'_> = mat.to_ref();
 
     #[cfg(debug_assertions)]
     {
@@ -127,8 +128,8 @@ where
     A: VecZnxToRef,
     M: VmpPMatToRef<BE>,
 {
-    let a: VecZnx<&[u8]> = a.to_ref();
-    let pmat: VmpPMat<&[u8], BE> = pmat.to_ref();
+    let a: VecZnxRef<'_> = a.to_ref();
+    let pmat: VmpPMatRef<'_, BE> = pmat.to_ref();
 
     let n: usize = a.n();
     let cols: usize = pmat.cols_in();
@@ -142,7 +143,7 @@ where
 
     let (data, tmp_bytes) = tmp_bytes.split_at_mut(BE::vec_znx_dft_bytes_of_impl(n, cols, size));
 
-    let mut a_dft: VecZnxDft<&mut [u8], BE> = VecZnxDft::from_data(cast_mut(data), n, cols, size);
+    let mut a_dft: VecZnxDftMut<'_, BE> = VecZnxDft::from_data(cast_mut(data), n, cols, size);
 
     let offset: usize = cols - a.cols();
     for j in 0..cols {
@@ -180,9 +181,9 @@ where
 {
     use crate::layouts::{ZnxView, ZnxViewMut};
 
-    let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
-    let a: VecZnxDft<&[u8], BE> = a.to_ref();
-    let pmat: VmpPMat<&[u8], BE> = pmat.to_ref();
+    let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
+    let a: VecZnxDftRef<'_, BE> = a.to_ref();
+    let pmat: VmpPMatRef<'_, BE> = pmat.to_ref();
 
     #[cfg(debug_assertions)]
     {
@@ -219,9 +220,9 @@ where
 {
     use crate::layouts::{ZnxView, ZnxViewMut};
 
-    let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
-    let a: VecZnxDft<&[u8], BE> = a.to_ref();
-    let pmat: VmpPMat<&[u8], BE> = pmat.to_ref();
+    let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
+    let a: VecZnxDftRef<'_, BE> = a.to_ref();
+    let pmat: VmpPMatRef<'_, BE> = pmat.to_ref();
 
     #[cfg(debug_assertions)]
     {

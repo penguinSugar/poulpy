@@ -5,7 +5,7 @@ use poulpy_core::{
 };
 use poulpy_hal::{
     api::{ScratchOwnedAlloc, ScratchOwnedBorrow},
-    layouts::{Backend, Module, ScalarZnx, Scratch, ScratchOwned, ZnxViewMut},
+    layouts::{Backend, Module, ScalarZnx, ScalarZnxOwned, Scratch, ScratchOwned, ZnxViewMut},
     source::Source,
 };
 use rand::RngCore;
@@ -63,7 +63,7 @@ where
             scratch.borrow(),
         );
 
-        let mut pt: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(module.n(), 1);
+        let mut pt: ScalarZnxOwned = ScalarZnx::alloc(module.n(), 1);
         pt.raw_mut()[0] = bit;
         s.encrypt_sk(
             module,

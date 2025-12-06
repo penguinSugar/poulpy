@@ -117,13 +117,14 @@ where
 
 pub type VmpPMatOwned<B> = VmpPMat<Vec<u8>, B>;
 pub type VmpPMatRef<'a, B> = VmpPMat<&'a [u8], B>;
+pub type VmpPMatMut<'a, B> = VmpPMat<&'a mut [u8], B>;
 
 pub trait VmpPMatToRef<B: Backend> {
-    fn to_ref(&self) -> VmpPMat<&[u8], B>;
+    fn to_ref(&self) -> VmpPMatRef<'_, B>;
 }
 
 impl<D: DataRef, B: Backend> VmpPMatToRef<B> for VmpPMat<D, B> {
-    fn to_ref(&self) -> VmpPMat<&[u8], B> {
+    fn to_ref(&self) -> VmpPMatRef<'_, B> {
         VmpPMat {
             data: self.data.as_ref(),
             n: self.n,
@@ -137,11 +138,11 @@ impl<D: DataRef, B: Backend> VmpPMatToRef<B> for VmpPMat<D, B> {
 }
 
 pub trait VmpPMatToMut<B: Backend> {
-    fn to_mut(&mut self) -> VmpPMat<&mut [u8], B>;
+    fn to_mut(&mut self) -> VmpPMatMut<'_, B>;
 }
 
 impl<D: DataMut, B: Backend> VmpPMatToMut<B> for VmpPMat<D, B> {
-    fn to_mut(&mut self) -> VmpPMat<&mut [u8], B> {
+    fn to_mut(&mut self) -> VmpPMatMut<'_, B> {
         VmpPMat {
             data: self.data.as_mut(),
             n: self.n,

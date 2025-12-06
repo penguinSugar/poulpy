@@ -2,7 +2,7 @@ use itertools::izip;
 use rug::{Assign, Float};
 
 use crate::{
-    layouts::{DataMut, DataRef, VecZnx, VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut},
+    layouts::{DataMut, DataRef, VecZnx, VecZnxMut, VecZnxRef, VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut},
     reference::znx::{
         ZnxNormalizeFinalStepInplace, ZnxNormalizeFirstStepInplace, ZnxNormalizeMiddleStepInplace, ZnxRef, ZnxZero,
         get_carry_i128, get_digit_i128, znx_zero_ref,
@@ -15,7 +15,7 @@ impl<D: DataMut> VecZnx<D> {
 
         #[cfg(debug_assertions)]
         {
-            let a: VecZnx<&mut [u8]> = self.to_mut();
+            let a: VecZnxMut<'_> = self.to_mut();
             assert!(
                 size <= a.size(),
                 "invalid argument k.div_ceil(base2k)={} > a.size()={}",
@@ -26,7 +26,7 @@ impl<D: DataMut> VecZnx<D> {
             assert!(data.len() == a.n())
         }
 
-        let mut a: VecZnx<&mut [u8]> = self.to_mut();
+        let mut a: VecZnxMut<'_> = self.to_mut();
         let a_size: usize = a.size();
 
         // Zeroes coefficients of the i-th column
@@ -57,7 +57,7 @@ impl<D: DataMut> VecZnx<D> {
 
         #[cfg(debug_assertions)]
         {
-            let a: VecZnx<&mut [u8]> = self.to_mut();
+            let a: VecZnxMut<'_> = self.to_mut();
             assert!(
                 size <= a.size(),
                 "invalid argument k.div_ceil(base2k)={} > a.size()={}",
@@ -68,7 +68,7 @@ impl<D: DataMut> VecZnx<D> {
             assert!(data.len() == a.n())
         }
 
-        let mut a: VecZnx<&mut [u8]> = self.to_mut();
+        let mut a: VecZnxMut<'_> = self.to_mut();
         let a_size: usize = a.size();
 
         {
@@ -108,7 +108,7 @@ impl<D: DataMut> VecZnx<D> {
 
         #[cfg(debug_assertions)]
         {
-            let a: VecZnx<&mut [u8]> = self.to_mut();
+            let a: VecZnxMut<'_> = self.to_mut();
             assert!(idx < a.n());
             assert!(
                 size <= a.size(),
@@ -119,7 +119,7 @@ impl<D: DataMut> VecZnx<D> {
             assert!(col < a.cols());
         }
 
-        let mut a: VecZnx<&mut [u8]> = self.to_mut();
+        let mut a: VecZnxMut<'_> = self.to_mut();
         let a_size = a.size();
 
         for j in 0..a_size {
@@ -150,7 +150,7 @@ impl<D: DataRef> VecZnx<D> {
         let size: usize = k.div_ceil(base2k);
         #[cfg(debug_assertions)]
         {
-            let a: VecZnx<&[u8]> = self.to_ref();
+            let a: VecZnxRef<'_> = self.to_ref();
             assert!(
                 data.len() >= a.n(),
                 "invalid data: data.len()={} < a.n()={}",
@@ -160,7 +160,7 @@ impl<D: DataRef> VecZnx<D> {
             assert!(col < a.cols());
         }
 
-        let a: VecZnx<&[u8]> = self.to_ref();
+        let a: VecZnxRef<'_> = self.to_ref();
         data.copy_from_slice(a.at(col, 0));
         let rem: usize = base2k - (k % base2k);
         if k < base2k {
@@ -186,12 +186,12 @@ impl<D: DataRef> VecZnx<D> {
     pub fn decode_coeff_i64(&self, base2k: usize, col: usize, k: usize, idx: usize) -> i64 {
         #[cfg(debug_assertions)]
         {
-            let a: VecZnx<&[u8]> = self.to_ref();
+            let a: VecZnxRef<'_> = self.to_ref();
             assert!(idx < a.n());
             assert!(col < a.cols())
         }
 
-        let a: VecZnx<&[u8]> = self.to_ref();
+        let a: VecZnxRef<'_> = self.to_ref();
         let size: usize = k.div_ceil(base2k);
         let mut res: i64 = 0;
         let rem: usize = base2k - (k % base2k);
@@ -211,7 +211,7 @@ impl<D: DataRef> VecZnx<D> {
     pub fn decode_vec_float(&self, base2k: usize, col: usize, data: &mut [Float]) {
         #[cfg(debug_assertions)]
         {
-            let a: VecZnx<&[u8]> = self.to_ref();
+            let a: VecZnxRef<'_> = self.to_ref();
             assert!(
                 data.len() >= a.n(),
                 "invalid data: data.len()={} < a.n()={}",
@@ -221,7 +221,7 @@ impl<D: DataRef> VecZnx<D> {
             assert!(col < a.cols());
         }
 
-        let a: VecZnx<&[u8]> = self.to_ref();
+        let a: VecZnxRef<'_> = self.to_ref();
         let size: usize = a.size();
         let prec: u32 = (base2k * size) as u32;
 

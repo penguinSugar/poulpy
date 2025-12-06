@@ -4,7 +4,7 @@ use poulpy_core::{
 };
 use poulpy_hal::{
     api::{VecZnxAddScalarInplace, VecZnxNormalizeInplace},
-    layouts::{Backend, Module, ScalarZnx, ScalarZnxToRef, Scratch, ZnxZero},
+    layouts::{Backend, Module, ScalarZnxRef, ScalarZnxToRef, Scratch, ZnxZero},
 };
 
 use crate::bin_fhe::bdd_arithmetic::{Cmux, GetGGSWBit, UnsignedInteger};
@@ -127,7 +127,7 @@ where
         Scratch<BE>: ScratchTakeCore<BE>,
     {
         let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
-        let test_vector: &ScalarZnx<&[u8]> = &test_vector.to_ref();
+        let test_vector: &ScalarZnxRef<'_> = &test_vector.to_ref();
 
         let base2k: usize = res.base2k().into();
         let dsize: usize = res.dsize().into();

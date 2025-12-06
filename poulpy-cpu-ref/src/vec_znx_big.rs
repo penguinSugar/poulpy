@@ -2,8 +2,8 @@ use crate::FFT64Ref;
 use poulpy_hal::{
     api::{TakeSlice, VecZnxBigAutomorphismInplaceTmpBytes, VecZnxBigNormalizeTmpBytes},
     layouts::{
-        Backend, Module, Scratch, VecZnx, VecZnxBig, VecZnxBigOwned, VecZnxBigToMut, VecZnxBigToRef, VecZnxToMut, VecZnxToRef,
-        ZnxInfos, ZnxView, ZnxViewMut,
+        Backend, Module, Scratch, VecZnxBig, VecZnxBigMut, VecZnxBigOwned, VecZnxBigToMut, VecZnxBigToRef, VecZnxRef,
+        VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut,
     },
     oep::{
         TakeSliceImpl, VecZnxBigAddImpl, VecZnxBigAddInplaceImpl, VecZnxBigAddNormalImpl, VecZnxBigAddSmallImpl,
@@ -50,8 +50,8 @@ unsafe impl VecZnxBigFromSmallImpl<Self> for FFT64Ref {
         R: VecZnxBigToMut<Self>,
         A: VecZnxToRef,
     {
-        let mut res: VecZnxBig<&mut [u8], FFT64Ref> = res.to_mut();
-        let a: VecZnx<&[u8]> = a.to_ref();
+        let mut res: VecZnxBigMut<'_, FFT64Ref> = res.to_mut();
+        let a: VecZnxRef<'_> = a.to_ref();
 
         #[cfg(debug_assertions)]
         {

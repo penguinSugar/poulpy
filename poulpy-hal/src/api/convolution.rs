@@ -24,9 +24,9 @@ where
         A: VecZnxToRef,
         B: VecZnxDftToRef<BE>,
     {
-        let res: &mut crate::layouts::VecZnxDft<&mut [u8], BE> = &mut res.to_mut();
-        let a: &crate::layouts::VecZnx<&[u8]> = &a.to_ref();
-        let b: &crate::layouts::VecZnxDft<&[u8], BE> = &b.to_ref();
+        let res: &mut crate::layouts::VecZnxDftMut<'_, BE> = &mut res.to_mut();
+        let a: &crate::layouts::VecZnxRef<'_> = &a.to_ref();
+        let b: &crate::layouts::VecZnxDftRef<'_, BE> = &b.to_ref();
 
         let res_cols: usize = res.cols();
         let a_cols: usize = a.cols();
@@ -126,9 +126,9 @@ where
         A: VecZnxToRef,
         B: VecZnxDftToRef<BE>,
     {
-        let res: &mut crate::layouts::VecZnxDft<&mut [u8], BE> = &mut res.to_mut();
-        let a: &crate::layouts::VecZnx<&[u8]> = &a.to_ref();
-        let b: &crate::layouts::VecZnxDft<&[u8], BE> = &b.to_ref();
+        let res: &mut crate::layouts::VecZnxDftMut<'_, BE> = &mut res.to_mut();
+        let a: &crate::layouts::VecZnxRef<'_> = &a.to_ref();
+        let b: &crate::layouts::VecZnxDftRef<'_, BE> = &b.to_ref();
 
         let (mut ppol, scratch_1) = scratch.take_svp_ppol(self, 1);
         let (mut res_tmp, _) = scratch_1.take_vec_znx_dft(self, 1, b.size());

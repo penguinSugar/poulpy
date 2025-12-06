@@ -1,5 +1,5 @@
 use crate::{
-    layouts::{VecZnx, VecZnxToMut, ZnxInfos, ZnxViewMut},
+    layouts::{VecZnxMut, VecZnxToMut, ZnxInfos, ZnxViewMut},
     reference::znx::ZnxZero,
 };
 
@@ -8,7 +8,7 @@ where
     R: VecZnxToMut,
     ZNXARI: ZnxZero,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let mut res: VecZnxMut<'_> = res.to_mut();
     let res_size = res.size();
     for j in 0..res_size {
         ZNXARI::znx_zero(res.at_mut(res_col, j));

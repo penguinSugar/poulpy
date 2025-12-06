@@ -99,13 +99,15 @@ where
 }
 
 pub type SvpPPolOwned<B> = SvpPPol<Vec<u8>, B>;
+pub type SvpPPolRef<'a, B> = SvpPPol<&'a [u8], B>;
+pub type SvpPPolMut<'a, B> = SvpPPol<&'a mut [u8], B>;
 
 pub trait SvpPPolToRef<B: Backend> {
-    fn to_ref(&self) -> SvpPPol<&[u8], B>;
+    fn to_ref(&self) -> SvpPPolRef<'_, B>;
 }
 
 impl<D: DataRef, B: Backend> SvpPPolToRef<B> for SvpPPol<D, B> {
-    fn to_ref(&self) -> SvpPPol<&[u8], B> {
+    fn to_ref(&self) -> SvpPPolRef<'_, B> {
         SvpPPol {
             data: self.data.as_ref(),
             n: self.n,
@@ -116,11 +118,11 @@ impl<D: DataRef, B: Backend> SvpPPolToRef<B> for SvpPPol<D, B> {
 }
 
 pub trait SvpPPolToMut<B: Backend> {
-    fn to_mut(&mut self) -> SvpPPol<&mut [u8], B>;
+    fn to_mut(&mut self) -> SvpPPolMut<'_, B>;
 }
 
 impl<D: DataMut, B: Backend> SvpPPolToMut<B> for SvpPPol<D, B> {
-    fn to_mut(&mut self) -> SvpPPol<&mut [u8], B> {
+    fn to_mut(&mut self) -> SvpPPolMut<'_, B> {
         SvpPPol {
             data: self.data.as_mut(),
             n: self.n,

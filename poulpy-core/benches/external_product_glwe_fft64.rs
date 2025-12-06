@@ -14,7 +14,7 @@ pub use poulpy_cpu_ref::FFT64Ref as BackendImpl;
 
 use poulpy_hal::{
     api::{ModuleNew, ScratchOwnedAlloc, ScratchOwnedBorrow},
-    layouts::{Module, ScalarZnx, ScratchOwned},
+    layouts::{Module, ScalarZnx, ScalarZnxOwned, ScratchOwned},
     source::Source,
 };
 
@@ -69,7 +69,7 @@ fn bench_external_product_glwe_fft64(c: &mut Criterion) {
         let mut ct_ggsw: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_layout);
         let mut ct_glwe_in: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_in_layout);
         let mut ct_glwe_out: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_out_layout);
-        let pt_rgsw: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n.into(), 1);
+        let pt_rgsw: ScalarZnxOwned = ScalarZnx::alloc(n.into(), 1);
 
         let mut scratch: ScratchOwned<BackendImpl> = ScratchOwned::alloc(
             GGSW::encrypt_sk_tmp_bytes(&module, &ggsw_layout)
@@ -172,7 +172,7 @@ fn bench_external_product_glwe_inplace_fft64(c: &mut Criterion) {
 
         let mut ct_ggsw: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_layout);
         let mut ct_glwe: GLWE<Vec<u8>> = GLWE::alloc_from_infos(&glwe_layout);
-        let pt_rgsw: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n.into(), 1);
+        let pt_rgsw: ScalarZnxOwned = ScalarZnx::alloc(n.into(), 1);
 
         let mut scratch: ScratchOwned<BackendImpl> = ScratchOwned::alloc(
             GGSW::encrypt_sk_tmp_bytes(&module, &ggsw_layout)

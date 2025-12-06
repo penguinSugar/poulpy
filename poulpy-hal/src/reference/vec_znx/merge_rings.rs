@@ -1,5 +1,5 @@
 use crate::{
-    layouts::{VecZnx, VecZnxToMut, VecZnxToRef, ZnxInfos},
+    layouts::{VecZnxMut, VecZnxToMut, VecZnxToRef, ZnxInfos},
     reference::{
         vec_znx::{vec_znx_rotate_inplace, vec_znx_switch_ring},
         znx::{ZnxCopy, ZnxRotate, ZnxSwitchRing, ZnxZero},
@@ -16,7 +16,7 @@ where
     A: VecZnxToRef,
     ZNXARI: ZnxCopy + ZnxSwitchRing + ZnxRotate + ZnxZero,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let mut res: VecZnxMut<'_> = res.to_mut();
 
     let (_n_out, _n_in) = (res.n(), a[0].to_ref().n());
 

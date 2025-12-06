@@ -7,8 +7,8 @@ use rand_distr::{Distribution, weighted::WeightedIndex};
 use crate::{
     alloc_aligned,
     layouts::{
-        Data, DataMut, DataRef, DataView, DataViewMut, DigestU64, FillUniform, ReaderFrom, ToOwnedDeep, VecZnx, WriterTo,
-        ZnxInfos, ZnxSliceSize, ZnxView, ZnxViewMut, ZnxZero,
+        Data, DataMut, DataRef, DataView, DataViewMut, DigestU64, FillUniform, ReaderFrom, ToOwnedDeep, VecZnx, VecZnxMut,
+        VecZnxRef, WriterTo, ZnxInfos, ZnxSliceSize, ZnxView, ZnxViewMut, ZnxZero,
     },
     source::Source,
 };
@@ -32,7 +32,7 @@ impl<D: DataRef> DigestU64 for ScalarZnx<D> {
 }
 
 impl<D: DataRef> ToOwnedDeep for ScalarZnx<D> {
-    type Owned = ScalarZnx<Vec<u8>>;
+    type Owned = ScalarZnxOwned;
     fn to_owned_deep(&self) -> Self::Owned {
         ScalarZnx {
             data: self.data.as_ref().to_vec(),
@@ -131,7 +131,7 @@ impl<D: DataMut> ScalarZnx<D> {
     }
 }
 
-impl ScalarZnx<Vec<u8>> {
+impl ScalarZnxOwned {
     pub fn bytes_of(n: usize, cols: usize) -> usize {
         n * cols * size_of::<i64>()
     }
@@ -174,6 +174,8 @@ impl<D: DataMut> FillUniform for ScalarZnx<D> {
 }
 
 pub type ScalarZnxOwned = ScalarZnx<Vec<u8>>;
+pub type ScalarZnxRef<'a> = ScalarZnx<&'a [u8]>;
+pub type ScalarZnxMut<'a> = ScalarZnx<&'a mut [u8]>;
 
 impl<D: Data> ScalarZnx<D> {
     pub fn from_data(data: D, n: usize, cols: usize) -> Self {
@@ -182,11 +184,11 @@ impl<D: Data> ScalarZnx<D> {
 }
 
 pub trait ScalarZnxToRef {
-    fn to_ref(&self) -> ScalarZnx<&[u8]>;
+    fn to_ref(&self) -> ScalarZnxRef<'_>;
 }
 
 impl<D: DataRef> ScalarZnxToRef for ScalarZnx<D> {
-    fn to_ref(&self) -> ScalarZnx<&[u8]> {
+    fn to_ref(&self) -> ScalarZnxRef<'_> {
         ScalarZnx {
             data: self.data.as_ref(),
             n: self.n,
@@ -196,11 +198,11 @@ impl<D: DataRef> ScalarZnxToRef for ScalarZnx<D> {
 }
 
 pub trait ScalarZnxToMut {
-    fn to_mut(&mut self) -> ScalarZnx<&mut [u8]>;
+    fn to_mut(&mut self) -> ScalarZnxMut<'_>;
 }
 
 impl<D: DataMut> ScalarZnxToMut for ScalarZnx<D> {
-    fn to_mut(&mut self) -> ScalarZnx<&mut [u8]> {
+    fn to_mut(&mut self) -> ScalarZnxMut<'_> {
         ScalarZnx {
             data: self.data.as_mut(),
             n: self.n,
@@ -210,7 +212,7 @@ impl<D: DataMut> ScalarZnxToMut for ScalarZnx<D> {
 }
 
 impl<D: DataRef> ScalarZnx<D> {
-    pub fn as_vec_znx(&self) -> VecZnx<&[u8]> {
+    pub fn as_vec_znx(&self) -> VecZnxRef<'_> {
         VecZnx {
             data: self.data.as_ref(),
             n: self.n,
@@ -222,7 +224,7 @@ impl<D: DataRef> ScalarZnx<D> {
 }
 
 impl<D: DataMut> ScalarZnx<D> {
-    pub fn as_vec_znx_mut(&mut self) -> VecZnx<&mut [u8]> {
+    pub fn as_vec_znx_mut(&mut self) -> VecZnxMut<'_> {
         VecZnx {
             data: self.data.as_mut(),
             n: self.n,

@@ -4,12 +4,13 @@ use crate::{
         VecZnxDftApply, VecZnxIdftApplyConsume, VmpApplyDft, VmpApplyDftTmpBytes, VmpApplyDftToDft, VmpApplyDftToDftAdd,
         VmpApplyDftToDftAddTmpBytes, VmpApplyDftToDftTmpBytes, VmpPMatAlloc, VmpPrepare, VmpPrepareTmpBytes,
     },
-    layouts::{DataViewMut, DigestU64, FillUniform, MatZnx, Module, ScratchOwned, VecZnx, VecZnxBig},
+    layouts::{
+        Backend, DataViewMut, DigestU64, FillUniform, MatZnx, MatZnxOwned, Module, ScratchOwned, VecZnx, VecZnxBigOwned,
+        VecZnxDftOwned, VecZnxOwned, VmpPMatOwned,
+    },
     source::Source,
 };
 use rand::RngCore;
-
-use crate::layouts::{Backend, VecZnxDft, VmpPMat};
 
 pub fn test_vmp_apply_dft<BR: Backend, BT: Backend>(base2k: usize, module_ref: &Module<BR>, module_test: &Module<BT>)
 where
@@ -52,24 +53,24 @@ where
                 for size_out in 1..max_size + 1 {
                     let rows: usize = cols_in;
 
-                    let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols_in, size_in);
+                    let mut a: VecZnxOwned = VecZnx::alloc(n, cols_in, size_in);
                     a.fill_uniform(base2k, &mut source);
                     let a_digest: u64 = a.digest_u64();
 
-                    let mut mat: MatZnx<Vec<u8>> = MatZnx::alloc(n, rows, cols_in, cols_out, size_out);
+                    let mut mat: MatZnxOwned = MatZnx::alloc(n, rows, cols_in, cols_out, size_out);
                     mat.fill_uniform(base2k, &mut source);
                     let mat_digest: u64 = mat.digest_u64();
 
-                    let mut pmat_ref: VmpPMat<Vec<u8>, BR> = module_ref.vmp_pmat_alloc(rows, cols_in, cols_out, size_out);
-                    let mut pmat_test: VmpPMat<Vec<u8>, BT> = module_test.vmp_pmat_alloc(rows, cols_in, cols_out, size_out);
+                    let mut pmat_ref: VmpPMatOwned<BR> = module_ref.vmp_pmat_alloc(rows, cols_in, cols_out, size_out);
+                    let mut pmat_test: VmpPMatOwned<BT> = module_test.vmp_pmat_alloc(rows, cols_in, cols_out, size_out);
 
                     module_ref.vmp_prepare(&mut pmat_ref, &mat, scratch_ref.borrow());
                     module_test.vmp_prepare(&mut pmat_test, &mat, scratch_test.borrow());
 
                     assert_eq!(mat.digest_u64(), mat_digest);
 
-                    let mut res_dft_ref: VecZnxDft<Vec<u8>, BR> = module_ref.vec_znx_dft_alloc(cols_out, size_out);
-                    let mut res_dft_test: VecZnxDft<Vec<u8>, BT> = module_test.vec_znx_dft_alloc(cols_out, size_out);
+                    let mut res_dft_ref: VecZnxDftOwned<BR> = module_ref.vec_znx_dft_alloc(cols_out, size_out);
+                    let mut res_dft_test: VecZnxDftOwned<BT> = module_test.vec_znx_dft_alloc(cols_out, size_out);
 
                     source.fill_bytes(res_dft_ref.data_mut());
                     source.fill_bytes(res_dft_test.data_mut());
@@ -79,11 +80,11 @@ where
 
                     assert_eq!(a.digest_u64(), a_digest);
 
-                    let res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_idft_apply_consume(res_dft_ref);
-                    let res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_idft_apply_consume(res_dft_test);
+                    let res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_idft_apply_consume(res_dft_ref);
+                    let res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_idft_apply_consume(res_dft_test);
 
-                    let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols_out, size_out);
-                    let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols_out, size_out);
+                    let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols_out, size_out);
+                    let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols_out, size_out);
 
                     let res_ref_digest: u64 = res_big_ref.digest_u64();
                     let res_test_digest: u64 = res_big_test.digest_u64();
@@ -173,12 +174,12 @@ where
                 for size_out in 1..max_size + 1 {
                     let rows: usize = size_in;
 
-                    let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols_in, size_in);
+                    let mut a: VecZnxOwned = VecZnx::alloc(n, cols_in, size_in);
                     a.fill_uniform(base2k, &mut source);
                     let a_digest: u64 = a.digest_u64();
 
-                    let mut a_dft_ref: VecZnxDft<Vec<u8>, BR> = module_ref.vec_znx_dft_alloc(cols_in, size_in);
-                    let mut a_dft_test: VecZnxDft<Vec<u8>, BT> = module_test.vec_znx_dft_alloc(cols_in, size_in);
+                    let mut a_dft_ref: VecZnxDftOwned<BR> = module_ref.vec_znx_dft_alloc(cols_in, size_in);
+                    let mut a_dft_test: VecZnxDftOwned<BT> = module_test.vec_znx_dft_alloc(cols_in, size_in);
 
                     for j in 0..cols_in {
                         module_ref.vec_znx_dft_apply(1, 0, &mut a_dft_ref, j, &a, j);
@@ -187,20 +188,20 @@ where
 
                     assert_eq!(a.digest_u64(), a_digest);
 
-                    let mut mat: MatZnx<Vec<u8>> = MatZnx::alloc(n, rows, cols_in, cols_out, size_out);
+                    let mut mat: MatZnxOwned = MatZnx::alloc(n, rows, cols_in, cols_out, size_out);
                     mat.fill_uniform(base2k, &mut source);
                     let mat_digest: u64 = mat.digest_u64();
 
-                    let mut pmat_ref: VmpPMat<Vec<u8>, BR> = module_ref.vmp_pmat_alloc(rows, cols_in, cols_out, size_out);
-                    let mut pmat_test: VmpPMat<Vec<u8>, BT> = module_test.vmp_pmat_alloc(rows, cols_in, cols_out, size_out);
+                    let mut pmat_ref: VmpPMatOwned<BR> = module_ref.vmp_pmat_alloc(rows, cols_in, cols_out, size_out);
+                    let mut pmat_test: VmpPMatOwned<BT> = module_test.vmp_pmat_alloc(rows, cols_in, cols_out, size_out);
 
                     module_ref.vmp_prepare(&mut pmat_ref, &mat, scratch_ref.borrow());
                     module_test.vmp_prepare(&mut pmat_test, &mat, scratch_test.borrow());
 
                     assert_eq!(mat.digest_u64(), mat_digest);
 
-                    let mut res_dft_ref: VecZnxDft<Vec<u8>, BR> = module_ref.vec_znx_dft_alloc(cols_out, size_out);
-                    let mut res_dft_test: VecZnxDft<Vec<u8>, BT> = module_test.vec_znx_dft_alloc(cols_out, size_out);
+                    let mut res_dft_ref: VecZnxDftOwned<BR> = module_ref.vec_znx_dft_alloc(cols_out, size_out);
+                    let mut res_dft_test: VecZnxDftOwned<BT> = module_test.vec_znx_dft_alloc(cols_out, size_out);
 
                     source.fill_bytes(res_dft_ref.data_mut());
                     source.fill_bytes(res_dft_test.data_mut());
@@ -218,11 +219,11 @@ where
                         scratch_test.borrow(),
                     );
 
-                    let res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_idft_apply_consume(res_dft_ref);
-                    let res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_idft_apply_consume(res_dft_test);
+                    let res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_idft_apply_consume(res_dft_ref);
+                    let res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_idft_apply_consume(res_dft_test);
 
-                    let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols_out, size_out);
-                    let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols_out, size_out);
+                    let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols_out, size_out);
+                    let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols_out, size_out);
 
                     let res_ref_digest: u64 = res_big_ref.digest_u64();
                     let res_test_digest: u64 = res_big_test.digest_u64();
@@ -312,12 +313,12 @@ where
                 for size_out in 1..max_size + 1 {
                     let rows: usize = size_in;
 
-                    let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols_in, size_in);
+                    let mut a: VecZnxOwned = VecZnx::alloc(n, cols_in, size_in);
                     a.fill_uniform(base2k, &mut source);
                     let a_digest: u64 = a.digest_u64();
 
-                    let mut a_dft_ref: VecZnxDft<Vec<u8>, BR> = module_ref.vec_znx_dft_alloc(cols_in, size_in);
-                    let mut a_dft_test: VecZnxDft<Vec<u8>, BT> = module_test.vec_znx_dft_alloc(cols_in, size_in);
+                    let mut a_dft_ref: VecZnxDftOwned<BR> = module_ref.vec_znx_dft_alloc(cols_in, size_in);
+                    let mut a_dft_test: VecZnxDftOwned<BT> = module_test.vec_znx_dft_alloc(cols_in, size_in);
 
                     for j in 0..cols_in {
                         module_ref.vec_znx_dft_apply(1, 0, &mut a_dft_ref, j, &a, j);
@@ -326,12 +327,12 @@ where
 
                     assert_eq!(a.digest_u64(), a_digest);
 
-                    let mut mat: MatZnx<Vec<u8>> = MatZnx::alloc(n, rows, cols_in, cols_out, size_out);
+                    let mut mat: MatZnxOwned = MatZnx::alloc(n, rows, cols_in, cols_out, size_out);
                     mat.fill_uniform(base2k, &mut source);
                     let mat_digest: u64 = mat.digest_u64();
 
-                    let mut pmat_ref: VmpPMat<Vec<u8>, BR> = module_ref.vmp_pmat_alloc(rows, cols_in, cols_out, size_out);
-                    let mut pmat_test: VmpPMat<Vec<u8>, BT> = module_test.vmp_pmat_alloc(rows, cols_in, cols_out, size_out);
+                    let mut pmat_ref: VmpPMatOwned<BR> = module_ref.vmp_pmat_alloc(rows, cols_in, cols_out, size_out);
+                    let mut pmat_test: VmpPMatOwned<BT> = module_test.vmp_pmat_alloc(rows, cols_in, cols_out, size_out);
 
                     module_ref.vmp_prepare(&mut pmat_ref, &mat, scratch_ref.borrow());
                     module_test.vmp_prepare(&mut pmat_test, &mat, scratch_test.borrow());
@@ -339,12 +340,12 @@ where
                     assert_eq!(mat.digest_u64(), mat_digest);
 
                     for limb_offset in 0..size_out {
-                        let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols_out, size_out);
+                        let mut res: VecZnxOwned = VecZnx::alloc(n, cols_out, size_out);
                         res.fill_uniform(base2k, &mut source);
                         let res_digest: u64 = res.digest_u64();
 
-                        let mut res_dft_ref: VecZnxDft<Vec<u8>, BR> = module_ref.vec_znx_dft_alloc(cols_out, size_out);
-                        let mut res_dft_test: VecZnxDft<Vec<u8>, BT> = module_test.vec_znx_dft_alloc(cols_out, size_out);
+                        let mut res_dft_ref: VecZnxDftOwned<BR> = module_ref.vec_znx_dft_alloc(cols_out, size_out);
+                        let mut res_dft_test: VecZnxDftOwned<BT> = module_test.vec_znx_dft_alloc(cols_out, size_out);
 
                         for j in 0..cols_out {
                             module_ref.vec_znx_dft_apply(1, 0, &mut res_dft_ref, j, &res, j);
@@ -368,11 +369,11 @@ where
                             scratch_test.borrow(),
                         );
 
-                        let res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_idft_apply_consume(res_dft_ref);
-                        let res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_idft_apply_consume(res_dft_test);
+                        let res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_idft_apply_consume(res_dft_ref);
+                        let res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_idft_apply_consume(res_dft_test);
 
-                        let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols_out, size_out);
-                        let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols_out, size_out);
+                        let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols_out, size_out);
+                        let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols_out, size_out);
 
                         let res_ref_digest: u64 = res_big_ref.digest_u64();
                         let res_test_digest: u64 = res_big_test.digest_u64();

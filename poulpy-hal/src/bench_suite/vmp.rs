@@ -8,7 +8,9 @@ use crate::{
         ModuleNew, ScratchOwnedAlloc, ScratchOwnedBorrow, VecZnxDftAlloc, VmpApplyDft, VmpApplyDftTmpBytes, VmpApplyDftToDft,
         VmpApplyDftToDftAdd, VmpApplyDftToDftAddTmpBytes, VmpApplyDftToDftTmpBytes, VmpPMatAlloc, VmpPrepare, VmpPrepareTmpBytes,
     },
-    layouts::{Backend, DataViewMut, MatZnx, Module, ScratchOwned, VecZnx, VecZnxDft, VmpPMat},
+    layouts::{
+        Backend, DataViewMut, MatZnx, MatZnxOwned, Module, ScratchOwned, VecZnx, VecZnxDftOwned, VecZnxOwned, VmpPMatOwned,
+    },
     source::Source,
 };
 
@@ -37,8 +39,8 @@ where
 
         let mut scratch: ScratchOwned<B> = ScratchOwned::alloc(module.vmp_prepare_tmp_bytes(rows, cols_in, cols_out, size));
 
-        let mut mat: MatZnx<Vec<u8>> = MatZnx::alloc(module.n(), rows, cols_in, cols_out, size);
-        let mut pmat: VmpPMat<Vec<u8>, B> = module.vmp_pmat_alloc(rows, cols_in, cols_out, size);
+        let mut mat: MatZnxOwned = MatZnx::alloc(module.n(), rows, cols_in, cols_out, size);
+        let mut pmat: VmpPMatOwned<B> = module.vmp_pmat_alloc(rows, cols_in, cols_out, size);
 
         source.fill_bytes(mat.data_mut());
         source.fill_bytes(pmat.data_mut());
@@ -96,9 +98,9 @@ where
 
         let mut scratch: ScratchOwned<B> = ScratchOwned::alloc(1 << 20);
 
-        let mut res: VecZnxDft<Vec<u8>, _> = module.vec_znx_dft_alloc(cols_out, size);
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(module.n(), cols_in, size);
-        let mut pmat: VmpPMat<Vec<u8>, B> = module.vmp_pmat_alloc(rows, cols_in, cols_out, size);
+        let mut res: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols_out, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(module.n(), cols_in, size);
+        let mut pmat: VmpPMatOwned<B> = module.vmp_pmat_alloc(rows, cols_in, cols_out, size);
 
         source.fill_bytes(pmat.data_mut());
         source.fill_bytes(res.data_mut());
@@ -158,10 +160,10 @@ where
         let mut scratch: ScratchOwned<B> =
             ScratchOwned::alloc(module.vmp_apply_dft_to_dft_tmp_bytes(size, size, rows, cols_in, cols_out, size));
 
-        let mut res: VecZnxDft<Vec<u8>, _> = module.vec_znx_dft_alloc(cols_out, size);
-        let mut a: VecZnxDft<Vec<u8>, _> = module.vec_znx_dft_alloc(cols_in, size);
+        let mut res: VecZnxDftOwned<_> = module.vec_znx_dft_alloc(cols_out, size);
+        let mut a: VecZnxDftOwned<_> = module.vec_znx_dft_alloc(cols_in, size);
 
-        let mut pmat: VmpPMat<Vec<u8>, B> = module.vmp_pmat_alloc(rows, cols_in, cols_out, size);
+        let mut pmat: VmpPMatOwned<B> = module.vmp_pmat_alloc(rows, cols_in, cols_out, size);
 
         source.fill_bytes(pmat.data_mut());
         source.fill_bytes(res.data_mut());
@@ -221,10 +223,10 @@ where
         let mut scratch: ScratchOwned<B> =
             ScratchOwned::alloc(module.vmp_apply_dft_to_dft_add_tmp_bytes(size, size, rows, cols_in, cols_out, size));
 
-        let mut res: VecZnxDft<Vec<u8>, _> = module.vec_znx_dft_alloc(cols_out, size);
-        let mut a: VecZnxDft<Vec<u8>, _> = module.vec_znx_dft_alloc(cols_in, size);
+        let mut res: VecZnxDftOwned<_> = module.vec_znx_dft_alloc(cols_out, size);
+        let mut a: VecZnxDftOwned<_> = module.vec_znx_dft_alloc(cols_in, size);
 
-        let mut pmat: VmpPMat<Vec<u8>, B> = module.vmp_pmat_alloc(rows, cols_in, cols_out, size);
+        let mut pmat: VmpPMatOwned<B> = module.vmp_pmat_alloc(rows, cols_in, cols_out, size);
 
         source.fill_bytes(pmat.data_mut());
         source.fill_bytes(res.data_mut());

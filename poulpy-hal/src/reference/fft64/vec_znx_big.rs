@@ -3,7 +3,8 @@ use std::f64::consts::SQRT_2;
 use crate::{
     api::VecZnxBigAddNormal,
     layouts::{
-        Backend, Module, VecZnx, VecZnxBig, VecZnxBigToMut, VecZnxBigToRef, VecZnxToMut, VecZnxToRef, ZnxView, ZnxViewMut,
+        Backend, Module, VecZnx, VecZnxBig, VecZnxBigMut, VecZnxBigOwned, VecZnxBigRef, VecZnxBigToMut, VecZnxBigToRef,
+        VecZnxMut, VecZnxRef, VecZnxToMut, VecZnxToRef, ZnxView, ZnxViewMut,
     },
     oep::VecZnxBigAllocBytesImpl,
     reference::{
@@ -28,11 +29,11 @@ where
     A: VecZnxBigToRef<BE>,
     B: VecZnxBigToRef<BE>,
 {
-    let res: VecZnxBig<&mut [u8], BE> = res.to_mut();
-    let a: VecZnxBig<&[u8], BE> = a.to_ref();
-    let b: VecZnxBig<&[u8], BE> = b.to_ref();
+    let res: VecZnxBigMut<'_, BE> = res.to_mut();
+    let a: VecZnxBigRef<'_, BE> = a.to_ref();
+    let b: VecZnxBigRef<'_, BE> = b.to_ref();
 
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,
@@ -40,7 +41,7 @@ where
         max_size: res.max_size,
     };
 
-    let a_vznx: VecZnx<&[u8]> = VecZnx {
+    let a_vznx: VecZnxRef<'_> = VecZnx {
         data: a.data,
         n: a.n,
         cols: a.cols,
@@ -48,7 +49,7 @@ where
         max_size: a.max_size,
     };
 
-    let b_vznx: VecZnx<&[u8]> = VecZnx {
+    let b_vznx: VecZnxRef<'_> = VecZnx {
         data: b.data,
         n: b.n,
         cols: b.cols,
@@ -65,10 +66,10 @@ where
     R: VecZnxBigToMut<BE>,
     A: VecZnxBigToRef<BE>,
 {
-    let res: VecZnxBig<&mut [u8], BE> = res.to_mut();
-    let a: VecZnxBig<&[u8], BE> = a.to_ref();
+    let res: VecZnxBigMut<'_, BE> = res.to_mut();
+    let a: VecZnxBigRef<'_, BE> = a.to_ref();
 
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,
@@ -76,7 +77,7 @@ where
         max_size: res.max_size,
     };
 
-    let a_vznx: VecZnx<&[u8]> = VecZnx {
+    let a_vznx: VecZnxRef<'_> = VecZnx {
         data: a.data,
         n: a.n,
         cols: a.cols,
@@ -94,10 +95,10 @@ where
     A: VecZnxBigToRef<BE>,
     B: VecZnxToRef,
 {
-    let res: VecZnxBig<&mut [u8], BE> = res.to_mut();
-    let a: VecZnxBig<&[u8], BE> = a.to_ref();
+    let res: VecZnxBigMut<'_, BE> = res.to_mut();
+    let a: VecZnxBigRef<'_, BE> = a.to_ref();
 
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,
@@ -105,7 +106,7 @@ where
         max_size: res.max_size,
     };
 
-    let a_vznx: VecZnx<&[u8]> = VecZnx {
+    let a_vznx: VecZnxRef<'_> = VecZnx {
         data: a.data,
         n: a.n,
         cols: a.cols,
@@ -122,8 +123,8 @@ where
     R: VecZnxBigToMut<BE>,
     A: VecZnxToRef,
 {
-    let res: VecZnxBig<&mut [u8], BE> = res.to_mut();
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let res: VecZnxBigMut<'_, BE> = res.to_mut();
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,
@@ -144,10 +145,10 @@ where
     R: VecZnxBigToMut<BE>,
     A: VecZnxBigToRef<BE>,
 {
-    let res: VecZnxBig<&mut [u8], _> = res.to_mut();
-    let a: VecZnxBig<&[u8], _> = a.to_ref();
+    let res: VecZnxBigMut<'_, _> = res.to_mut();
+    let a: VecZnxBigRef<'_, _> = a.to_ref();
 
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,
@@ -155,7 +156,7 @@ where
         max_size: res.max_size,
     };
 
-    let a_vznx: VecZnx<&[u8]> = VecZnx {
+    let a_vznx: VecZnxRef<'_> = VecZnx {
         data: a.data,
         n: a.n,
         cols: a.cols,
@@ -171,9 +172,9 @@ where
     BE: Backend<ScalarBig = i64> + ZnxAutomorphism + ZnxCopy,
     R: VecZnxBigToMut<BE>,
 {
-    let res: VecZnxBig<&mut [u8], _> = res.to_mut();
+    let res: VecZnxBigMut<'_, _> = res.to_mut();
 
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,
@@ -190,10 +191,10 @@ where
     R: VecZnxBigToMut<BE>,
     A: VecZnxBigToRef<BE>,
 {
-    let res: VecZnxBig<&mut [u8], _> = res.to_mut();
-    let a: VecZnxBig<&[u8], _> = a.to_ref();
+    let res: VecZnxBigMut<'_, _> = res.to_mut();
+    let a: VecZnxBigRef<'_, _> = a.to_ref();
 
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,
@@ -201,7 +202,7 @@ where
         max_size: res.max_size,
     };
 
-    let a_vznx: VecZnx<&[u8]> = VecZnx {
+    let a_vznx: VecZnxRef<'_> = VecZnx {
         data: a.data,
         n: a.n,
         cols: a.cols,
@@ -217,9 +218,9 @@ where
     BE: Backend<ScalarBig = i64> + ZnxNegateInplace,
     R: VecZnxBigToMut<BE>,
 {
-    let res: VecZnxBig<&mut [u8], _> = res.to_mut();
+    let res: VecZnxBigMut<'_, _> = res.to_mut();
 
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,
@@ -258,8 +259,8 @@ pub fn vec_znx_big_normalize<R, A, BE>(
         + ZnxExtractDigitAddMul
         + ZnxNormalizeDigit,
 {
-    let a: VecZnxBig<&[u8], _> = a.to_ref();
-    let a_vznx: VecZnx<&[u8]> = VecZnx {
+    let a: VecZnxBigRef<'_, _> = a.to_ref();
+    let a_vznx: VecZnxRef<'_> = VecZnx {
         data: a.data,
         n: a.n,
         cols: a.cols,
@@ -281,7 +282,7 @@ pub fn vec_znx_big_add_normal_ref<R, B: Backend<ScalarBig = i64>>(
 ) where
     R: VecZnxBigToMut<B>,
 {
-    let mut res: VecZnxBig<&mut [u8], B> = res.to_mut();
+    let mut res: VecZnxBigMut<'_, B> = res.to_mut();
     assert!(
         (bound.log2().ceil() as i64) < 64,
         "invalid bound: ceil(log2(bound))={} > 63",
@@ -315,7 +316,7 @@ where
     let k_f64: f64 = (1u64 << k as u64) as f64;
     let sqrt2: f64 = SQRT_2;
     (0..cols).for_each(|col_i| {
-        let mut a: VecZnxBig<Vec<u8>, B> = VecZnxBig::alloc(n, cols, size);
+        let mut a: VecZnxBigOwned<B> = VecZnxBig::alloc(n, cols, size);
         module.vec_znx_big_add_normal(base2k, &mut a, col_i, k, &mut source, sigma, bound);
         module.vec_znx_big_add_normal(base2k, &mut a, col_i, k, &mut source, sigma, bound);
         (0..cols).for_each(|col_j| {
@@ -344,11 +345,11 @@ where
     A: VecZnxBigToRef<BE>,
     B: VecZnxBigToRef<BE>,
 {
-    let res: VecZnxBig<&mut [u8], BE> = res.to_mut();
-    let a: VecZnxBig<&[u8], BE> = a.to_ref();
-    let b: VecZnxBig<&[u8], BE> = b.to_ref();
+    let res: VecZnxBigMut<'_, BE> = res.to_mut();
+    let a: VecZnxBigRef<'_, BE> = a.to_ref();
+    let b: VecZnxBigRef<'_, BE> = b.to_ref();
 
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,
@@ -356,7 +357,7 @@ where
         max_size: res.max_size,
     };
 
-    let a_vznx: VecZnx<&[u8]> = VecZnx {
+    let a_vznx: VecZnxRef<'_> = VecZnx {
         data: a.data,
         n: a.n,
         cols: a.cols,
@@ -364,7 +365,7 @@ where
         max_size: a.max_size,
     };
 
-    let b_vznx: VecZnx<&[u8]> = VecZnx {
+    let b_vznx: VecZnxRef<'_> = VecZnx {
         data: b.data,
         n: b.n,
         cols: b.cols,
@@ -382,10 +383,10 @@ where
     R: VecZnxBigToMut<BE>,
     A: VecZnxBigToRef<BE>,
 {
-    let res: VecZnxBig<&mut [u8], BE> = res.to_mut();
-    let a: VecZnxBig<&[u8], BE> = a.to_ref();
+    let res: VecZnxBigMut<'_, BE> = res.to_mut();
+    let a: VecZnxBigRef<'_, BE> = a.to_ref();
 
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,
@@ -393,7 +394,7 @@ where
         max_size: res.max_size,
     };
 
-    let a_vznx: VecZnx<&[u8]> = VecZnx {
+    let a_vznx: VecZnxRef<'_> = VecZnx {
         data: a.data,
         n: a.n,
         cols: a.cols,
@@ -411,10 +412,10 @@ where
     R: VecZnxBigToMut<BE>,
     A: VecZnxBigToRef<BE>,
 {
-    let res: VecZnxBig<&mut [u8], BE> = res.to_mut();
-    let a: VecZnxBig<&[u8], BE> = a.to_ref();
+    let res: VecZnxBigMut<'_, BE> = res.to_mut();
+    let a: VecZnxBigRef<'_, BE> = a.to_ref();
 
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,
@@ -422,7 +423,7 @@ where
         max_size: res.max_size,
     };
 
-    let a_vznx: VecZnx<&[u8]> = VecZnx {
+    let a_vznx: VecZnxRef<'_> = VecZnx {
         data: a.data,
         n: a.n,
         cols: a.cols,
@@ -441,10 +442,10 @@ where
     A: VecZnxToRef,
     B: VecZnxBigToRef<BE>,
 {
-    let res: VecZnxBig<&mut [u8], BE> = res.to_mut();
-    let b: VecZnxBig<&[u8], BE> = b.to_ref();
+    let res: VecZnxBigMut<'_, BE> = res.to_mut();
+    let b: VecZnxBigRef<'_, BE> = b.to_ref();
 
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,
@@ -452,7 +453,7 @@ where
         max_size: res.max_size,
     };
 
-    let b_vznx: VecZnx<&[u8]> = VecZnx {
+    let b_vznx: VecZnxRef<'_> = VecZnx {
         data: b.data,
         n: b.n,
         cols: b.cols,
@@ -471,10 +472,10 @@ where
     A: VecZnxBigToRef<BE>,
     B: VecZnxToRef,
 {
-    let res: VecZnxBig<&mut [u8], BE> = res.to_mut();
-    let a: VecZnxBig<&[u8], BE> = a.to_ref();
+    let res: VecZnxBigMut<'_, BE> = res.to_mut();
+    let a: VecZnxBigRef<'_, BE> = a.to_ref();
 
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,
@@ -482,7 +483,7 @@ where
         max_size: res.max_size,
     };
 
-    let a_vznx: VecZnx<&[u8]> = VecZnx {
+    let a_vznx: VecZnxRef<'_> = VecZnx {
         data: a.data,
         n: a.n,
         cols: a.cols,
@@ -500,9 +501,9 @@ where
     R: VecZnxBigToMut<BE>,
     A: VecZnxToRef,
 {
-    let res: VecZnxBig<&mut [u8], BE> = res.to_mut();
+    let res: VecZnxBigMut<'_, BE> = res.to_mut();
 
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,
@@ -520,9 +521,9 @@ where
     R: VecZnxBigToMut<BE>,
     A: VecZnxToRef,
 {
-    let res: VecZnxBig<&mut [u8], BE> = res.to_mut();
+    let res: VecZnxBigMut<'_, BE> = res.to_mut();
 
-    let mut res_vznx: VecZnx<&mut [u8]> = VecZnx {
+    let mut res_vznx: VecZnxMut<'_> = VecZnx {
         data: res.data,
         n: res.n,
         cols: res.cols,

@@ -1,6 +1,6 @@
 use poulpy_hal::{
     api::{VecZnxAddNormal, VecZnxFillUniform, VecZnxNormalizeInplace},
-    layouts::{Backend, DataMut, Module, Scratch, VecZnx, ZnxView, ZnxViewMut},
+    layouts::{Backend, DataMut, Module, Scratch, VecZnx, VecZnxOwned, ZnxView, ZnxViewMut},
     source::Source,
 };
 
@@ -77,7 +77,7 @@ where
 
         self.vec_znx_fill_uniform(base2k, &mut res.data, 0, source_xa);
 
-        let mut tmp_znx: VecZnx<Vec<u8>> = VecZnx::alloc(1, 1, res.size());
+        let mut tmp_znx: VecZnxOwned = VecZnx::alloc(1, 1, res.size());
 
         let min_size: usize = res.size().min(pt.size());
 

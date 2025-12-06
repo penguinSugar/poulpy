@@ -1,8 +1,8 @@
 use poulpy_hal::{
     api::{TakeSlice, VmpPrepareTmpBytes},
     layouts::{
-        Backend, MatZnx, MatZnxToRef, Module, Scratch, VecZnxDft, VecZnxDftToMut, VecZnxDftToRef, VmpPMat, VmpPMatOwned,
-        VmpPMatToMut, VmpPMatToRef, ZnxInfos,
+        Backend, MatZnxRef, MatZnxToRef, Module, Scratch, VecZnxDftMut, VecZnxDftRef, VecZnxDftToMut, VecZnxDftToRef, VmpPMatMut,
+        VmpPMatOwned, VmpPMatRef, VmpPMatToMut, VmpPMatToRef, ZnxInfos,
     },
     oep::{
         VmpApplyDftToDftAddImpl, VmpApplyDftToDftAddTmpBytesImpl, VmpApplyDftToDftImpl, VmpApplyDftToDftTmpBytesImpl,
@@ -39,9 +39,9 @@ where
         A: VecZnxDftToRef<Self>,
         C: VmpPMatToRef<Self>,
     {
-        let mut res: VecZnxDft<&mut [u8], Self> = res.to_mut();
-        let a: VecZnxDft<&[u8], Self> = a.to_ref();
-        let pmat: VmpPMat<&[u8], Self> = pmat.to_ref();
+        let mut res: VecZnxDftMut<'_, Self> = res.to_mut();
+        let a: VecZnxDftRef<'_, Self> = a.to_ref();
+        let pmat: VmpPMatRef<'_, Self> = pmat.to_ref();
 
         let (tmp, _) = scratch.take_slice(
             Self::vmp_apply_dft_to_dft_tmp_bytes_impl(
@@ -75,9 +75,9 @@ where
         A: VecZnxDftToRef<Self>,
         C: VmpPMatToRef<Self>,
     {
-        let mut res: VecZnxDft<&mut [u8], Self> = res.to_mut();
-        let a: VecZnxDft<&[u8], Self> = a.to_ref();
-        let pmat: VmpPMat<&[u8], Self> = pmat.to_ref();
+        let mut res: VecZnxDftMut<'_, Self> = res.to_mut();
+        let a: VecZnxDftRef<'_, Self> = a.to_ref();
+        let pmat: VmpPMatRef<'_, Self> = pmat.to_ref();
 
         let (tmp, _) = scratch.take_slice(
             Self::vmp_apply_dft_to_dft_tmp_bytes_impl(
@@ -107,8 +107,8 @@ unsafe impl VmpPrepareImpl<Self> for FFT64Ref {
         A: MatZnxToRef,
     {
         {}
-        let mut res: VmpPMat<&mut [u8], Self> = res.to_mut();
-        let a: MatZnx<&[u8]> = a.to_ref();
+        let mut res: VmpPMatMut<'_, Self> = res.to_mut();
+        let a: MatZnxRef<'_> = a.to_ref();
         let (tmp, _) =
             scratch.take_slice(module.vmp_prepare_tmp_bytes(a.rows(), a.cols_in(), a.cols_out(), a.size()) / size_of::<f64>());
         vmp_prepare(module.get_fft_table(), &mut res, &a, tmp);

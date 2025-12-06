@@ -1,6 +1,6 @@
 use poulpy_hal::{
     api::{ScratchOwnedAlloc, ScratchOwnedBorrow},
-    layouts::{Backend, Module, ScalarZnx, Scratch, ScratchOwned},
+    layouts::{Backend, Module, ScalarZnx, ScalarZnxOwned, Scratch, ScratchOwned},
     source::Source,
 };
 
@@ -38,7 +38,7 @@ where
 
             let mut ct: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_infos);
 
-            let mut pt_scalar: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n, 1);
+            let mut pt_scalar: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
 
             let mut source_xs: Source = Source::new([0u8; 32]);
             let mut source_xe: Source = Source::new([0u8; 32]);
@@ -104,7 +104,7 @@ where
 
             let mut ct_compressed: GGSWCompressed<Vec<u8>> = GGSWCompressed::alloc_from_infos(&ggsw_infos);
 
-            let mut pt_scalar: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n, 1);
+            let mut pt_scalar: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
 
             let mut source_xs: Source = Source::new([0u8; 32]);
             let mut source_xe: Source = Source::new([0u8; 32]);

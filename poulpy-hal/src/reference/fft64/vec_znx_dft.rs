@@ -2,8 +2,8 @@ use bytemuck::cast_slice_mut;
 
 use crate::{
     layouts::{
-        Backend, Data, VecZnx, VecZnxBig, VecZnxBigToMut, VecZnxDft, VecZnxDftToMut, VecZnxDftToRef, VecZnxToRef, ZnxInfos,
-        ZnxView, ZnxViewMut,
+        Backend, Data, VecZnxBig, VecZnxBigMut, VecZnxBigToMut, VecZnxDft, VecZnxDftMut, VecZnxDftRef, VecZnxDftToMut,
+        VecZnxDftToRef, VecZnxRef, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut,
     },
     reference::{
         fft64::reim::{
@@ -21,9 +21,9 @@ where
     A: VecZnxDftToRef<BE>,
     B: VecZnxDftToRef<BE>,
 {
-    let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
-    let a: VecZnxDft<&[u8], BE> = a.to_ref();
-    let b: VecZnxDft<&[u8], BE> = b.to_ref();
+    let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
+    let a: VecZnxDftRef<'_, BE> = a.to_ref();
+    let b: VecZnxDftRef<'_, BE> = b.to_ref();
 
     #[cfg(debug_assertions)]
     {
@@ -74,8 +74,8 @@ where
     R: VecZnxDftToMut<BE>,
     A: VecZnxDftToRef<BE>,
 {
-    let a: VecZnxDft<&[u8], BE> = a.to_ref();
-    let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
+    let a: VecZnxDftRef<'_, BE> = a.to_ref();
+    let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
 
     #[cfg(debug_assertions)]
     {
@@ -99,8 +99,8 @@ where
     R: VecZnxDftToMut<BE>,
     A: VecZnxDftToRef<BE>,
 {
-    let a: VecZnxDft<&[u8], BE> = a.to_ref();
-    let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
+    let a: VecZnxDftRef<'_, BE> = a.to_ref();
+    let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
 
     #[cfg(debug_assertions)]
     {
@@ -136,8 +136,8 @@ where
     R: VecZnxDftToMut<BE>,
     A: VecZnxDftToRef<BE>,
 {
-    let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
-    let a: VecZnxDft<&[u8], BE> = a.to_ref();
+    let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
+    let a: VecZnxDftRef<'_, BE> = a.to_ref();
 
     #[cfg(debug_assertions)]
     {
@@ -171,8 +171,8 @@ pub fn vec_znx_dft_apply<R, A, BE>(
     R: VecZnxDftToMut<BE>,
     A: VecZnxToRef,
 {
-    let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
-    let a: VecZnx<&[u8]> = a.to_ref();
+    let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
+    let a: VecZnxRef<'_> = a.to_ref();
 
     #[cfg(debug_assertions)]
     {
@@ -210,8 +210,8 @@ where
     R: VecZnxBigToMut<BE>,
     A: VecZnxDftToRef<BE>,
 {
-    let mut res: VecZnxBig<&mut [u8], BE> = res.to_mut();
-    let a: VecZnxDft<&[u8], BE> = a.to_ref();
+    let mut res: VecZnxBigMut<'_, BE> = res.to_mut();
+    let a: VecZnxDftRef<'_, BE> = a.to_ref();
 
     #[cfg(debug_assertions)]
     {
@@ -242,8 +242,8 @@ where
     R: VecZnxBigToMut<BE>,
     A: VecZnxDftToMut<BE>,
 {
-    let mut res: VecZnxBig<&mut [u8], BE> = res.to_mut();
-    let mut a: VecZnxDft<&mut [u8], BE> = a.to_mut();
+    let mut res: VecZnxBigMut<'_, BE> = res.to_mut();
+    let mut a: VecZnxDftMut<'_, BE> = a.to_mut();
 
     #[cfg(debug_assertions)]
     {
@@ -272,7 +272,7 @@ where
     VecZnxDft<D, BE>: VecZnxDftToMut<BE>,
 {
     {
-        let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
+        let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
 
         #[cfg(debug_assertions)]
         {
@@ -299,9 +299,9 @@ where
     A: VecZnxDftToRef<BE>,
     B: VecZnxDftToRef<BE>,
 {
-    let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
-    let a: VecZnxDft<&[u8], BE> = a.to_ref();
-    let b: VecZnxDft<&[u8], BE> = b.to_ref();
+    let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
+    let a: VecZnxDftRef<'_, BE> = a.to_ref();
+    let b: VecZnxDftRef<'_, BE> = b.to_ref();
 
     #[cfg(debug_assertions)]
     {
@@ -352,8 +352,8 @@ where
     R: VecZnxDftToMut<BE>,
     A: VecZnxDftToRef<BE>,
 {
-    let a: VecZnxDft<&[u8], BE> = a.to_ref();
-    let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
+    let a: VecZnxDftRef<'_, BE> = a.to_ref();
+    let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
 
     #[cfg(debug_assertions)]
     {
@@ -376,8 +376,8 @@ where
     R: VecZnxDftToMut<BE>,
     A: VecZnxDftToRef<BE>,
 {
-    let a: VecZnxDft<&[u8], BE> = a.to_ref();
-    let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
+    let a: VecZnxDftRef<'_, BE> = a.to_ref();
+    let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
 
     #[cfg(debug_assertions)]
     {
@@ -403,7 +403,7 @@ where
     R: VecZnxDftToMut<BE>,
     BE: Backend<ScalarPrep = f64> + ReimZero,
 {
-    let res: &mut VecZnxDft<&mut [u8], BE> = &mut res.to_mut();
+    let res: &mut VecZnxDftMut<'_, BE> = &mut res.to_mut();
     for j in 0..res.size() {
         BE::reim_zero(res.at_mut(res_col, j))
     }

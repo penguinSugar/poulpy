@@ -4,7 +4,10 @@ use criterion::{BenchmarkId, Criterion};
 
 use crate::{
     api::{ModuleNew, ScratchOwnedAlloc, ScratchOwnedBorrow, VecZnxRotate, VecZnxRotateInplace, VecZnxRotateInplaceTmpBytes},
-    layouts::{Backend, FillUniform, Module, ScratchOwned, VecZnx, VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut},
+    layouts::{
+        Backend, FillUniform, Module, ScratchOwned, VecZnx, VecZnxMut, VecZnxOwned, VecZnxRef, VecZnxToMut, VecZnxToRef,
+        ZnxInfos, ZnxView, ZnxViewMut,
+    },
     reference::znx::{ZnxCopy, ZnxRotate, ZnxZero},
     source::Source,
 };
@@ -19,8 +22,8 @@ where
     A: VecZnxToRef,
     ZNXARI: ZnxRotate + ZnxZero,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
-    let a: VecZnx<&[u8]> = a.to_ref();
+    let mut res: VecZnxMut<'_> = res.to_mut();
+    let a: VecZnxRef<'_> = a.to_ref();
 
     #[cfg(debug_assertions)]
     {
@@ -46,7 +49,7 @@ where
     R: VecZnxToMut,
     ZNXARI: ZnxRotate + ZnxCopy,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let mut res: VecZnxMut<'_> = res.to_mut();
     #[cfg(debug_assertions)]
     {
         assert_eq!(res.n(), tmp.len());
@@ -77,8 +80,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut res: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         // Fill a with random i64
         a.fill_uniform(50, &mut source);
@@ -123,7 +126,7 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut res: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         let mut scratch = ScratchOwned::alloc(module.vec_znx_rotate_inplace_tmp_bytes());
 

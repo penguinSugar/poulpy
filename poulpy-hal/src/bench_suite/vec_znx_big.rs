@@ -11,7 +11,7 @@ use crate::{
         VecZnxBigNormalizeTmpBytes, VecZnxBigSub, VecZnxBigSubInplace, VecZnxBigSubNegateInplace, VecZnxBigSubSmallA,
         VecZnxBigSubSmallB,
     },
-    layouts::{Backend, DataViewMut, Module, ScratchOwned, VecZnx, VecZnxBig},
+    layouts::{Backend, DataViewMut, Module, ScratchOwned, VecZnx, VecZnxBigOwned, VecZnxOwned},
     source::Source,
 };
 
@@ -35,9 +35,9 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut b: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut c: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
+        let mut a: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut b: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut c: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
 
         // Fill a with random bytes
         source.fill_bytes(a.data_mut());
@@ -81,8 +81,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut c: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
+        let mut a: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut c: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
 
         // Fill a with random i64
         source.fill_bytes(a.data_mut());
@@ -125,9 +125,9 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut c: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
+        let mut a: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut b: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut c: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
 
         // Fill a with random i64
         source.fill_bytes(a.data_mut());
@@ -171,8 +171,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut c: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut c: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
 
         // Fill a with random i64
         source.fill_bytes(a.data_mut());
@@ -215,8 +215,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut res: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
+        let mut a: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut res: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
 
         // Fill a with random i64
         source.fill_bytes(a.data_mut());
@@ -261,7 +261,7 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut res: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
+        let mut res: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
 
         let mut scratch: ScratchOwned<B> = ScratchOwned::alloc(module.vec_znx_big_automorphism_inplace_tmp_bytes());
 
@@ -304,8 +304,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut b: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
+        let mut a: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut b: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
 
         // Fill a with random i64
         source.fill_bytes(a.data_mut());
@@ -347,7 +347,7 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
+        let mut a: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
 
         // Fill a with random i64
         source.fill_bytes(a.data_mut());
@@ -393,8 +393,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(module.n(), cols, size);
+        let mut a: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut res: VecZnxOwned = VecZnx::alloc(module.n(), cols, size);
 
         // Fill a with random i64
         source.fill_bytes(a.data_mut());
@@ -438,9 +438,9 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut b: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut c: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
+        let mut a: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut b: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut c: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
 
         // Fill a with random bytes
         source.fill_bytes(a.data_mut());
@@ -483,8 +483,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut c: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
+        let mut a: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut c: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
 
         // Fill a with random bytes
         source.fill_bytes(a.data_mut());
@@ -526,8 +526,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut c: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
+        let mut a: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut c: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
 
         // Fill a with random bytes
         source.fill_bytes(a.data_mut());
@@ -569,9 +569,9 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(module.n(), cols, size);
-        let mut b: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut c: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(module.n(), cols, size);
+        let mut b: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut c: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
 
         // Fill a with random bytes
         source.fill_bytes(a.data_mut());
@@ -614,9 +614,9 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(module.n(), cols, size);
-        let mut c: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
+        let mut a: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut b: VecZnxOwned = VecZnx::alloc(module.n(), cols, size);
+        let mut c: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
 
         // Fill a with random bytes
         source.fill_bytes(a.data_mut());

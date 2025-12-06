@@ -1,6 +1,6 @@
 use poulpy_hal::{
     api::{SvpPPolAlloc, SvpPrepare},
-    layouts::{Backend, DataMut, DataRef, Module, ScalarZnx, Scratch, SvpPPol},
+    layouts::{Backend, DataMut, DataRef, Module, ScalarZnx, ScalarZnxOwned, Scratch, SvpPPolOwned},
 };
 
 use std::marker::PhantomData;
@@ -63,10 +63,10 @@ where
         res.dist = other.dist;
 
         if let Distribution::BinaryBlock(_) = other.dist {
-            let mut x_pow_a: Vec<SvpPPol<Vec<u8>, BE>> = Vec::with_capacity(n << 1);
-            let mut buf: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n, 1);
+            let mut x_pow_a: Vec<SvpPPolOwned<BE>> = Vec::with_capacity(n << 1);
+            let mut buf: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
             (0..n << 1).for_each(|i| {
-                let mut res: SvpPPol<Vec<u8>, BE> = self.svp_ppol_alloc(1);
+                let mut res: SvpPPolOwned<BE> = self.svp_ppol_alloc(1);
                 set_xai_plus_y(self, i, 0, &mut res, &mut buf);
                 x_pow_a.push(res);
             });

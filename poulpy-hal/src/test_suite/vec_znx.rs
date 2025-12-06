@@ -10,7 +10,10 @@ use crate::{
         VecZnxRotateInplace, VecZnxRotateInplaceTmpBytes, VecZnxRsh, VecZnxRshInplace, VecZnxSplitRing, VecZnxSplitRingTmpBytes,
         VecZnxSub, VecZnxSubInplace, VecZnxSubNegateInplace, VecZnxSubScalar, VecZnxSubScalarInplace, VecZnxSwitchRing,
     },
-    layouts::{Backend, DigestU64, FillUniform, Module, ScalarZnx, ScratchOwned, VecZnx, ZnxInfos, ZnxView, ZnxViewMut},
+    layouts::{
+        Backend, DigestU64, FillUniform, Module, ScalarZnx, ScalarZnxOwned, ScratchOwned, VecZnx, VecZnxOwned, ZnxInfos, ZnxView,
+        ZnxViewMut,
+    },
     reference::znx::znx_copy_ref,
     source::Source,
 };
@@ -20,7 +23,7 @@ pub fn test_vec_znx_encode_vec_i64() {
     let base2k: usize = 17;
     let size: usize = 5;
     for k in [1, base2k / 2, size * base2k - 5] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, 2, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, 2, size);
         let mut source = Source::new([0u8; 32]);
         let raw: &mut [i64] = a.raw_mut();
         raw.iter_mut().enumerate().for_each(|(i, x)| *x = i as i64);
@@ -53,18 +56,18 @@ where
     let mut source: Source = Source::new([0u8; 32]);
     let cols: usize = 2;
 
-    let mut a: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n, cols);
+    let mut a: ScalarZnxOwned = ScalarZnx::alloc(n, cols);
     a.fill_uniform(base2k, &mut source);
     let a_digest = a.digest_u64();
 
     for a_size in [1, 2, 3, 4] {
-        let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut b: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         b.fill_uniform(base2k, &mut source);
         let b_digest: u64 = b.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut rest_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut rest_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             // Set d to garbage
             rest_ref.fill_uniform(base2k, &mut source);
@@ -95,13 +98,13 @@ where
     let mut source: Source = Source::new([0u8; 32]);
     let cols: usize = 2;
 
-    let mut b: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n, cols);
+    let mut b: ScalarZnxOwned = ScalarZnx::alloc(n, cols);
     b.fill_uniform(base2k, &mut source);
     let b_digest: u64 = b.digest_u64();
 
     for res_size in [1, 2, 3, 4] {
-        let mut rest_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-        let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+        let mut rest_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+        let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
         rest_ref.fill_uniform(base2k, &mut source);
         res_test.raw_mut().copy_from_slice(rest_ref.raw());
@@ -127,20 +130,20 @@ where
     let cols: usize = 2;
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
 
         let a_digest: u64 = a.digest_u64();
 
         for b_size in [1, 2, 3, 4] {
-            let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, b_size);
+            let mut b: VecZnxOwned = VecZnx::alloc(n, cols, b_size);
             b.fill_uniform(base2k, &mut source);
 
             let b_digest: u64 = b.digest_u64();
 
             for res_size in [1, 2, 3, 4] {
-                let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-                let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+                let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+                let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
                 // Set d to garbage
                 res_ref.fill_uniform(base2k, &mut source);
@@ -173,13 +176,13 @@ where
     let cols: usize = 2;
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
         let a_digest: u64 = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             res_ref.fill_uniform(base2k, &mut source);
             res_test.raw_mut().copy_from_slice(res_ref.raw());
@@ -207,13 +210,13 @@ where
     let cols: usize = 2;
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
         let a_digest: u64 = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             let p: i64 = -5;
 
@@ -260,8 +263,8 @@ pub fn test_vec_znx_automorphism_inplace<BR: Backend, BT: Backend>(
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_automorphism_inplace_tmp_bytes());
 
     for size in [1, 2, 3, 4] {
-        let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         // Fill a with random i64
         res_ref.fill_uniform(base2k, &mut source);
@@ -301,13 +304,13 @@ where
     let cols: usize = 2;
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
         let a_digest: u64 = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res_0: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_1: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_0: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_1: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             // Set d to garbage
             res_0.fill_uniform(base2k, &mut source);
@@ -341,7 +344,7 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_merge_rings_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: [VecZnx<Vec<u8>>; 2] = [
+        let mut a: [VecZnxOwned; 2] = [
             VecZnx::alloc(n >> 1, cols, a_size),
             VecZnx::alloc(n >> 1, cols, a_size),
         ];
@@ -353,8 +356,8 @@ where
         let a_digests: [u64; 2] = [a[0].digest_u64(), a[1].digest_u64()];
 
         for res_size in [1, 2, 3, 4] {
-            let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             res_ref.fill_uniform(base2k, &mut source);
             res_test.fill_uniform(base2k, &mut source);
@@ -382,14 +385,14 @@ where
     let cols: usize = 2;
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
 
         let a_digest: u64 = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             let p: i64 = -5;
 
@@ -436,8 +439,8 @@ pub fn test_vec_znx_mul_xp_minus_one_inplace<BR: Backend, BT: Backend>(
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_mul_xp_minus_one_inplace_tmp_bytes());
 
     for size in [1, 2, 3, 4] {
-        let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         // Fill a with random i64
         res_ref.fill_uniform(base2k, &mut source);
@@ -475,13 +478,13 @@ where
     let cols: usize = 2;
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
         let a_digest: u64 = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             res_ref.fill_uniform(base2k, &mut source);
             res_test.raw_mut().copy_from_slice(res_ref.raw());
@@ -509,8 +512,8 @@ where
     let cols: usize = 2;
 
     for res_size in [1, 2, 3, 4] {
-        let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-        let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+        let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+        let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
         res_ref.fill_uniform(base2k, &mut source);
         res_test.raw_mut().copy_from_slice(res_ref.raw());
@@ -541,13 +544,13 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_normalize_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
         let a_digest: u64 = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             // Set d to garbage
             res_ref.fill_uniform(base2k, &mut source);
@@ -590,8 +593,8 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_normalize_tmp_bytes());
 
     for res_size in [1, 2, 3, 4] {
-        let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-        let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+        let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+        let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
         res_ref.fill_uniform(base2k, &mut source);
         res_test.raw_mut().copy_from_slice(res_ref.raw());
@@ -618,13 +621,13 @@ where
     let cols: usize = 2;
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
         let a_digest: u64 = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             let p: i64 = -5;
 
@@ -668,8 +671,8 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_rotate_inplace_tmp_bytes());
 
     for size in [1, 2, 3, 4] {
-        let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         // Fill a with random i64
         res_ref.fill_uniform(base2k, &mut source);
@@ -810,14 +813,14 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_lsh_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
         let a_digest: u64 = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
             for k in 0..res_size * base2k {
-                let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-                let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+                let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+                let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
                 // Set d to garbage
                 res_ref.fill_uniform(base2k, &mut source);
@@ -854,8 +857,8 @@ where
 
     for res_size in [1, 2, 3, 4] {
         for k in 0..base2k * res_size {
-            let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             res_ref.fill_uniform(base2k, &mut source);
             res_test.raw_mut().copy_from_slice(res_ref.raw());
@@ -886,14 +889,14 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_lsh_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
         let a_digest: u64 = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
             for k in 0..res_size * base2k {
-                let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-                let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+                let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+                let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
                 // Set d to garbage
                 res_ref.fill_uniform(base2k, &mut source);
@@ -929,8 +932,8 @@ where
 
     for res_size in [1, 2, 3, 4] {
         for k in 0..base2k * res_size {
-            let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             res_ref.fill_uniform(base2k, &mut source);
             res_test.raw_mut().copy_from_slice(res_ref.raw());
@@ -961,17 +964,17 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_split_ring_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
         let a_digest = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res_ref: [VecZnx<Vec<u8>>; 2] = [
+            let mut res_ref: [VecZnxOwned; 2] = [
                 VecZnx::alloc(n >> 1, cols, res_size),
                 VecZnx::alloc(n >> 1, cols, res_size),
             ];
 
-            let mut res_test: [VecZnx<Vec<u8>>; 2] = [
+            let mut res_test: [VecZnxOwned; 2] = [
                 VecZnx::alloc(n >> 1, cols, res_size),
                 VecZnx::alloc(n >> 1, cols, res_size),
             ];
@@ -1009,18 +1012,18 @@ where
     let mut source: Source = Source::new([0u8; 32]);
     let cols: usize = 2;
 
-    let mut a: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n, cols);
+    let mut a: ScalarZnxOwned = ScalarZnx::alloc(n, cols);
     a.fill_uniform(base2k, &mut source);
     let a_digest: u64 = a.digest_u64();
 
     for b_size in [1, 2, 3, 4] {
-        let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, b_size);
+        let mut b: VecZnxOwned = VecZnx::alloc(n, cols, b_size);
         b.fill_uniform(base2k, &mut source);
         let b_digest: u64 = b.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res_0: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_1: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_0: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_1: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             // Set d to garbage
             res_0.fill_uniform(base2k, &mut source);
@@ -1050,13 +1053,13 @@ where
     let mut source: Source = Source::new([0u8; 32]);
     let cols: usize = 2;
 
-    let mut a: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n, cols);
+    let mut a: ScalarZnxOwned = ScalarZnx::alloc(n, cols);
     a.fill_uniform(base2k, &mut source);
     let a_digest: u64 = a.digest_u64();
 
     for res_size in [1, 2, 3, 4] {
-        let mut res_0: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-        let mut res_1: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+        let mut res_0: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+        let mut res_1: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
         res_0.fill_uniform(base2k, &mut source);
         res_1.raw_mut().copy_from_slice(res_0.raw());
@@ -1083,18 +1086,18 @@ where
     let cols: usize = 2;
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
         let a_digest: u64 = a.digest_u64();
 
         for b_size in [1, 2, 3, 4] {
-            let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, b_size);
+            let mut b: VecZnxOwned = VecZnx::alloc(n, cols, b_size);
             b.fill_uniform(base2k, &mut source);
             let b_digest: u64 = b.digest_u64();
 
             for res_size in [1, 2, 3, 4] {
-                let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-                let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+                let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+                let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
                 // Set d to garbage
                 res_ref.fill_uniform(base2k, &mut source);
@@ -1127,13 +1130,13 @@ where
     let cols: usize = 2;
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
         let a_digest: u64 = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             res_ref.fill_uniform(base2k, &mut source);
             res_test.raw_mut().copy_from_slice(res_ref.raw());
@@ -1161,13 +1164,13 @@ where
     let cols: usize = 2;
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
         let a_digest: u64 = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             res_ref.fill_uniform(base2k, &mut source);
             res_test.raw_mut().copy_from_slice(res_ref.raw());
@@ -1195,7 +1198,7 @@ where
     let cols: usize = 2;
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
 
         // Fill a with random i64
         a.fill_uniform(base2k, &mut source);
@@ -1203,8 +1206,8 @@ where
 
         for res_size in [1, 2, 3, 4] {
             {
-                let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n << 1, cols, res_size);
-                let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n << 1, cols, res_size);
+                let mut res_ref: VecZnxOwned = VecZnx::alloc(n << 1, cols, res_size);
+                let mut res_test: VecZnxOwned = VecZnx::alloc(n << 1, cols, res_size);
 
                 res_ref.fill_uniform(base2k, &mut source);
                 res_test.fill_uniform(base2k, &mut source);
@@ -1220,8 +1223,8 @@ where
             }
 
             {
-                let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n >> 1, cols, res_size);
-                let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n >> 1, cols, res_size);
+                let mut res_ref: VecZnxOwned = VecZnx::alloc(n >> 1, cols, res_size);
+                let mut res_test: VecZnxOwned = VecZnx::alloc(n >> 1, cols, res_size);
 
                 res_ref.fill_uniform(base2k, &mut source);
                 res_test.fill_uniform(base2k, &mut source);

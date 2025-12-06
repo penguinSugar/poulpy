@@ -5,7 +5,7 @@ use poulpy_hal::{
         VecZnxBigNormalizeTmpBytes, VecZnxCopy, VecZnxDftAddInplace, VecZnxDftApply, VecZnxDftBytesOf, VecZnxDftSubInplace,
         VecZnxDftZero, VecZnxIdftApply, VecZnxIdftApplyTmpBytes, VecZnxRotate, VmpApplyDftToDft, VmpApplyDftToDftTmpBytes,
     },
-    layouts::{Backend, DataMut, DataRef, Module, Scratch, SvpPPol, VecZnx, ZnxZero},
+    layouts::{Backend, DataMut, DataRef, Module, Scratch, SvpPPolOwned, VecZnx, ZnxZero},
 };
 
 use poulpy_core::{
@@ -154,7 +154,7 @@ fn execute_block_binary_extended<DataRes, DataIn, DataBrk, M, BE: Backend>(
         acc[i].zero();
     });
 
-    let x_pow_a: &Vec<SvpPPol<Vec<u8>, BE>>;
+    let x_pow_a: &Vec<SvpPPolOwned<BE>>;
     if let Some(b) = &brk.x_pow_a {
         x_pow_a = b
     } else {
@@ -330,7 +330,7 @@ fn execute_block_binary<DataRes, DataIn, DataBrk, M, BE: Backend>(
     let (mut acc_add_dft, scratch_3) = scratch_2.take_vec_znx_dft(module, cols, brk.size());
     let (mut vmp_xai, scratch_4) = scratch_3.take_vec_znx_dft(module, 1, brk.size());
 
-    let x_pow_a: &Vec<SvpPPol<Vec<u8>, BE>>;
+    let x_pow_a: &Vec<SvpPPolOwned<BE>>;
     if let Some(b) = &brk.x_pow_a {
         x_pow_a = b
     } else {

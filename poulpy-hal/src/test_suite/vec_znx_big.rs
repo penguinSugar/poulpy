@@ -8,7 +8,7 @@ use crate::{
         VecZnxBigSub, VecZnxBigSubInplace, VecZnxBigSubNegateInplace, VecZnxBigSubSmallA, VecZnxBigSubSmallB,
         VecZnxBigSubSmallInplace, VecZnxBigSubSmallNegateInplace,
     },
-    layouts::{Backend, DataViewMut, DigestU64, FillUniform, Module, ScratchOwned, VecZnx, VecZnxBig},
+    layouts::{Backend, DataViewMut, DigestU64, FillUniform, Module, ScratchOwned, VecZnx, VecZnxBigOwned, VecZnxOwned},
     source::Source,
 };
 
@@ -31,12 +31,12 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_big_normalize_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
         let a_digest = a.digest_u64();
 
-        let mut a_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, a_size);
-        let mut a_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, a_size);
+        let mut a_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, a_size);
+        let mut a_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, a_size);
 
         for j in 0..cols {
             module_ref.vec_znx_big_from_small(&mut a_ref, j, &a, j);
@@ -49,12 +49,12 @@ where
         let a_test_digest: u64 = a_test.digest_u64();
 
         for b_size in [1, 2, 3, 4] {
-            let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, b_size);
+            let mut b: VecZnxOwned = VecZnx::alloc(n, cols, b_size);
             b.fill_uniform(base2k, &mut source);
             let b_digest = b.digest_u64();
 
-            let mut b_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, b_size);
-            let mut b_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, b_size);
+            let mut b_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, b_size);
+            let mut b_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, b_size);
 
             for j in 0..cols {
                 module_ref.vec_znx_big_from_small(&mut b_ref, j, &b, j);
@@ -67,8 +67,8 @@ where
             let b_test_digest: u64 = b_test.digest_u64();
 
             for res_size in [1, 2, 3, 4] {
-                let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-                let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+                let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+                let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
                 // Set res to garbage
                 source.fill_bytes(res_big_ref.data_mut());
@@ -85,8 +85,8 @@ where
                 assert_eq!(b_ref.digest_u64(), b_ref_digest);
                 assert_eq!(b_test.digest_u64(), b_test_digest);
 
-                let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-                let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+                let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+                let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
                 let res_ref_digest: u64 = res_big_ref.digest_u64();
                 let res_test_digest: u64 = res_big_test.digest_u64();
@@ -146,11 +146,11 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_big_normalize_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
 
-        let mut a_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, a_size);
-        let mut a_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, a_size);
+        let mut a_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, a_size);
+        let mut a_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, a_size);
 
         for j in 0..cols {
             module_ref.vec_znx_big_from_small(&mut a_ref, j, &a, j);
@@ -161,11 +161,11 @@ where
         let a_test_digest: u64 = a_test.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
             res.fill_uniform(base2k, &mut source);
 
-            let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-            let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+            let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+            let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
             for j in 0..cols {
                 module_ref.vec_znx_big_from_small(&mut res_big_ref, j, &res, j);
@@ -180,8 +180,8 @@ where
             assert_eq!(a_ref.digest_u64(), a_ref_digest);
             assert_eq!(a_test.digest_u64(), a_test_digest);
 
-            let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             let res_ref_digest: u64 = res_big_ref.digest_u64();
             let res_test_digest: u64 = res_big_test.digest_u64();
@@ -234,11 +234,11 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_big_normalize_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
 
-        let mut a_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, a_size);
-        let mut a_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, a_size);
+        let mut a_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, a_size);
+        let mut a_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, a_size);
 
         for j in 0..cols {
             module_ref.vec_znx_big_from_small(&mut a_ref, j, &a, j);
@@ -249,13 +249,13 @@ where
         let a_test_digest: u64 = a_test.digest_u64();
 
         for b_size in [1, 2, 3, 4] {
-            let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, b_size);
+            let mut b: VecZnxOwned = VecZnx::alloc(n, cols, b_size);
             b.fill_uniform(base2k, &mut source);
             let b_digest: u64 = b.digest_u64();
 
             for res_size in [1, 2, 3, 4] {
-                let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-                let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+                let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+                let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
                 // Set res to garbage
                 source.fill_bytes(res_big_ref.data_mut());
@@ -271,8 +271,8 @@ where
                 assert_eq!(a_test.digest_u64(), a_test_digest);
                 assert_eq!(b.digest_u64(), b_digest);
 
-                let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-                let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+                let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+                let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
                 let res_ref_digest: u64 = res_big_ref.digest_u64();
                 let res_test_digest: u64 = res_big_test.digest_u64();
@@ -335,17 +335,17 @@ pub fn test_vec_znx_big_add_small_inplace<BR: Backend, BT: Backend>(
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_big_normalize_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
 
         let a_digest: u64 = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
             res.fill_uniform(base2k, &mut source);
 
-            let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-            let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+            let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+            let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
             for j in 0..cols {
                 module_ref.vec_znx_big_from_small(&mut res_big_ref, j, &res, j);
@@ -359,8 +359,8 @@ pub fn test_vec_znx_big_add_small_inplace<BR: Backend, BT: Backend>(
 
             assert_eq!(a.digest_u64(), a_digest);
 
-            let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             let res_ref_digest: u64 = res_big_ref.digest_u64();
             let res_test_digest: u64 = res_big_test.digest_u64();
@@ -419,11 +419,11 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_big_normalize_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
 
-        let mut a_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, a_size);
-        let mut a_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, a_size);
+        let mut a_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, a_size);
+        let mut a_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, a_size);
 
         for j in 0..cols {
             module_ref.vec_znx_big_from_small(&mut a_ref, j, &a, j);
@@ -435,8 +435,8 @@ where
 
         for res_size in [1, 2, 3, 4] {
             for p in [-5, 5] {
-                let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-                let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+                let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+                let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
                 // Set res to garbage
                 source.fill_bytes(res_big_ref.data_mut());
@@ -451,8 +451,8 @@ where
                 assert_eq!(a_ref.digest_u64(), a_ref_digest);
                 assert_eq!(a_test.digest_u64(), a_test_digest);
 
-                let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-                let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+                let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+                let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
                 let res_ref_digest: u64 = res_big_ref.digest_u64();
                 let res_test_digest: u64 = res_big_test.digest_u64();
@@ -521,11 +521,11 @@ pub fn test_vec_znx_big_automorphism_inplace<BR: Backend, BT: Backend>(
     );
 
     for res_size in [1, 2, 3, 4] {
-        let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+        let mut res: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
         res.fill_uniform(base2k, &mut source);
 
-        let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-        let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+        let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+        let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
         for p in [-5, 5] {
             for j in 0..cols {
@@ -538,8 +538,8 @@ pub fn test_vec_znx_big_automorphism_inplace<BR: Backend, BT: Backend>(
                 module_test.vec_znx_big_automorphism_inplace(p, &mut res_big_test, i, scratch_test.borrow());
             }
 
-            let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             let res_ref_digest: u64 = res_big_ref.digest_u64();
             let res_test_digest: u64 = res_big_test.digest_u64();
@@ -592,11 +592,11 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_big_normalize_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
 
-        let mut a_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, a_size);
-        let mut a_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, a_size);
+        let mut a_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, a_size);
+        let mut a_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, a_size);
 
         for j in 0..cols {
             module_ref.vec_znx_big_from_small(&mut a_ref, j, &a, j);
@@ -607,8 +607,8 @@ where
         let a_test_digest: u64 = a_test.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-            let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+            let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+            let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
             // Set res to garbage
             source.fill_bytes(res_big_ref.data_mut());
@@ -623,8 +623,8 @@ where
             assert_eq!(a_ref.digest_u64(), a_ref_digest);
             assert_eq!(a_test.digest_u64(), a_test_digest);
 
-            let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             let res_ref_digest: u64 = res_big_ref.digest_u64();
             let res_test_digest: u64 = res_big_test.digest_u64();
@@ -685,11 +685,11 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_big_normalize_tmp_bytes());
 
     for res_size in [1, 2, 3, 4] {
-        let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+        let mut res: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
         res.fill_uniform(base2k, &mut source);
 
-        let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-        let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+        let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+        let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
         for j in 0..cols {
             module_ref.vec_znx_big_from_small(&mut res_big_ref, j, &res, j);
@@ -701,8 +701,8 @@ where
             module_test.vec_znx_big_negate_inplace(&mut res_big_test, i);
         }
 
-        let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-        let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+        let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+        let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
         let res_ref_digest: u64 = res_big_ref.digest_u64();
         let res_test_digest: u64 = res_big_test.digest_u64();
@@ -764,11 +764,11 @@ where
     );
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(63, &mut source);
 
-        let mut a_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, a_size);
-        let mut a_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, a_size);
+        let mut a_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, a_size);
+        let mut a_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, a_size);
 
         for j in 0..cols {
             module_ref.vec_znx_big_from_small(&mut a_ref, j, &a, j);
@@ -779,8 +779,8 @@ where
         let a_test_digest: u64 = a_test.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             // Set d to garbage
             source.fill_bytes(res_ref.data_mut());
@@ -835,11 +835,11 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_big_normalize_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
 
-        let mut a_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, a_size);
-        let mut a_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, a_size);
+        let mut a_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, a_size);
+        let mut a_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, a_size);
 
         for j in 0..cols {
             module_ref.vec_znx_big_from_small(&mut a_ref, j, &a, j);
@@ -850,11 +850,11 @@ where
         let a_test_digest: u64 = a_test.digest_u64();
 
         for b_size in [1, 2, 3, 4] {
-            let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, b_size);
+            let mut b: VecZnxOwned = VecZnx::alloc(n, cols, b_size);
             b.fill_uniform(base2k, &mut source);
 
-            let mut b_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, b_size);
-            let mut b_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, b_size);
+            let mut b_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, b_size);
+            let mut b_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, b_size);
 
             for j in 0..cols {
                 module_ref.vec_znx_big_from_small(&mut b_ref, j, &b, j);
@@ -865,8 +865,8 @@ where
             let b_test_digest: u64 = b_test.digest_u64();
 
             for res_size in [1, 2, 3, 4] {
-                let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-                let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+                let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+                let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
                 // Set res to garbage
                 source.fill_bytes(res_big_ref.data_mut());
@@ -883,8 +883,8 @@ where
                 assert_eq!(b_ref.digest_u64(), b_ref_digest);
                 assert_eq!(b_test.digest_u64(), b_test_digest);
 
-                let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-                let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+                let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+                let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
                 let res_ref_digest: u64 = res_big_ref.digest_u64();
                 let res_test_digest: u64 = res_big_test.digest_u64();
@@ -944,11 +944,11 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_big_normalize_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
 
-        let mut a_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, a_size);
-        let mut a_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, a_size);
+        let mut a_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, a_size);
+        let mut a_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, a_size);
 
         for j in 0..cols {
             module_ref.vec_znx_big_from_small(&mut a_ref, j, &a, j);
@@ -959,11 +959,11 @@ where
         let a_test_digest: u64 = a_test.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
             res.fill_uniform(base2k, &mut source);
 
-            let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-            let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+            let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+            let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
             for j in 0..cols {
                 module_ref.vec_znx_big_from_small(&mut res_big_ref, j, &res, j);
@@ -978,8 +978,8 @@ where
             assert_eq!(a_ref.digest_u64(), a_ref_digest);
             assert_eq!(a_test.digest_u64(), a_test_digest);
 
-            let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             let res_ref_digest: u64 = res_big_ref.digest_u64();
             let res_test_digest: u64 = res_big_test.digest_u64();
@@ -1041,11 +1041,11 @@ pub fn test_vec_znx_big_sub_negate_inplace<BR: Backend, BT: Backend>(
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_big_normalize_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
 
-        let mut a_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, a_size);
-        let mut a_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, a_size);
+        let mut a_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, a_size);
+        let mut a_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, a_size);
 
         for j in 0..cols {
             module_ref.vec_znx_big_from_small(&mut a_ref, j, &a, j);
@@ -1056,11 +1056,11 @@ pub fn test_vec_znx_big_sub_negate_inplace<BR: Backend, BT: Backend>(
         let a_test_digest: u64 = a_test.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
             res.fill_uniform(base2k, &mut source);
 
-            let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-            let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+            let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+            let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
             for j in 0..cols {
                 module_ref.vec_znx_big_from_small(&mut res_big_ref, j, &res, j);
@@ -1075,8 +1075,8 @@ pub fn test_vec_znx_big_sub_negate_inplace<BR: Backend, BT: Backend>(
             assert_eq!(a_ref.digest_u64(), a_ref_digest);
             assert_eq!(a_test.digest_u64(), a_test_digest);
 
-            let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             let res_ref_digest: u64 = res_big_ref.digest_u64();
             let res_test_digest: u64 = res_big_test.digest_u64();
@@ -1135,11 +1135,11 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_big_normalize_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
 
-        let mut a_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, a_size);
-        let mut a_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, a_size);
+        let mut a_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, a_size);
+        let mut a_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, a_size);
 
         for j in 0..cols {
             module_ref.vec_znx_big_from_small(&mut a_ref, j, &a, j);
@@ -1150,13 +1150,13 @@ where
         let a_test_digest: u64 = a_test.digest_u64();
 
         for b_size in [1, 2, 3, 4] {
-            let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, b_size);
+            let mut b: VecZnxOwned = VecZnx::alloc(n, cols, b_size);
             b.fill_uniform(base2k, &mut source);
             let b_digest: u64 = b.digest_u64();
 
             for res_size in [1, 2, 3, 4] {
-                let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-                let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+                let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+                let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
                 // Set res to garbage
                 source.fill_bytes(res_big_ref.data_mut());
@@ -1172,8 +1172,8 @@ where
                 assert_eq!(a_test.digest_u64(), a_test_digest);
                 assert_eq!(b.digest_u64(), b_digest);
 
-                let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-                let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+                let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+                let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
                 let res_ref_digest: u64 = res_big_ref.digest_u64();
                 let res_test_digest: u64 = res_big_test.digest_u64();
@@ -1233,11 +1233,11 @@ where
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_big_normalize_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
 
-        let mut a_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, a_size);
-        let mut a_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, a_size);
+        let mut a_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, a_size);
+        let mut a_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, a_size);
 
         for j in 0..cols {
             module_ref.vec_znx_big_from_small(&mut a_ref, j, &a, j);
@@ -1248,13 +1248,13 @@ where
         let a_test_digest: u64 = a_test.digest_u64();
 
         for b_size in [1, 2, 3, 4] {
-            let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, b_size);
+            let mut b: VecZnxOwned = VecZnx::alloc(n, cols, b_size);
             b.fill_uniform(base2k, &mut source);
             let b_digest: u64 = b.digest_u64();
 
             for res_size in [1, 2, 3, 4] {
-                let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-                let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+                let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+                let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
                 // Set res to garbage
                 source.fill_bytes(res_big_ref.data_mut());
@@ -1270,8 +1270,8 @@ where
                 assert_eq!(a_test.digest_u64(), a_test_digest);
                 assert_eq!(b.digest_u64(), b_digest);
 
-                let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-                let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+                let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+                let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
                 let res_ref_digest: u64 = res_big_ref.digest_u64();
                 let res_test_digest: u64 = res_big_test.digest_u64();
@@ -1334,17 +1334,17 @@ pub fn test_vec_znx_big_sub_small_a_inplace<BR: Backend, BT: Backend>(
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_big_normalize_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
 
         let a_digest: u64 = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
             res.fill_uniform(base2k, &mut source);
 
-            let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-            let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+            let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+            let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
             for j in 0..cols {
                 module_ref.vec_znx_big_from_small(&mut res_big_ref, j, &res, j);
@@ -1358,8 +1358,8 @@ pub fn test_vec_znx_big_sub_small_a_inplace<BR: Backend, BT: Backend>(
 
             assert_eq!(a.digest_u64(), a_digest);
 
-            let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             let res_ref_digest: u64 = res_big_ref.digest_u64();
             let res_test_digest: u64 = res_big_test.digest_u64();
@@ -1421,17 +1421,17 @@ pub fn test_vec_znx_big_sub_small_b_inplace<BR: Backend, BT: Backend>(
     let mut scratch_test: ScratchOwned<BT> = ScratchOwned::alloc(module_test.vec_znx_big_normalize_tmp_bytes());
 
     for a_size in [1, 2, 3, 4] {
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, a_size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, a_size);
         a.fill_uniform(base2k, &mut source);
 
         let a_digest: u64 = a.digest_u64();
 
         for res_size in [1, 2, 3, 4] {
-            let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
             res.fill_uniform(base2k, &mut source);
 
-            let mut res_big_ref: VecZnxBig<Vec<u8>, BR> = module_ref.vec_znx_big_alloc(cols, res_size);
-            let mut res_big_test: VecZnxBig<Vec<u8>, BT> = module_test.vec_znx_big_alloc(cols, res_size);
+            let mut res_big_ref: VecZnxBigOwned<BR> = module_ref.vec_znx_big_alloc(cols, res_size);
+            let mut res_big_test: VecZnxBigOwned<BT> = module_test.vec_znx_big_alloc(cols, res_size);
 
             for j in 0..cols {
                 module_ref.vec_znx_big_from_small(&mut res_big_ref, j, &res, j);
@@ -1445,8 +1445,8 @@ pub fn test_vec_znx_big_sub_small_b_inplace<BR: Backend, BT: Backend>(
 
             assert_eq!(a.digest_u64(), a_digest);
 
-            let mut res_small_ref: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
-            let mut res_small_test: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_ref: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
+            let mut res_small_test: VecZnxOwned = VecZnx::alloc(n, cols, res_size);
 
             let res_ref_digest: u64 = res_big_ref.digest_u64();
             let res_test_digest: u64 = res_big_test.digest_u64();

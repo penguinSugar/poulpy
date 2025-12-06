@@ -1,5 +1,5 @@
 use crate::{
-    layouts::{VecZnx, VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut},
+    layouts::{VecZnxMut, VecZnxRef, VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut},
     reference::znx::{ZnxRotate, ZnxSwitchRing, ZnxZero},
 };
 
@@ -13,7 +13,7 @@ where
     A: VecZnxToRef,
     ZNXARI: ZnxSwitchRing + ZnxRotate + ZnxZero,
 {
-    let a: VecZnx<&[u8]> = a.to_ref();
+    let a: VecZnxRef<'_> = a.to_ref();
     let a_size = a.size();
 
     let (_n_in, _n_out) = (a.n(), res[0].to_mut().n());
@@ -40,7 +40,7 @@ where
     }
 
     res.iter_mut().enumerate().for_each(|(i, bi)| {
-        let mut bi: VecZnx<&mut [u8]> = bi.to_mut();
+        let mut bi: VecZnxMut<'_> = bi.to_mut();
 
         let min_size = bi.size().min(a_size);
 

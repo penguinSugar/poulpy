@@ -142,6 +142,8 @@ where
 }
 
 pub type VecZnxDftOwned<B> = VecZnxDft<Vec<u8>, B>;
+pub type VecZnxDftRef<'a, B> = VecZnxDft<&'a [u8], B>;
+pub type VecZnxDftMut<'a, B> = VecZnxDft<&'a mut [u8], B>;
 
 impl<D: Data, B: Backend> VecZnxDft<D, B> {
     pub fn from_data(data: D, n: usize, cols: usize, size: usize) -> Self {
@@ -157,11 +159,11 @@ impl<D: Data, B: Backend> VecZnxDft<D, B> {
 }
 
 pub trait VecZnxDftToRef<B: Backend> {
-    fn to_ref(&self) -> VecZnxDft<&[u8], B>;
+    fn to_ref(&self) -> VecZnxDftRef<'_, B>;
 }
 
 impl<D: DataRef, B: Backend> VecZnxDftToRef<B> for VecZnxDft<D, B> {
-    fn to_ref(&self) -> VecZnxDft<&[u8], B> {
+    fn to_ref(&self) -> VecZnxDftRef<'_, B> {
         VecZnxDft {
             data: self.data.as_ref(),
             n: self.n,
@@ -174,11 +176,11 @@ impl<D: DataRef, B: Backend> VecZnxDftToRef<B> for VecZnxDft<D, B> {
 }
 
 pub trait VecZnxDftToMut<B: Backend> {
-    fn to_mut(&mut self) -> VecZnxDft<&mut [u8], B>;
+    fn to_mut(&mut self) -> VecZnxDftMut<'_, B>;
 }
 
 impl<D: DataMut, B: Backend> VecZnxDftToMut<B> for VecZnxDft<D, B> {
-    fn to_mut(&mut self) -> VecZnxDft<&mut [u8], B> {
+    fn to_mut(&mut self) -> VecZnxDftMut<'_, B> {
         VecZnxDft {
             data: self.data.as_mut(),
             n: self.n,

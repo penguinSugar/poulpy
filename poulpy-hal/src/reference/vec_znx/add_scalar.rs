@@ -1,5 +1,5 @@
 use crate::{
-    layouts::{ScalarZnx, ScalarZnxToRef, VecZnx, VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut},
+    layouts::{ScalarZnxRef, ScalarZnxToRef, VecZnxMut, VecZnxRef, VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut},
     reference::znx::{ZnxAdd, ZnxAddInplace, ZnxCopy, ZnxZero},
 };
 
@@ -10,9 +10,9 @@ where
     B: VecZnxToRef,
     ZNXARI: ZnxAdd + ZnxCopy + ZnxZero,
 {
-    let a: ScalarZnx<&[u8]> = a.to_ref();
-    let b: VecZnx<&[u8]> = b.to_ref();
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let a: ScalarZnxRef<'_> = a.to_ref();
+    let b: VecZnxRef<'_> = b.to_ref();
+    let mut res: VecZnxMut<'_> = res.to_mut();
 
     let min_size: usize = b.size().min(res.size());
 
@@ -40,8 +40,8 @@ where
     A: ScalarZnxToRef,
     ZNXARI: ZnxAddInplace,
 {
-    let a: ScalarZnx<&[u8]> = a.to_ref();
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let a: ScalarZnxRef<'_> = a.to_ref();
+    let mut res: VecZnxMut<'_> = res.to_mut();
 
     #[cfg(debug_assertions)]
     {

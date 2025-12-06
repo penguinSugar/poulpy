@@ -37,18 +37,18 @@ where
 
 #[test]
 fn scalar_znx_serialize() {
-    let original: crate::layouts::ScalarZnx<Vec<u8>> = crate::layouts::ScalarZnx::alloc(1024, 3);
+    let original: crate::layouts::ScalarZnxOwned = crate::layouts::ScalarZnx::alloc(1024, 3);
     test_reader_writer_interface(original);
 }
 
 #[test]
 fn vec_znx_serialize() {
-    let original: crate::layouts::VecZnx<Vec<u8>> = crate::layouts::VecZnx::alloc(1024, 3, 4);
+    let original: crate::layouts::VecZnxOwned = crate::layouts::VecZnx::alloc(1024, 3, 4);
     test_reader_writer_interface(original);
 }
 
 #[test]
 fn mat_znx_serialize() {
-    let original: crate::layouts::MatZnx<Vec<u8>> = crate::layouts::MatZnx::alloc(1024, 3, 2, 2, 4);
+    let original: crate::layouts::MatZnxOwned = crate::layouts::MatZnx::alloc(1024, 3, 2, 2, 4);
     test_reader_writer_interface(original);
 }

@@ -2,7 +2,7 @@ use std::time::Instant;
 
 use poulpy_hal::{
     api::{ModuleN, ScratchOwnedAlloc, ScratchOwnedBorrow, VecZnxRotateInplace},
-    layouts::{Backend, ScalarZnx, Scratch, ScratchOwned, ZnxView, ZnxViewMut},
+    layouts::{Backend, ScalarZnx, ScalarZnxOwned, Scratch, ScratchOwned, ZnxView, ZnxViewMut},
     source::Source,
 };
 
@@ -181,7 +181,7 @@ where
     println!("CBT: {} ms", now.elapsed().as_millis());
 
     // X^{data * 2^log_gap_out}
-    let mut pt_ggsw: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n_glwe, 1);
+    let mut pt_ggsw: ScalarZnxOwned = ScalarZnx::alloc(n_glwe, 1);
     pt_ggsw.at_mut(0, 0)[0] = 1;
     module.vec_znx_rotate_inplace(
         data * (1 << log_gap_out),
@@ -385,7 +385,7 @@ where
     println!("CBT: {} ms", now.elapsed().as_millis());
 
     // X^{data * 2^log_gap_out}
-    let mut pt_ggsw: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n_glwe, 1);
+    let mut pt_ggsw: ScalarZnxOwned = ScalarZnx::alloc(n_glwe, 1);
     pt_ggsw.at_mut(0, 0)[0] = data;
 
     for row in 0..res.dnum().as_usize() {

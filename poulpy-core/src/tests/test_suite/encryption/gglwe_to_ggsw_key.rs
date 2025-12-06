@@ -1,6 +1,6 @@
 use poulpy_hal::{
     api::{ScratchAvailable, ScratchOwnedAlloc, ScratchOwnedBorrow, VecZnxCopy},
-    layouts::{Backend, Module, ScalarZnx, Scratch, ScratchOwned},
+    layouts::{Backend, Module, ScalarZnx, ScalarZnxOwned, Scratch, ScratchOwned},
     source::Source,
 };
 
@@ -68,7 +68,7 @@ where
 
         let max_noise = SIGMA.log2() + 0.5 - (key.k().as_u32() as f64);
 
-        let mut pt_want: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(module.n(), rank);
+        let mut pt_want: ScalarZnxOwned = ScalarZnx::alloc(module.n(), rank);
 
         for i in 0..rank {
             for j in 0..rank {
@@ -148,7 +148,7 @@ where
 
         let max_noise = SIGMA.log2() + 0.5 - (key.k().as_u32() as f64);
 
-        let mut pt_want: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(module.n(), rank);
+        let mut pt_want: ScalarZnxOwned = ScalarZnx::alloc(module.n(), rank);
 
         for i in 0..rank {
             for j in 0..rank {

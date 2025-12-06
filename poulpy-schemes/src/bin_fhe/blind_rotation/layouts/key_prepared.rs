@@ -1,4 +1,4 @@
-use poulpy_hal::layouts::{Backend, Data, DataMut, DataRef, Scratch, SvpPPol};
+use poulpy_hal::layouts::{Backend, Data, DataMut, DataRef, Scratch, SvpPPolOwned};
 
 use std::marker::PhantomData;
 
@@ -59,7 +59,7 @@ impl<D: DataMut, BRA: BlindRotationAlgo, BE: Backend> BlindRotationKeyPrepared<D
 pub struct BlindRotationKeyPrepared<D: Data, BRT: BlindRotationAlgo, B: Backend> {
     pub(crate) data: Vec<GGSWPrepared<D, B>>,
     pub(crate) dist: Distribution,
-    pub(crate) x_pow_a: Option<Vec<SvpPPol<Vec<u8>, B>>>,
+    pub(crate) x_pow_a: Option<Vec<SvpPPolOwned<B>>>,
     pub(crate) _phantom: PhantomData<BRT>,
 }
 

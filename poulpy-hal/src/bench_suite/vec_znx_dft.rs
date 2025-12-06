@@ -9,7 +9,7 @@ use crate::{
         VecZnxDftApply, VecZnxDftSub, VecZnxDftSubInplace, VecZnxDftSubNegateInplace, VecZnxIdftApply, VecZnxIdftApplyTmpA,
         VecZnxIdftApplyTmpBytes,
     },
-    layouts::{Backend, DataViewMut, Module, ScratchOwned, VecZnx, VecZnxBig, VecZnxDft},
+    layouts::{Backend, DataViewMut, Module, ScratchOwned, VecZnx, VecZnxBigOwned, VecZnxDftOwned, VecZnxOwned},
     source::Source,
 };
 
@@ -33,9 +33,9 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
-        let mut b: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
-        let mut c: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
+        let mut a: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
+        let mut b: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
+        let mut c: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
 
         source.fill_bytes(a.data_mut());
         source.fill_bytes(b.data_mut());
@@ -78,8 +78,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
-        let mut c: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
+        let mut a: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
+        let mut c: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
 
         // Fill a with random i64
         source.fill_bytes(a.data_mut());
@@ -122,8 +122,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut res: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut res: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, size);
         source.fill_bytes(res.data_mut());
         source.fill_bytes(a.data_mut());
 
@@ -166,8 +166,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut res: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut a: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
+        let mut res: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut a: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
         source.fill_bytes(res.data_mut());
         source.fill_bytes(a.data_mut());
 
@@ -209,8 +209,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut res: VecZnxBig<Vec<u8>, B> = module.vec_znx_big_alloc(cols, size);
-        let mut a: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
+        let mut res: VecZnxBigOwned<B> = module.vec_znx_big_alloc(cols, size);
+        let mut a: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
         source.fill_bytes(res.data_mut());
         source.fill_bytes(a.data_mut());
 
@@ -251,9 +251,9 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
-        let mut b: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
-        let mut c: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
+        let mut a: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
+        let mut b: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
+        let mut c: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
 
         source.fill_bytes(a.data_mut());
         source.fill_bytes(b.data_mut());
@@ -296,8 +296,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
-        let mut c: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
+        let mut a: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
+        let mut c: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
 
         // Fill a with random i64
         source.fill_bytes(a.data_mut());
@@ -340,8 +340,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
-        let mut c: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
+        let mut a: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
+        let mut c: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
 
         // Fill a with random i64
         source.fill_bytes(a.data_mut());

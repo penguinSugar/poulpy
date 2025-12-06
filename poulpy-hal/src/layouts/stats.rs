@@ -4,7 +4,7 @@ use rug::{
     ops::{AddAssignRound, DivAssignRound, SubAssignRound},
 };
 
-use crate::layouts::{Backend, DataRef, VecZnx, VecZnxBig, VecZnxBigToRef, ZnxInfos};
+use crate::layouts::{Backend, DataRef, VecZnx, VecZnxBig, VecZnxBigRef, VecZnxBigToRef, VecZnxRef, ZnxInfos};
 
 pub struct Stats {
     max: f64,
@@ -51,8 +51,8 @@ impl<D: DataRef> VecZnx<D> {
 
 impl<D: DataRef, B: Backend + Backend<ScalarBig = i64>> VecZnxBig<D, B> {
     pub fn stats(&self, base2k: usize, col: usize) -> Stats {
-        let self_ref: VecZnxBig<&[u8], B> = self.to_ref();
-        let znx: VecZnx<&[u8]> = VecZnx {
+        let self_ref: VecZnxBigRef<'_, B> = self.to_ref();
+        let znx: VecZnxRef<'_> = VecZnx {
             data: self_ref.data,
             n: self_ref.n,
             cols: self_ref.cols,

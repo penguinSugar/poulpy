@@ -13,7 +13,7 @@ use poulpy_hal::{
         ScratchAvailable, ScratchTakeBasic, VecZnxBigAddSmall, VecZnxBigAddSmallInplace, VecZnxBigBytesOf, VecZnxBigNormalize,
         VecZnxBigNormalizeTmpBytes, VecZnxBigSubSmallA, VecZnxDftBytesOf,
     },
-    layouts::{Backend, DataMut, Module, Scratch, VecZnxBig, ZnxInfos, ZnxZero},
+    layouts::{Backend, DataMut, Module, Scratch, VecZnxBigMut, ZnxInfos, ZnxZero},
 };
 
 use crate::bin_fhe::bdd_arithmetic::GetGGSWBit;
@@ -348,7 +348,7 @@ where
         let s_base2k: usize = s.base2k().as_usize();
 
         if res_base2k == s_base2k {
-            let res_big: VecZnxBig<&mut [u8], BE>;
+            let res_big: VecZnxBigMut<'_, BE>;
             let (res_dft, scratch_1) = scratch.take_vec_znx_dft(self, (s.rank() + 1).into(), s.size()); // Todo optimise
             {
                 // Temporary value storing a - b
@@ -411,7 +411,7 @@ where
             self.glwe_normalize(&mut tmp_a, res_a, scratch_2);
             self.glwe_normalize(&mut tmp_b, res_b, scratch_2);
 
-            let res_big: VecZnxBig<&mut [u8], BE>;
+            let res_big: VecZnxBigMut<'_, BE>;
             let (res_dft, scratch_3) = scratch_2.take_vec_znx_dft(self, (s.rank() + 1).into(), s.size()); // Todo optimise
             {
                 // Temporary value storing a - b
@@ -502,7 +502,7 @@ where
 
         self.glwe_sub(res, t, &f);
         let (res_dft, scratch_1) = scratch.take_vec_znx_dft(self, (res.rank() + 1).into(), s.size()); // Todo optimise
-        let mut res_big: VecZnxBig<&mut [u8], BE> = self.glwe_external_product_internal(res_dft, res, s, scratch_1);
+        let mut res_big: VecZnxBigMut<'_, BE> = self.glwe_external_product_internal(res_dft, res, s, scratch_1);
         for j in 0..(res.rank() + 1).into() {
             self.vec_znx_big_add_small_inplace(&mut res_big, j, f.data(), j);
             self.vec_znx_big_normalize(
@@ -541,7 +541,7 @@ where
         });
         self.glwe_sub(&mut tmp, a, res);
         let (res_dft, scratch_2) = scratch_1.take_vec_znx_dft(self, (res.rank() + 1).into(), s.size()); // Todo optimise
-        let mut res_big: VecZnxBig<&mut [u8], BE> = self.glwe_external_product_internal(res_dft, &tmp, s, scratch_2);
+        let mut res_big: VecZnxBigMut<'_, BE> = self.glwe_external_product_internal(res_dft, &tmp, s, scratch_2);
         for j in 0..(res.rank() + 1).into() {
             self.vec_znx_big_add_small_inplace(&mut res_big, j, res.data(), j);
             self.vec_znx_big_normalize(
@@ -571,7 +571,7 @@ where
         let ggsw_base2k: usize = s.base2k().into();
         self.glwe_sub_inplace(res, &a);
         let (res_dft, scratch_1) = scratch.take_vec_znx_dft(self, (res.rank() + 1).into(), s.size()); // Todo optimise
-        let mut res_big: VecZnxBig<&mut [u8], BE> = self.glwe_external_product_internal(res_dft, res, s, scratch_1);
+        let mut res_big: VecZnxBigMut<'_, BE> = self.glwe_external_product_internal(res_dft, res, s, scratch_1);
         for j in 0..(res.rank() + 1).into() {
             self.vec_znx_big_add_small_inplace(&mut res_big, j, a.data(), j);
             self.vec_znx_big_normalize(

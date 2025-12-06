@@ -1,6 +1,6 @@
 use poulpy_hal::{
     api::{ModuleN, VecZnxAddScalarInplace, VecZnxNormalizeInplace},
-    layouts::{Backend, DataMut, Module, ScalarZnx, ScalarZnxToRef, Scratch, ZnxInfos, ZnxZero},
+    layouts::{Backend, DataMut, Module, ScalarZnxRef, ScalarZnxToRef, Scratch, ZnxInfos, ZnxZero},
     source::Source,
 };
 
@@ -93,7 +93,7 @@ where
         let dsize: usize = res.dsize().into();
 
         let sk: &GLWESecretPrepared<&[u8], BE> = &sk.to_ref();
-        let pt: &ScalarZnx<&[u8]> = &pt.to_ref();
+        let pt: &ScalarZnxRef<'_> = &pt.to_ref();
 
         assert_eq!(res.rank(), sk.rank());
         assert_eq!(pt.n(), self.n());

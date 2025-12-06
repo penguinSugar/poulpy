@@ -135,13 +135,15 @@ impl<D: Data, B: Backend> VecZnxBig<D, B> {
 }
 
 pub type VecZnxBigOwned<B> = VecZnxBig<Vec<u8>, B>;
+pub type VecZnxBigRef<'a, B> = VecZnxBig<&'a [u8], B>;
+pub type VecZnxBigMut<'a, B> = VecZnxBig<&'a mut [u8], B>;
 
 pub trait VecZnxBigToRef<B: Backend> {
-    fn to_ref(&self) -> VecZnxBig<&[u8], B>;
+    fn to_ref(&self) -> VecZnxBigRef<'_, B>;
 }
 
 impl<D: DataRef, B: Backend> VecZnxBigToRef<B> for VecZnxBig<D, B> {
-    fn to_ref(&self) -> VecZnxBig<&[u8], B> {
+    fn to_ref(&self) -> VecZnxBigRef<'_, B> {
         VecZnxBig {
             data: self.data.as_ref(),
             n: self.n,
@@ -154,11 +156,11 @@ impl<D: DataRef, B: Backend> VecZnxBigToRef<B> for VecZnxBig<D, B> {
 }
 
 pub trait VecZnxBigToMut<B: Backend> {
-    fn to_mut(&mut self) -> VecZnxBig<&mut [u8], B>;
+    fn to_mut(&mut self) -> VecZnxBigMut<'_, B>;
 }
 
 impl<D: DataMut, B: Backend> VecZnxBigToMut<B> for VecZnxBig<D, B> {
-    fn to_mut(&mut self) -> VecZnxBig<&mut [u8], B> {
+    fn to_mut(&mut self) -> VecZnxBigMut<'_, B> {
         VecZnxBig {
             data: self.data.as_mut(),
             n: self.n,

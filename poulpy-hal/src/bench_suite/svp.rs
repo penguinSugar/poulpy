@@ -8,7 +8,9 @@ use crate::{
         ModuleNew, SvpApplyDft, SvpApplyDftToDft, SvpApplyDftToDftAdd, SvpApplyDftToDftInplace, SvpPPolAlloc, SvpPrepare,
         VecZnxDftAlloc,
     },
-    layouts::{Backend, DataViewMut, FillUniform, Module, ScalarZnx, SvpPPol, VecZnx, VecZnxDft},
+    layouts::{
+        Backend, DataViewMut, FillUniform, Module, ScalarZnx, ScalarZnxOwned, SvpPPolOwned, VecZnx, VecZnxDftOwned, VecZnxOwned,
+    },
     source::Source,
 };
 
@@ -30,8 +32,8 @@ where
 
         let cols: usize = 2;
 
-        let mut svp: SvpPPol<Vec<u8>, B> = module.svp_ppol_alloc(cols);
-        let mut a: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(module.n(), cols);
+        let mut svp: SvpPPolOwned<B> = module.svp_ppol_alloc(cols);
+        let mut a: ScalarZnxOwned = ScalarZnx::alloc(module.n(), cols);
         let mut source = Source::new([0u8; 32]);
         a.fill_uniform(50, &mut source);
 
@@ -70,9 +72,9 @@ where
 
         let module: Module<B> = Module::<B>::new(n as u64);
 
-        let mut svp: SvpPPol<Vec<u8>, B> = module.svp_ppol_alloc(cols);
-        let mut res: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut svp: SvpPPolOwned<B> = module.svp_ppol_alloc(cols);
+        let mut res: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         let mut source = Source::new([0u8; 32]);
 
@@ -117,9 +119,9 @@ where
 
         let module: Module<B> = Module::<B>::new(n as u64);
 
-        let mut svp: SvpPPol<Vec<u8>, B> = module.svp_ppol_alloc(cols);
-        let mut res: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
-        let mut a: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
+        let mut svp: SvpPPolOwned<B> = module.svp_ppol_alloc(cols);
+        let mut res: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
+        let mut a: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
 
         let mut source = Source::new([0u8; 32]);
 
@@ -164,9 +166,9 @@ where
 
         let module: Module<B> = Module::<B>::new(n as u64);
 
-        let mut svp: SvpPPol<Vec<u8>, B> = module.svp_ppol_alloc(cols);
-        let mut res: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
-        let mut a: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
+        let mut svp: SvpPPolOwned<B> = module.svp_ppol_alloc(cols);
+        let mut res: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
+        let mut a: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
 
         let mut source = Source::new([0u8; 32]);
 
@@ -211,8 +213,8 @@ where
 
         let module: Module<B> = Module::<B>::new(n as u64);
 
-        let mut svp: SvpPPol<Vec<u8>, B> = module.svp_ppol_alloc(cols);
-        let mut res: VecZnxDft<Vec<u8>, B> = module.vec_znx_dft_alloc(cols, size);
+        let mut svp: SvpPPolOwned<B> = module.svp_ppol_alloc(cols);
+        let mut res: VecZnxDftOwned<B> = module.vec_znx_dft_alloc(cols, size);
 
         let mut source = Source::new([0u8; 32]);
 

@@ -4,8 +4,8 @@ use crate::{
         VecZnxBigNormalize, VecZnxDftAlloc, VecZnxDftApply, VecZnxIdftApplyTmpA, VecZnxNormalizeInplace,
     },
     layouts::{
-        Backend, FillUniform, Scratch, ScratchOwned, VecZnx, VecZnxBig, VecZnxDft, VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView,
-        ZnxViewMut, ZnxZero,
+        Backend, FillUniform, Scratch, ScratchOwned, VecZnx, VecZnxBigOwned, VecZnxDftOwned, VecZnxMut, VecZnxOwned, VecZnxRef,
+        VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut, ZnxZero,
     },
     source::Source,
 };
@@ -34,20 +34,20 @@ where
     let c_cols: usize = a_cols + b_cols - 1;
     let c_size: usize = a_size + b_size;
 
-    let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(module.n(), a_cols, a_size);
-    let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(module.n(), b_cols, b_size);
+    let mut a: VecZnxOwned = VecZnx::alloc(module.n(), a_cols, a_size);
+    let mut b: VecZnxOwned = VecZnx::alloc(module.n(), b_cols, b_size);
 
-    let mut c_want: VecZnx<Vec<u8>> = VecZnx::alloc(module.n(), c_cols, c_size);
-    let mut c_have: VecZnx<Vec<u8>> = VecZnx::alloc(module.n(), c_cols, c_size);
-    let mut c_have_dft: VecZnxDft<Vec<u8>, BE> = module.vec_znx_dft_alloc(c_cols, c_size);
-    let mut c_have_big: VecZnxBig<Vec<u8>, BE> = module.vec_znx_big_alloc(c_cols, c_size);
+    let mut c_want: VecZnxOwned = VecZnx::alloc(module.n(), c_cols, c_size);
+    let mut c_have: VecZnxOwned = VecZnx::alloc(module.n(), c_cols, c_size);
+    let mut c_have_dft: VecZnxDftOwned<BE> = module.vec_znx_dft_alloc(c_cols, c_size);
+    let mut c_have_big: VecZnxBigOwned<BE> = module.vec_znx_big_alloc(c_cols, c_size);
 
     let mut scratch: ScratchOwned<BE> = ScratchOwned::alloc(module.convolution_tmp_bytes(b_size));
 
     a.fill_uniform(base2k, &mut source);
     b.fill_uniform(base2k, &mut source);
 
-    let mut b_dft: VecZnxDft<Vec<u8>, BE> = module.vec_znx_dft_alloc(b_cols, b_size);
+    let mut b_dft: VecZnxDftOwned<BE> = module.vec_znx_dft_alloc(b_cols, b_size);
     for i in 0..b.cols() {
         module.vec_znx_dft_apply(1, 0, &mut b_dft, i, &b, i);
     }
@@ -94,9 +94,9 @@ fn bivariate_tensoring_naive<R, A, B, M, BE: Backend>(
     M: VecZnxNormalizeInplace<BE>,
     Scratch<BE>: TakeSlice,
 {
-    let res: &mut VecZnx<&mut [u8]> = &mut res.to_mut();
-    let a: &VecZnx<&[u8]> = &a.to_ref();
-    let b: &VecZnx<&[u8]> = &b.to_ref();
+    let res: &mut VecZnxMut<'_> = &mut res.to_mut();
+    let a: &VecZnxRef<'_> = &a.to_ref();
+    let b: &VecZnxRef<'_> = &b.to_ref();
 
     assert!(res.cols() >= a.cols() + b.cols() - 1);
 

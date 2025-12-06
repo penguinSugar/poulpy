@@ -5,7 +5,7 @@ use poulpy_hal::{
         VecZnxDftApply, VecZnxDftBytesOf, VecZnxFillUniform, VecZnxIdftApplyConsume, VecZnxNormalize, VecZnxNormalizeInplace,
         VecZnxNormalizeTmpBytes, VecZnxSub, VecZnxSubInplace,
     },
-    layouts::{Backend, DataMut, Module, ScalarZnx, Scratch, VecZnx, VecZnxBig, VecZnxToMut, ZnxInfos, ZnxZero},
+    layouts::{Backend, DataMut, Module, ScalarZnx, Scratch, VecZnx, VecZnxBigMut, VecZnxMut, VecZnxToMut, ZnxInfos, ZnxZero},
     source::Source,
 };
 
@@ -483,7 +483,7 @@ where
         P: GLWEPlaintextToRef,
         S: GLWESecretPreparedToRef<BE>,
     {
-        let ct: &mut VecZnx<&mut [u8]> = &mut res.to_mut();
+        let ct: &mut VecZnxMut<'_> = &mut res.to_mut();
         let sk: GLWESecretPrepared<&[u8], BE> = sk.to_ref();
 
         if compressed {
@@ -534,7 +534,7 @@ where
                 }
 
                 self.svp_apply_dft_to_dft_inplace(&mut ci_dft, 0, &sk.data, i - 1);
-                let ci_big: VecZnxBig<&mut [u8], BE> = self.vec_znx_idft_apply_consume(ci_dft);
+                let ci_big: VecZnxBigMut<'_, BE> = self.vec_znx_idft_apply_consume(ci_dft);
 
                 // use c[0] as buffer, which is overwritten later by the normalization step
                 self.vec_znx_big_normalize(base2k, &mut ci, 0, base2k, &ci_big, 0, scratch_3);

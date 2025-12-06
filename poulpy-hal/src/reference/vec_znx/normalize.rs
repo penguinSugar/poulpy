@@ -4,7 +4,10 @@ use criterion::{BenchmarkId, Criterion};
 
 use crate::{
     api::{ModuleNew, ScratchOwnedAlloc, ScratchOwnedBorrow, VecZnxNormalize, VecZnxNormalizeInplace, VecZnxNormalizeTmpBytes},
-    layouts::{Backend, FillUniform, Module, ScratchOwned, VecZnx, VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut},
+    layouts::{
+        Backend, FillUniform, Module, ScratchOwned, VecZnx, VecZnxMut, VecZnxOwned, VecZnxRef, VecZnxToMut, VecZnxToRef,
+        ZnxInfos, ZnxView, ZnxViewMut,
+    },
     reference::znx::{
         ZnxAddInplace, ZnxCopy, ZnxExtractDigitAddMul, ZnxMulPowerOfTwoInplace, ZnxNormalizeDigit, ZnxNormalizeFinalStep,
         ZnxNormalizeFinalStepInplace, ZnxNormalizeFirstStep, ZnxNormalizeFirstStepCarryOnly, ZnxNormalizeFirstStepInplace,
@@ -40,8 +43,8 @@ pub fn vec_znx_normalize<R, A, ZNXARI>(
         + ZnxExtractDigitAddMul
         + ZnxNormalizeDigit,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
-    let a: VecZnx<&[u8]> = a.to_ref();
+    let mut res: VecZnxMut<'_> = res.to_mut();
+    let a: VecZnxRef<'_> = a.to_ref();
 
     #[cfg(debug_assertions)]
     {
@@ -209,7 +212,7 @@ pub fn vec_znx_normalize_inplace<R: VecZnxToMut, ZNXARI>(base2k: usize, res: &mu
 where
     ZNXARI: ZnxNormalizeFirstStepInplace + ZnxNormalizeMiddleStepInplace + ZnxNormalizeFinalStepInplace,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let mut res: VecZnxMut<'_> = res.to_mut();
 
     #[cfg(debug_assertions)]
     {
@@ -253,8 +256,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut res: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         // Fill a with random i64
         a.fill_uniform(50, &mut source);
@@ -303,7 +306,7 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         // Fill a with random i64
         a.fill_uniform(50, &mut source);
@@ -349,12 +352,12 @@ fn test_vec_znx_normalize_conv() {
         for end_base2k in 1..50 {
             let end_size: usize = prec.div_ceil(end_base2k);
 
-            let mut want: VecZnx<Vec<u8>> = VecZnx::alloc(n, 1, end_size);
+            let mut want: VecZnxOwned = VecZnx::alloc(n, 1, end_size);
             want.encode_vec_i128(end_base2k, 0, prec, &data);
             vec_znx_normalize_inplace::<_, ZnxRef>(end_base2k, &mut want, 0, &mut carry);
 
             // Creates a temporary poly where encoding is in start_base2k
-            let mut tmp: VecZnx<Vec<u8>> = VecZnx::alloc(n, 1, prec.div_ceil(start_base2k));
+            let mut tmp: VecZnxOwned = VecZnx::alloc(n, 1, prec.div_ceil(start_base2k));
             tmp.encode_vec_i128(start_base2k, 0, prec, &data);
 
             vec_znx_normalize_inplace::<_, ZnxRef>(start_base2k, &mut tmp, 0, &mut carry);
@@ -362,7 +365,7 @@ fn test_vec_znx_normalize_conv() {
             let mut data_tmp: Vec<Float> = (0..n).map(|_| Float::with_val(prec as u32, 0)).collect();
             tmp.decode_vec_float(start_base2k, 0, &mut data_tmp);
 
-            let mut have: VecZnx<Vec<u8>> = VecZnx::alloc(n, 1, end_size);
+            let mut have: VecZnxOwned = VecZnx::alloc(n, 1, end_size);
             vec_znx_normalize::<_, _, ZnxRef>(end_base2k, &mut have, 0, start_base2k, &tmp, 0, &mut carry);
 
             let out_prec: u32 = (end_size * end_base2k) as u32;

@@ -1,5 +1,5 @@
 use crate::{
-    layouts::{VecZnx, VecZnxToMut, ZnxInfos, ZnxViewMut},
+    layouts::{VecZnxMut, VecZnxToMut, ZnxInfos, ZnxViewMut},
     reference::znx::{znx_add_normal_f64_ref, znx_fill_normal_f64_ref, znx_fill_uniform_ref},
     source::Source,
 };
@@ -8,7 +8,7 @@ pub fn vec_znx_fill_uniform_ref<R>(base2k: usize, res: &mut R, res_col: usize, s
 where
     R: VecZnxToMut,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let mut res: VecZnxMut<'_> = res.to_mut();
     for j in 0..res.size() {
         znx_fill_uniform_ref(base2k, res.at_mut(res_col, j), source)
     }
@@ -25,7 +25,7 @@ pub fn vec_znx_fill_normal_ref<R>(
 ) where
     R: VecZnxToMut,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let mut res: VecZnxMut<'_> = res.to_mut();
     assert!(
         (bound.log2().ceil() as i64) < 64,
         "invalid bound: ceil(log2(bound))={} > 63",
@@ -53,7 +53,7 @@ pub fn vec_znx_add_normal_ref<R>(
 ) where
     R: VecZnxToMut,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let mut res: VecZnxMut<'_> = res.to_mut();
     assert!(
         (bound.log2().ceil() as i64) < 64,
         "invalid bound: ceil(log2(bound))={} > 63",

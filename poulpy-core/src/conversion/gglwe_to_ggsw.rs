@@ -3,7 +3,7 @@ use poulpy_hal::{
         ScratchAvailable, ScratchTakeBasic, VecZnxBigAddSmallInplace, VecZnxBigBytesOf, VecZnxBigNormalize,
         VecZnxBigNormalizeTmpBytes, VecZnxCopy, VecZnxDftApply, VecZnxDftBytesOf, VecZnxIdftApplyConsume, VecZnxNormalize,
     },
-    layouts::{Backend, DataMut, Module, Scratch, VecZnx, VecZnxBig, VecZnxDft, VecZnxDftToRef, VecZnxToRef},
+    layouts::{Backend, DataMut, Module, Scratch, VecZnx, VecZnxBigMut, VecZnxDftRef, VecZnxDftToRef, VecZnxRef, VecZnxToRef},
 };
 
 use crate::{
@@ -214,8 +214,8 @@ fn ggsw_expand_rows_internal<M, R, C, A, T, BE: Backend>(
     Scratch<BE>: ScratchTakeCore<BE>,
 {
     let res: &mut GGSW<&mut [u8]> = &mut res.to_mut();
-    let a_0: &VecZnx<&[u8]> = &a_0.to_ref();
-    let a_dft: &VecZnxDft<&[u8], BE> = &a_dft.to_ref();
+    let a_0: &VecZnxRef<'_> = &a_0.to_ref();
+    let a_dft: &VecZnxDftRef<'_, BE> = &a_dft.to_ref();
     let tsk: &GGLWEToGGSWKeyPrepared<&[u8], BE> = &tsk.to_ref();
     let cols: usize = res.rank().as_usize() + 1;
 
@@ -254,7 +254,7 @@ fn ggsw_expand_rows_internal<M, R, C, A, T, BE: Backend>(
         // (-(x0s0 + x1s1 + x2s2) + s0(a0s0 + a1s1 + a2s2), x0, x1, x2)
         module.gglwe_product_dft(&mut res_dft, a_dft, tsk.at(col - 1), scratch_1);
 
-        let mut res_big: VecZnxBig<&mut [u8], BE> = module.vec_znx_idft_apply_consume(res_dft);
+        let mut res_big: VecZnxBigMut<'_, BE> = module.vec_znx_idft_apply_consume(res_dft);
 
         // Adds -(sum a[i] * s[i]) + m)  on the i-th column of tmp_idft_i
         //

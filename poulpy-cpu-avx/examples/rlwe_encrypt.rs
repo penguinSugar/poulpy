@@ -11,7 +11,10 @@ use poulpy_hal::{
         VecZnxBigAddSmallInplace, VecZnxBigAlloc, VecZnxBigNormalize, VecZnxBigNormalizeTmpBytes, VecZnxBigSubSmallNegateInplace,
         VecZnxDftAlloc, VecZnxDftApply, VecZnxFillUniform, VecZnxIdftApplyTmpA, VecZnxNormalizeInplace,
     },
-    layouts::{Module, ScalarZnx, ScratchOwned, SvpPPol, VecZnx, VecZnxBig, VecZnxDft, ZnxInfos},
+    layouts::{
+        Module, ScalarZnx, ScalarZnxOwned, ScratchOwned, SvpPPolOwned, VecZnx, VecZnxBigOwned, VecZnxDftOwned, VecZnxOwned,
+        ZnxInfos,
+    },
     source::Source,
 };
 
@@ -29,17 +32,17 @@ fn main() {
     let mut source: Source = Source::new(seed);
 
     // s <- Z_{-1, 0, 1}[X]/(X^{N}+1)
-    let mut s: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(module.n(), 1);
+    let mut s: ScalarZnxOwned = ScalarZnx::alloc(module.n(), 1);
     s.fill_ternary_prob(0, 0.5, &mut source);
 
     // Buffer to store s in the DFT domain
-    let mut s_dft: SvpPPol<Vec<u8>, BackendImpl> = module.svp_ppol_alloc(s.cols());
+    let mut s_dft: SvpPPolOwned<BackendImpl> = module.svp_ppol_alloc(s.cols());
 
     // s_dft <- DFT(s)
     module.svp_prepare(&mut s_dft, 0, &s, 0);
 
     // Allocates a VecZnx with two columns: ct=(0, 0)
-    let mut ct: VecZnx<Vec<u8>> = VecZnx::alloc(
+    let mut ct: VecZnxOwned = VecZnx::alloc(
         module.n(),
         2,       // Number of columns
         ct_size, // Number of small poly per column
@@ -48,7 +51,7 @@ fn main() {
     // Fill the second column with random values: ct = (0, a)
     module.vec_znx_fill_uniform(base2k, &mut ct, 1, &mut source);
 
-    let mut buf_dft: VecZnxDft<Vec<u8>, BackendImpl> = module.vec_znx_dft_alloc(1, ct_size);
+    let mut buf_dft: VecZnxDftOwned<BackendImpl> = module.vec_znx_dft_alloc(1, ct_size);
 
     module.vec_znx_dft_apply(1, 0, &mut buf_dft, 0, &ct, 1);
 
@@ -63,7 +66,7 @@ fn main() {
     // Alias scratch space (VecZnxDft<B> is always at least as big as VecZnxBig<B>)
 
     // BIG(ct[1] * s) <- IDFT(DFT(ct[1] * s)) (not normalized)
-    let mut buf_big: VecZnxBig<Vec<u8>, BackendImpl> = module.vec_znx_big_alloc(1, ct_size);
+    let mut buf_big: VecZnxBigOwned<BackendImpl> = module.vec_znx_big_alloc(1, ct_size);
     module.vec_znx_idft_apply_tmpa(&mut buf_big, 0, &mut buf_dft, 0);
 
     // Creates a plaintext: VecZnx with 1 column

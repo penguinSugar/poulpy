@@ -2,6 +2,7 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![feature(trait_alias)]
+#![feature(allocator_api)]
 
 pub mod api;
 pub mod bench_suite;

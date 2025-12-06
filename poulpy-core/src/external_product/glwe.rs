@@ -4,7 +4,7 @@ use poulpy_hal::{
         VecZnxDftApply, VecZnxDftBytesOf, VecZnxIdftApplyConsume, VecZnxNormalize, VecZnxNormalizeTmpBytes, VmpApplyDftToDft,
         VmpApplyDftToDftAdd, VmpApplyDftToDftTmpBytes,
     },
-    layouts::{Backend, DataMut, DataViewMut, Module, Scratch, VecZnxBig, VecZnxDft},
+    layouts::{Backend, DataMut, DataViewMut, Module, Scratch, VecZnxBig, VecZnxBigMut, VecZnxDft},
 };
 
 use crate::{
@@ -115,7 +115,7 @@ where
 
         let (res_dft, scratch_1) = scratch.take_vec_znx_dft(self, (res.rank() + 1).into(), ggsw.size()); // Todo optimise
 
-        let res_big: VecZnxBig<&mut [u8], BE> = if base2k_res != base2k_ggsw {
+        let res_big: VecZnxBigMut<'_, BE> = if base2k_res != base2k_ggsw {
             let (mut res_conv, scratch_2) = scratch_1.take_glwe(&GLWELayout {
                 n: res.n(),
                 base2k: ggsw.base2k(),
@@ -161,7 +161,7 @@ where
 
         let (res_dft, scratch_1) = scratch.take_vec_znx_dft(self, (res.rank() + 1).into(), ggsw.size()); // Todo optimise
 
-        let res_big: VecZnxBig<&mut [u8], BE> = if base2k_a != base2k_ggsw {
+        let res_big: VecZnxBigMut<'_, BE> = if base2k_a != base2k_ggsw {
             let (mut a_conv, scratch_2) = scratch_1.take_glwe(&GLWELayout {
                 n: a.n(),
                 base2k: ggsw.base2k(),

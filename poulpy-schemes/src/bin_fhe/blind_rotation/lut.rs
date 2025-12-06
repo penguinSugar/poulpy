@@ -4,7 +4,7 @@ use poulpy_hal::{
         ScratchOwnedAlloc, ScratchOwnedBorrow, TakeSlice, VecZnxCopy, VecZnxNormalizeInplace, VecZnxNormalizeTmpBytes,
         VecZnxRotateInplace, VecZnxRotateInplaceTmpBytes, VecZnxSwitchRing,
     },
-    layouts::{Backend, Module, Scratch, ScratchOwned, VecZnx, ZnxInfos, ZnxViewMut},
+    layouts::{Backend, Module, Scratch, ScratchOwned, VecZnx, VecZnxOwned, ZnxInfos, ZnxViewMut},
     reference::{vec_znx::vec_znx_rotate_inplace, znx::ZnxRef},
 };
 
@@ -52,7 +52,7 @@ impl LookupTableInfos for LookUpTableLayout {
 }
 
 pub struct LookupTable {
-    pub(crate) data: Vec<VecZnx<Vec<u8>>>,
+    pub(crate) data: Vec<VecZnxOwned>,
     pub(crate) rot_dir: LookUpTableRotationDirection,
     pub(crate) base2k: Base2K,
     pub(crate) k: TorusPrecision,
@@ -225,7 +225,7 @@ where
         let size: usize = res.k.div_ceil(res.base2k) as usize;
 
         // Equivalent to AUTO([f(0), -f(n-1), -f(n-2), ..., -f(1)], -1)
-        let mut lut_full: VecZnx<Vec<u8>> = VecZnx::alloc(domain_size, 1, size);
+        let mut lut_full: VecZnxOwned = VecZnx::alloc(domain_size, 1, size);
 
         let lut_at: &mut [i64] = lut_full.at_mut(0, limbs - 1);
 

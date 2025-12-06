@@ -6,8 +6,8 @@ use std::{
 use crate::{
     alloc_aligned,
     layouts::{
-        Data, DataMut, DataRef, DataView, DataViewMut, DigestU64, FillUniform, ReaderFrom, ScalarZnx, ToOwnedDeep, WriterTo,
-        ZnxInfos, ZnxSliceSize, ZnxView, ZnxViewMut, ZnxZero,
+        Data, DataMut, DataRef, DataView, DataViewMut, DigestU64, FillUniform, ReaderFrom, ScalarZnx, ScalarZnxMut, ScalarZnxRef,
+        ToOwnedDeep, WriterTo, ZnxInfos, ZnxSliceSize, ZnxView, ZnxViewMut, ZnxZero,
     },
     source::Source,
 };
@@ -26,7 +26,7 @@ pub struct VecZnx<D: Data> {
 }
 
 impl<D: DataRef> VecZnx<D> {
-    pub fn as_scalar_znx_ref(&self, col: usize, limb: usize) -> ScalarZnx<&[u8]> {
+    pub fn as_scalar_znx_ref(&self, col: usize, limb: usize) -> ScalarZnxRef<'_> {
         ScalarZnx {
             data: bytemuck::cast_slice(self.at(col, limb)),
             n: self.n,
@@ -36,23 +36,11 @@ impl<D: DataRef> VecZnx<D> {
 }
 
 impl<D: DataMut> VecZnx<D> {
-    pub fn as_scalar_znx_mut(&mut self, col: usize, limb: usize) -> ScalarZnx<&mut [u8]> {
+    pub fn as_scalar_znx_mut(&mut self, col: usize, limb: usize) -> ScalarZnxMut<'_> {
         ScalarZnx {
             n: self.n,
             cols: 1,
             data: bytemuck::cast_slice_mut(self.at_mut(col, limb)),
-        }
-    }
-}
-
-impl<D: Data + Default> Default for VecZnx<D> {
-    fn default() -> Self {
-        Self {
-            data: D::default(),
-            n: 0,
-            cols: 0,
-            size: 0,
-            max_size: 0,
         }
     }
 }
@@ -70,7 +58,7 @@ impl<D: DataRef> DigestU64 for VecZnx<D> {
 }
 
 impl<D: DataRef> ToOwnedDeep for VecZnx<D> {
-    type Owned = VecZnx<Vec<u8>>;
+    type Owned = VecZnxOwned;
     fn to_owned_deep(&self) -> Self::Owned {
         VecZnx {
             data: self.data.as_ref().to_vec(),
@@ -235,11 +223,11 @@ pub type VecZnxMut<'a> = VecZnx<&'a mut [u8]>;
 pub type VecZnxRef<'a> = VecZnx<&'a [u8]>;
 
 pub trait VecZnxToRef {
-    fn to_ref(&self) -> VecZnx<&[u8]>;
+    fn to_ref(&self) -> VecZnxRef<'_>;
 }
 
 impl<D: DataRef> VecZnxToRef for VecZnx<D> {
-    fn to_ref(&self) -> VecZnx<&[u8]> {
+    fn to_ref(&self) -> VecZnxRef<'_> {
         VecZnx {
             data: self.data.as_ref(),
             n: self.n,
@@ -251,11 +239,11 @@ impl<D: DataRef> VecZnxToRef for VecZnx<D> {
 }
 
 pub trait VecZnxToMut {
-    fn to_mut(&mut self) -> VecZnx<&mut [u8]>;
+    fn to_mut(&mut self) -> VecZnxMut<'_>;
 }
 
 impl<D: DataMut> VecZnxToMut for VecZnx<D> {
-    fn to_mut(&mut self) -> VecZnx<&mut [u8]> {
+    fn to_mut(&mut self) -> VecZnxMut<'_> {
         VecZnx {
             data: self.data.as_mut(),
             n: self.n,

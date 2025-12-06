@@ -4,7 +4,10 @@ use poulpy_hal::{
         VecZnxDftApply, VecZnxDftBytesOf, VecZnxDftCopy, VecZnxIdftApplyConsume, VecZnxNormalize, VecZnxNormalizeTmpBytes,
         VmpApplyDftToDft, VmpApplyDftToDftAdd, VmpApplyDftToDftTmpBytes,
     },
-    layouts::{Backend, DataMut, DataViewMut, Module, Scratch, VecZnxBig, VecZnxDft, VecZnxDftToRef, VmpPMat, ZnxInfos},
+    layouts::{
+        Backend, DataMut, DataViewMut, Module, Scratch, VecZnxBig, VecZnxBigMut, VecZnxDft, VecZnxDftRef, VecZnxDftToRef,
+        VmpPMatRef, ZnxInfos,
+    },
 };
 
 use crate::{
@@ -111,7 +114,7 @@ where
 
         let (res_dft, scratch_1) = scratch.take_vec_znx_dft(self, (res.rank() + 1).into(), key.size()); // Todo optimise
 
-        let res_big: VecZnxBig<&mut [u8], BE> = if base2k_a != base2k_key {
+        let res_big: VecZnxBigMut<'_, BE> = if base2k_a != base2k_key {
             let (mut a_conv, scratch_2) = scratch_1.take_glwe(&GLWELayout {
                 n: a.n(),
                 base2k: key.base2k(),
@@ -174,7 +177,7 @@ where
 
         let (res_dft, scratch_1) = scratch.take_vec_znx_dft(self, (res.rank() + 1).into(), key.size()); // Todo optimise
 
-        let res_big: VecZnxBig<&mut [u8], BE> = if base2k_res != base2k_key {
+        let res_big: VecZnxBigMut<'_, BE> = if base2k_res != base2k_key {
             let (mut res_conv, scratch_2) = scratch_1.take_glwe(&GLWELayout {
                 n: res.n(),
                 base2k: key.base2k(),
@@ -342,12 +345,12 @@ where
         K: GGLWEPreparedToRef<BE>,
         Scratch<BE>: ScratchTakeCore<BE>,
     {
-        let a: &VecZnxDft<&[u8], BE> = &a.to_ref();
+        let a: &VecZnxDftRef<'_, BE> = &a.to_ref();
         let key: &GGLWEPrepared<&[u8], BE> = &key.to_ref();
 
         let cols: usize = a.cols();
         let a_size: usize = a.size();
-        let pmat: &VmpPMat<&[u8], BE> = &key.data;
+        let pmat: &VmpPMatRef<'_, BE> = &key.data;
 
         // If dsize == 1, then the digit decomposition is equal to Base2K and we can simply
         // can the vmp API.

@@ -5,7 +5,7 @@ use poulpy_hal::{
         VecZnxNormalizeInplace, VecZnxNormalizeTmpBytes, VecZnxRotate, VecZnxRotateInplace, VecZnxRshInplace, VecZnxRshTmpBytes,
         VecZnxSub, VecZnxSubInplace, VecZnxSubNegateInplace, VecZnxZero,
     },
-    layouts::{Backend, Module, Scratch, VecZnxBig, ZnxInfos},
+    layouts::{Backend, Module, Scratch, VecZnxBigMut, ZnxInfos},
     reference::vec_znx::vec_znx_rotate_inplace_tmp_bytes,
 };
 
@@ -52,7 +52,7 @@ where
         self.bivariate_tensoring(k, &mut res_dft, &a.data, &b.data, scratch_1);
 
         // res = IDFT(res)
-        let res_big: VecZnxBig<&mut [u8], BE> = self.vec_znx_idft_apply_consume(res_dft);
+        let res_big: VecZnxBigMut<'_, BE> = self.vec_znx_idft_apply_consume(res_dft);
 
         // Normalize and switches basis if required
         for res_col in 0..res_cols {

@@ -5,7 +5,9 @@ use poulpy_core::{
     layouts::{GGSWCompressed, GGSWInfos, GLWEInfos, GLWESecretPreparedToRef, LWEInfos, LWESecret, LWESecretToRef},
 };
 use poulpy_hal::{
-    layouts::{Backend, DataMut, DataRef, Module, ScalarZnx, ScalarZnxToRef, Scratch, ZnxView, ZnxViewMut},
+    layouts::{
+        Backend, DataMut, DataRef, Module, ScalarZnx, ScalarZnxOwned, ScalarZnxRef, ScalarZnxToRef, Scratch, ZnxView, ZnxViewMut,
+    },
     source::Source,
 };
 
@@ -72,8 +74,8 @@ where
 
             res.dist = sk_lwe.dist();
 
-            let mut pt: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(sk_glwe.n().into(), 1);
-            let sk_ref: ScalarZnx<&[u8]> = sk_lwe.data().to_ref();
+            let mut pt: ScalarZnxOwned = ScalarZnx::alloc(sk_glwe.n().into(), 1);
+            let sk_ref: ScalarZnxRef<'_> = sk_lwe.data().to_ref();
 
             for (i, ggsw) in res.keys.iter_mut().enumerate() {
                 pt.at_mut(0, 0)[0] = sk_ref.at(0, 0)[i];

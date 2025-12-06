@@ -1,6 +1,6 @@
 use poulpy_hal::{
     api::{ScratchAvailable, ScratchOwnedAlloc, ScratchOwnedBorrow, VecZnxRotateInplace},
-    layouts::{Backend, Module, ScalarZnx, ScalarZnxToMut, Scratch, ScratchOwned, ZnxViewMut},
+    layouts::{Backend, Module, ScalarZnx, ScalarZnxOwned, ScalarZnxToMut, Scratch, ScratchOwned, ZnxViewMut},
     source::Source,
 };
 
@@ -73,8 +73,8 @@ where
             let mut ggsw_in: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_in_infos);
             let mut ggsw_out: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_out_infos);
             let mut ggsw_apply: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_apply_infos);
-            let mut pt_in: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n, 1);
-            let mut pt_apply: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n, 1);
+            let mut pt_in: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
+            let mut pt_apply: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
 
             let mut source_xs: Source = Source::new([0u8; 32]);
             let mut source_xe: Source = Source::new([0u8; 32]);
@@ -208,8 +208,8 @@ where
             let mut ggsw_out: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_out_infos);
             let mut ggsw_apply: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_apply_infos);
 
-            let mut pt_in: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n, 1);
-            let mut pt_apply: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(n, 1);
+            let mut pt_in: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
+            let mut pt_apply: ScalarZnxOwned = ScalarZnx::alloc(n, 1);
 
             let mut source_xs: Source = Source::new([0u8; 32]);
             let mut source_xe: Source = Source::new([0u8; 32]);

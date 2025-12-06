@@ -4,7 +4,10 @@ use criterion::{BenchmarkId, Criterion};
 
 use crate::{
     api::{ModuleNew, VecZnxNegate, VecZnxNegateInplace},
-    layouts::{Backend, FillUniform, Module, VecZnx, VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut},
+    layouts::{
+        Backend, FillUniform, Module, VecZnx, VecZnxMut, VecZnxOwned, VecZnxRef, VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView,
+        ZnxViewMut,
+    },
     reference::znx::{ZnxNegate, ZnxNegateInplace, ZnxZero},
     source::Source,
 };
@@ -15,8 +18,8 @@ where
     A: VecZnxToRef,
     ZNXARI: ZnxNegate + ZnxZero,
 {
-    let a: VecZnx<&[u8]> = a.to_ref();
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let a: VecZnxRef<'_> = a.to_ref();
+    let mut res: VecZnxMut<'_> = res.to_mut();
 
     #[cfg(debug_assertions)]
     {
@@ -39,7 +42,7 @@ where
     R: VecZnxToMut,
     ZNXARI: ZnxNegateInplace,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let mut res: VecZnxMut<'_> = res.to_mut();
     for j in 0..res.size() {
         ZNXARI::znx_negate_inplace(res.at_mut(res_col, j));
     }
@@ -65,8 +68,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut b: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut b: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         // Fill a with random i64
         a.fill_uniform(50, &mut source);
@@ -109,7 +112,7 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         // Fill a with random i64
         a.fill_uniform(50, &mut source);

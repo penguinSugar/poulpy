@@ -1,8 +1,8 @@
 use crate::{
     alloc_aligned,
     layouts::{
-        Data, DataMut, DataRef, DataView, DataViewMut, DigestU64, FillUniform, ReaderFrom, ToOwnedDeep, VecZnx, WriterTo,
-        ZnxInfos, ZnxSliceSize, ZnxView, ZnxViewMut, ZnxZero,
+        Data, DataMut, DataRef, DataView, DataViewMut, DigestU64, FillUniform, ReaderFrom, ToOwnedDeep, VecZnx, VecZnxMut,
+        VecZnxRef, WriterTo, ZnxInfos, ZnxSliceSize, ZnxView, ZnxViewMut, ZnxZero,
     },
     source::Source,
 };
@@ -39,7 +39,7 @@ impl<D: DataRef> DigestU64 for MatZnx<D> {
 }
 
 impl<D: DataRef> ToOwnedDeep for MatZnx<D> {
-    type Owned = MatZnx<Vec<u8>>;
+    type Owned = MatZnxOwned;
     fn to_owned_deep(&self) -> Self::Owned {
         MatZnx {
             data: self.data.as_ref().to_vec(),
@@ -145,14 +145,14 @@ impl MatZnx<Vec<u8>> {
 }
 
 impl<D: DataRef> MatZnx<D> {
-    pub fn at(&self, row: usize, col: usize) -> VecZnx<&[u8]> {
+    pub fn at(&self, row: usize, col: usize) -> VecZnxRef<'_> {
         #[cfg(debug_assertions)]
         {
             assert!(row < self.rows(), "rows: {} >= {}", row, self.rows());
             assert!(col < self.cols_in(), "cols: {} >= {}", col, self.cols_in());
         }
 
-        let self_ref: MatZnx<&[u8]> = self.to_ref();
+        let self_ref: MatZnxRef<'_> = self.to_ref();
         let nb_bytes: usize = VecZnx::<Vec<u8>>::bytes_of(self.n, self.cols_out, self.size);
         let start: usize = nb_bytes * self.cols() * row + col * nb_bytes;
         let end: usize = start + nb_bytes;
@@ -168,7 +168,7 @@ impl<D: DataRef> MatZnx<D> {
 }
 
 impl<D: DataMut> MatZnx<D> {
-    pub fn at_mut(&mut self, row: usize, col: usize) -> VecZnx<&mut [u8]> {
+    pub fn at_mut(&mut self, row: usize, col: usize) -> VecZnxMut<'_> {
         #[cfg(debug_assertions)]
         {
             assert!(row < self.rows(), "rows: {} >= {}", row, self.rows());
@@ -180,7 +180,7 @@ impl<D: DataMut> MatZnx<D> {
         let cols_in: usize = self.cols_in();
         let size: usize = self.size();
 
-        let self_ref: MatZnx<&mut [u8]> = self.to_mut();
+        let self_ref: MatZnxMut<'_> = self.to_mut();
         let nb_bytes: usize = VecZnx::<Vec<u8>>::bytes_of(n, cols_out, size);
         let start: usize = nb_bytes * cols_in * row + col * nb_bytes;
         let end: usize = start + nb_bytes;
@@ -216,11 +216,11 @@ pub type MatZnxMut<'a> = MatZnx<&'a mut [u8]>;
 pub type MatZnxRef<'a> = MatZnx<&'a [u8]>;
 
 pub trait MatZnxToRef {
-    fn to_ref(&self) -> MatZnx<&[u8]>;
+    fn to_ref(&self) -> MatZnxRef<'_>;
 }
 
 impl<D: DataRef> MatZnxToRef for MatZnx<D> {
-    fn to_ref(&self) -> MatZnx<&[u8]> {
+    fn to_ref(&self) -> MatZnxRef<'_> {
         MatZnx {
             data: self.data.as_ref(),
             n: self.n,
@@ -233,11 +233,11 @@ impl<D: DataRef> MatZnxToRef for MatZnx<D> {
 }
 
 pub trait MatZnxToMut {
-    fn to_mut(&mut self) -> MatZnx<&mut [u8]>;
+    fn to_mut(&mut self) -> MatZnxMut<'_>;
 }
 
 impl<D: DataMut> MatZnxToMut for MatZnx<D> {
-    fn to_mut(&mut self) -> MatZnx<&mut [u8]> {
+    fn to_mut(&mut self) -> MatZnxMut<'_> {
         MatZnx {
             data: self.data.as_mut(),
             n: self.n,

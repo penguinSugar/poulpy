@@ -7,7 +7,7 @@ use poulpy_core::{
 };
 use poulpy_hal::{
     api::{ModuleNew, ScratchOwnedAlloc, ScratchOwnedBorrow, VecZnxRotateInplace},
-    layouts::{Backend, Module, ScalarZnx, Scratch, ScratchOwned, ZnxView, ZnxViewMut},
+    layouts::{Backend, Module, ScalarZnx, ScalarZnxOwned, Scratch, ScratchOwned, ZnxView, ZnxViewMut},
     source::Source,
 };
 use rand::RngCore;
@@ -67,7 +67,7 @@ where
     let mut scratch: ScratchOwned<BE> = ScratchOwned::alloc(1 << 22);
     let mut res: GGSW<Vec<u8>> = GGSW::alloc_from_infos(&ggsw_res_infos);
 
-    let mut scalar: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(module.n(), 1);
+    let mut scalar: ScalarZnxOwned = ScalarZnx::alloc(module.n(), 1);
     scalar
         .raw_mut()
         .iter_mut()
@@ -126,7 +126,7 @@ where
 
             let rot: i64 = (((k >> bit_start) & mask) << bit_step) as i64;
 
-            let mut scalar_want: ScalarZnx<Vec<u8>> = ScalarZnx::alloc(module.n(), 1);
+            let mut scalar_want: ScalarZnxOwned = ScalarZnx::alloc(module.n(), 1);
             scalar_want.raw_mut().copy_from_slice(scalar.raw());
 
             module.vec_znx_rotate_inplace(-rot, &mut scalar_want.as_vec_znx_mut(), 0, scratch.borrow());

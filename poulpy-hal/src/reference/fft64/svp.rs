@@ -1,7 +1,7 @@
 use crate::{
     layouts::{
-        Backend, ScalarZnx, ScalarZnxToRef, SvpPPol, SvpPPolToMut, SvpPPolToRef, VecZnx, VecZnxDft, VecZnxDftToMut,
-        VecZnxDftToRef, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut,
+        Backend, ScalarZnxRef, ScalarZnxToRef, SvpPPolMut, SvpPPolRef, SvpPPolToMut, SvpPPolToRef, VecZnxDftMut, VecZnxDftRef,
+        VecZnxDftToMut, VecZnxDftToRef, VecZnxRef, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut,
     },
     reference::fft64::reim::{ReimAddMul, ReimDFTExecute, ReimFFTTable, ReimFromZnx, ReimMul, ReimMulInplace, ReimZero},
 };
@@ -12,8 +12,8 @@ where
     R: SvpPPolToMut<BE>,
     A: ScalarZnxToRef,
 {
-    let mut res: SvpPPol<&mut [u8], BE> = res.to_mut();
-    let a: ScalarZnx<&[u8]> = a.to_ref();
+    let mut res: SvpPPolMut<'_, BE> = res.to_mut();
+    let a: ScalarZnxRef<'_> = a.to_ref();
     BE::reim_from_znx(res.at_mut(res_col, 0), a.at(a_col, 0));
     BE::reim_dft_execute(table, res.at_mut(res_col, 0));
 }
@@ -32,9 +32,9 @@ pub fn svp_apply_dft<R, A, B, BE>(
     A: SvpPPolToRef<BE>,
     B: VecZnxToRef,
 {
-    let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
-    let a: SvpPPol<&[u8], BE> = a.to_ref();
-    let b: VecZnx<&[u8]> = b.to_ref();
+    let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
+    let a: SvpPPolRef<'_, BE> = a.to_ref();
+    let b: VecZnxRef<'_> = b.to_ref();
 
     let res_size: usize = res.size();
     let b_size: usize = b.size();
@@ -60,9 +60,9 @@ where
     A: SvpPPolToRef<BE>,
     B: VecZnxDftToRef<BE>,
 {
-    let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
-    let a: SvpPPol<&[u8], BE> = a.to_ref();
-    let b: VecZnxDft<&[u8], BE> = b.to_ref();
+    let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
+    let a: SvpPPolRef<'_, BE> = a.to_ref();
+    let b: VecZnxDftRef<'_, BE> = b.to_ref();
 
     let res_size: usize = res.size();
     let b_size: usize = b.size();
@@ -85,9 +85,9 @@ where
     A: SvpPPolToRef<BE>,
     B: VecZnxDftToRef<BE>,
 {
-    let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
-    let a: SvpPPol<&[u8], BE> = a.to_ref();
-    let b: VecZnxDft<&[u8], BE> = b.to_ref();
+    let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
+    let a: SvpPPolRef<'_, BE> = a.to_ref();
+    let b: VecZnxDftRef<'_, BE> = b.to_ref();
 
     let res_size: usize = res.size();
     let b_size: usize = b.size();
@@ -109,8 +109,8 @@ where
     R: VecZnxDftToMut<BE>,
     A: SvpPPolToRef<BE>,
 {
-    let mut res: VecZnxDft<&mut [u8], BE> = res.to_mut();
-    let a: SvpPPol<&[u8], BE> = a.to_ref();
+    let mut res: VecZnxDftMut<'_, BE> = res.to_mut();
+    let a: SvpPPolRef<'_, BE> = a.to_ref();
 
     let ppol: &[f64] = a.at(a_col, 0);
     for j in 0..res.size() {

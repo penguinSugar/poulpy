@@ -7,7 +7,10 @@ use crate::{
         ModuleNew, ScratchOwnedAlloc, ScratchOwnedBorrow, VecZnxAutomorphism, VecZnxAutomorphismInplace,
         VecZnxAutomorphismInplaceTmpBytes,
     },
-    layouts::{Backend, FillUniform, Module, ScratchOwned, VecZnx, VecZnxToMut, VecZnxToRef, ZnxInfos, ZnxView, ZnxViewMut},
+    layouts::{
+        Backend, FillUniform, Module, ScratchOwned, VecZnx, VecZnxMut, VecZnxOwned, VecZnxRef, VecZnxToMut, VecZnxToRef,
+        ZnxInfos, ZnxView, ZnxViewMut,
+    },
     reference::znx::{ZnxAutomorphism, ZnxCopy, ZnxZero},
     source::Source,
 };
@@ -22,8 +25,8 @@ where
     A: VecZnxToRef,
     ZNXARI: ZnxAutomorphism + ZnxZero,
 {
-    let a: VecZnx<&[u8]> = a.to_ref();
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let a: VecZnxRef<'_> = a.to_ref();
+    let mut res: VecZnxMut<'_> = res.to_mut();
 
     #[cfg(debug_assertions)]
     {
@@ -48,7 +51,7 @@ where
     R: VecZnxToMut,
     ZNXARI: ZnxAutomorphism + ZnxCopy,
 {
-    let mut res: VecZnx<&mut [u8]> = res.to_mut();
+    let mut res: VecZnxMut<'_> = res.to_mut();
     #[cfg(debug_assertions)]
     {
         assert_eq!(res.n(), tmp.len());
@@ -79,8 +82,8 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut a: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
-        let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut a: VecZnxOwned = VecZnx::alloc(n, cols, size);
+        let mut res: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         // Fill a with random i64
         a.fill_uniform(50, &mut source);
@@ -125,7 +128,7 @@ where
 
         let mut source: Source = Source::new([0u8; 32]);
 
-        let mut res: VecZnx<Vec<u8>> = VecZnx::alloc(n, cols, size);
+        let mut res: VecZnxOwned = VecZnx::alloc(n, cols, size);
 
         let mut scratch = ScratchOwned::alloc(module.vec_znx_automorphism_inplace_tmp_bytes());
 
